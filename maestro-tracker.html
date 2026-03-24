@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Maestro Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F2ED;
+  --surface: #FFFFFF;
+  --surface2: #F0ECE4;
+  --border: #DDD8CE;
+  --border-light: #EAE6DE;
+  --text: #1C1A16;
+  --text-mid: #5C5850;
+  --text-muted: #9C9488;
+  --green-bg: #EAF3DE; --green: #3B6D11; --green-border: #97C459;
+  --amber-bg: #FAEEDA; --amber: #854F0B; --amber-border: #EF9F27;
+  --red-bg: #FCEBEB; --red: #A32D2D; --red-border: #E24B4A;
+  --blue-bg: #E6F1FB; --blue: #185FA5; --blue-border: #85B7EB;
+  --accent: #3B6D11; --accent-light: #EAF3DE;
+  --radius: 12px; --radius-sm: 8px;
+  --font: 'DM Sans', sans-serif;
+  --font-display: 'DM Serif Display', serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+
+/* HEADER */
+.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px 10px; position: sticky; top: 0; z-index: 100; }
+.app-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.app-title { font-family: var(--font-display); font-size: 21px; color: var(--text); letter-spacing: -0.3px; }
+.app-title span { font-style: italic; color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.day-badge { background: var(--accent-light); color: var(--accent); font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
+.sync-status { font-size: 11px; padding: 4px 9px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
+.sync-status.connected { background: var(--green-bg); color: var(--green); }
+.sync-status.disconnected { background: var(--surface2); color: var(--text-muted); cursor: pointer; border: 1px solid var(--border); }
+.sync-status.syncing { background: var(--blue-bg); color: var(--blue); }
+.date-row { display: flex; align-items: center; gap: 8px; }
+.date-row input[type="date"] { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; flex: 1; outline: none; -webkit-appearance: none; }
+.date-row input[type="date"]:focus { border-color: var(--accent); }
+
+/* NAV */
+.nav-tabs { display: flex; overflow-x: auto; scrollbar-width: none; gap: 2px; padding: 10px 18px 0; border-bottom: 1px solid var(--border-light); background: var(--surface); }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab { flex-shrink: 0; font-family: var(--font); font-size: 13px; font-weight: 400; color: var(--text-muted); background: none; border: none; padding: 6px 11px 10px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.15s; }
+.nav-tab.active { color: var(--accent); font-weight: 500; border-bottom-color: var(--accent); }
+.nav-tab.has-data::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; margin-left: 5px; vertical-align: middle; margin-top: -2px; }
+
+/* CONTENT */
+.content { padding: 14px 14px 110px; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
+.card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 13px; }
+
+/* FIELDS */
+.field { margin-bottom: 13px; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 13px; color: var(--text-mid); margin-bottom: 5px; }
+input[type="text"], input[type="number"], textarea, select {
+  width: 100%; font-family: var(--font); font-size: 15px; color: var(--text);
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 9px 11px; outline: none; -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: var(--accent); background: var(--surface); }
+textarea { resize: none; min-height: 76px; line-height: 1.5; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239C9488' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
+
+/* TOGGLES */
+.toggle-group { display: flex; gap: 7px; }
+.toggle-btn { flex: 1; font-family: var(--font); font-size: 14px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
+.toggle-btn.sel-yes { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
+.toggle-btn.sel-no { background: var(--surface2); color: var(--text-mid); border-color: var(--border); }
+
+/* SCORES */
+.score-group { display: flex; gap: 5px; }
+.score-btn { flex: 1; font-family: var(--font); font-size: 15px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 4px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
+.score-btn[data-v="1"].sel { background: var(--red-bg); color: var(--red); border-color: var(--red-border); font-weight: 500; }
+.score-btn[data-v="2"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
+.score-btn[data-v="3"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
+.score-btn[data-v="4"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
+.score-btn[data-v="5"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
+.score-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; min-height: 15px; }
+
+/* CHIPS */
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--font); font-size: 13px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; -webkit-appearance: none; white-space: nowrap; }
+.chip.sel { background: var(--accent-light); color: var(--accent); border-color: var(--green-border); font-weight: 500; }
+
+/* DURATION ROW */
+.dur-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.dur-row label { font-size: 12px; }
+.dur-row input { text-align: center; }
+
+/* CONDITIONAL */
+.cond { display: none; }
+.cond.show { display: block; }
+
+/* SEVERITY */
+.sev-group { display: flex; flex-direction: column; gap: 7px; }
+.sev-opt { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
+.sev-opt.sel { background: var(--amber-bg); border-color: var(--amber-border); }
+.sev-opt.sel.severe { background: var(--red-bg); border-color: var(--red-border); }
+.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid var(--border); transition: all 0.15s; }
+.sev-opt.sel .sev-dot { background: #EF9F27; border-color: #EF9F27; }
+.sev-opt.sel.severe .sev-dot { background: #E24B4A; border-color: #E24B4A; }
+.sev-label { font-size: 14px; color: var(--text-mid); }
+.sev-hint { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.sev-opt.sel .sev-label { color: var(--amber); font-weight: 500; }
+.sev-opt.sel.severe .sev-label { color: var(--red); }
+
+/* DAY RATING */
+.rating-row { display: flex; gap: 8px; }
+.rating-btn { flex: 1; font-family: var(--font); font-size: 13px; border-radius: var(--radius-sm); padding: 11px 6px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; border: 1.5px solid transparent; }
+.rating-btn.good { background: var(--green-bg); color: var(--green); border-color: var(--border-light); }
+.rating-btn.ok   { background: var(--amber-bg); color: var(--amber); border-color: var(--border-light); }
+.rating-btn.bad  { background: var(--red-bg);   color: var(--red);   border-color: var(--border-light); }
+.rating-btn.sel.good { border-color: var(--green-border); font-weight: 600; }
+.rating-btn.sel.ok   { border-color: var(--amber-border); font-weight: 600; }
+.rating-btn.sel.bad  { border-color: var(--red-border);   font-weight: 600; }
+
+/* MEDIA */
+.upload-area { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 22px 14px; text-align: center; cursor: pointer; background: var(--surface2); transition: border-color 0.15s; position: relative; overflow: hidden; }
+.upload-area:hover { border-color: var(--accent); }
+.upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.upload-icon { font-size: 26px; margin-bottom: 6px; filter: grayscale(1) opacity(0.5); }
+.upload-label { font-size: 14px; color: var(--text-mid); }
+.upload-hint { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.media-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 11px; }
+.m-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface2); border: 1px solid var(--border-light); }
+.m-thumb img, .m-thumb video { width: 100%; height: 100%; object-fit: cover; }
+.m-remove { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; background: rgba(0,0,0,0.55); border: none; border-radius: 50%; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
+.m-badge { position: absolute; bottom: 3px; left: 3px; background: rgba(0,0,0,0.58); color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
+.m-status { position: absolute; bottom: 3px; right: 3px; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
+.m-status.uploading { background: var(--blue-bg); color: var(--blue); }
+.m-status.done { background: var(--green-bg); color: var(--green); }
+.m-status.error { background: var(--red-bg); color: var(--red); }
+
+/* SETUP CARD */
+.setup-card { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
+.setup-card h3 { font-size: 13px; font-weight: 500; color: var(--blue); margin-bottom: 8px; }
+.setup-card p { font-size: 13px; color: #185FA5; line-height: 1.55; margin-bottom: 8px; }
+.setup-card p:last-child { margin-bottom: 0; }
+.setup-input { margin-top: 10px; }
+.setup-input label { color: var(--blue); font-size: 12px; margin-bottom: 4px; }
+.setup-input input { font-size: 13px; padding: 8px 10px; }
+.setup-btn { width: 100%; font-family: var(--font); font-size: 14px; font-weight: 500; color: white; background: var(--blue); border: none; border-radius: var(--radius-sm); padding: 11px; cursor: pointer; margin-top: 10px; transition: opacity 0.15s; }
+.setup-btn:active { opacity: 0.85; }
+
+/* SAVE BAR */
+.save-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--border-light); z-index: 200; }
+.save-btn { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: white; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; cursor: pointer; transition: opacity 0.15s; }
+.save-btn:active { opacity: 0.85; }
+.save-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+/* HISTORY */
+.hist-entry { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 9px; cursor: pointer; }
+.hist-entry:hover { border-color: var(--border); }
+.hist-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.hist-date { font-size: 14px; font-weight: 500; }
+.hist-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.dot-good { background: var(--green); }
+.dot-ok { background: #EF9F27; }
+.dot-bad { background: #E24B4A; }
+.dot-none { background: var(--border); }
+.hist-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
+.hist-notes { font-size: 13px; color: var(--text-mid); margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border-light); padding-top: 8px; display: none; }
+.hist-entry.open .hist-notes { display: block; }
+.hist-media { display: flex; gap: 5px; margin-top: 7px; overflow-x: auto; scrollbar-width: none; }
+.hist-media::-webkit-scrollbar { display: none; }
+.hist-media img, .hist-media video { flex-shrink: 0; width: 54px; height: 54px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-light); }
+.empty-hist { text-align: center; padding: 44px 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+/* DIVIDER */
+.div { height: 1px; background: var(--border-light); margin: 12px 0; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--text); color: white; font-size: 13px; padding: 9px 18px; border-radius: 20px; opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 300; white-space: nowrap; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { background: var(--red); }
+
+/* INFO NOTE */
+.info-note { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; color: var(--blue); line-height: 1.55; }
+.info-note strong { font-weight: 500; display: block; margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-header-top">
+    <div class="app-title"><span>Maestro</span> Daily Log</div>
+    <div class="header-right">
+      <div class="day-badge" id="dayBadge">TX —</div>
+      <div class="sync-status disconnected" id="syncStatus" onclick="showSection('settings')">Not connected</div>
+    </div>
+  </div>
+  <div class="date-row">
+    <input type="date" id="entryDate" onchange="onDateChange(this.value)">
+  </div>
+</div>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" data-s="ridden" onclick="showSection('ridden',this)">Ridden</button>
+  <button class="nav-tab" data-s="behavioral" onclick="showSection('behavioral',this)">Behavior</button>
+  <button class="nav-tab" data-s="lunge" onclick="showSection('lunge',this)">Lunge</button>
+  <button class="nav-tab" data-s="si" onclick="showSection('si',this)">SI</button>
+  <button class="nav-tab" data-s="modalities" onclick="showSection('modalities',this)">Modalities</button>
+  <button class="nav-tab" data-s="media" onclick="showSection('media',this)">Media</button>
+  <button class="nav-tab" data-s="notes" onclick="showSection('notes',this)">Notes</button>
+  <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
+  <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
+</div>
+
+<div class="content">
+
+<!-- RIDDEN -->
+<div class="section active" id="s-ridden">
+  <div class="card">
+    <div class="card-title">Day Overview</div>
+    <div class="field">
+      <label>Day rating</label>
+      <div class="rating-row">
+        <button class="rating-btn good" data-r="good" onclick="setRating(this)">Good</button>
+        <button class="rating-btn ok"   data-r="ok"   onclick="setRating(this)">OK</button>
+        <button class="rating-btn bad"  data-r="bad"  onclick="setRating(this)">Bad</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Day type</label>
+      <input type="text" id="dayType" placeholder="e.g. Lunge + ride, Hand walk, Day off…">
+    </div>
+    <div class="field">
+      <label>Total duration (min)</label>
+      <input type="number" id="totalDur" placeholder="45" inputmode="numeric">
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Ridden Work</div>
+    <div class="field">
+      <label>Rode today?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-f="rode" data-v="Y" onclick="tog(this,()=>show('ridenFields'))">Yes</button>
+        <button class="toggle-btn" data-f="rode" data-v="N" onclick="tog(this,()=>hide('ridenFields'))">No</button>
+      </div>
+    </div>
+    <div id="ridenFields" class="cond">
+      <div class="field">
+        <label>Saddle or bareback?</label>
+        <select id="saddleType">
+          <option value="">— select —</option>
+          <option>Saddle</option>
+          <option>Bareback</option>
+          <option>Bareback + pad</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Time in each gait (min)</label>
+        <div class="dur-row">
+          <div><label>Walk</label><input type="number" id="walkMin" placeholder="0" inputmode="numeric"></div>
+          <div><label>Trot</label><input type="number" id="trotMin" placeholder="0" inputmode="numeric"></div>
+          <div><label>Canter</label><input type="number" id="canterMin" placeholder="0" inputmode="numeric"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Gait achieved</label>
+        <div class="chip-group" id="gaitChips">
+          <button class="chip" onclick="oneChip(this,'gait')">Walk only</button>
+          <button class="chip" onclick="oneChip(this,'gait')">W / T</button>
+          <button class="chip" onclick="oneChip(this,'gait')">W / T / C</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Willingness <span style="color:var(--text-muted);font-weight:300">1–5</span></label>
+        <div class="score-group" id="willGrp">
+          <button class="score-btn" data-v="1" onclick="setScore(this,'will','willHint',WILL)">1</button>
+          <button class="score-btn" data-v="2" onclick="setScore(this,'will','willHint',WILL)">2</button>
+          <button class="score-btn" data-v="3" onclick="setScore(this,'will','willHint',WILL)">3</button>
+          <button class="score-btn" data-v="4" onclick="setScore(this,'will','willHint',WILL)">4</button>
+          <button class="score-btn" data-v="5" onclick="setScore(this,'will','willHint',WILL)">5</button>
+        </div>
+        <div class="score-hint" id="willHint"></div>
+      </div>
+      <div class="field">
+        <label>Crop used?</label>
+        <div class="toggle-group">
+          <button class="toggle-btn" data-f="crop" data-v="Y" onclick="tog(this)">Yes</button>
+          <button class="toggle-btn" data-f="crop" data-v="N" onclick="tog(this)">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEHAVIORAL -->
+<div class="section" id="s-behavioral">
+  <div class="card">
+    <div class="card-title">Tacking Up</div>
+    <div class="field">
+      <label>Cranky during tack up?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-f="cranky" data-v="Y" onclick="tog(this,()=>show('triggerField'))">Yes</button>
+        <button class="toggle-btn" data-f="cranky" data-v="N" onclick="tog(this,()=>hide('triggerField'))">No</button>
+      </div>
+    </div>
+    <div id="triggerField" class="cond field">
+      <label>Trigger</label>
+      <div class="chip-group" id="triggerChips">
+        <button class="chip" onclick="multiChip(this,'trigger')">Girth</button>
+        <button class="chip" onclick="multiChip(this,'trigger')">Back</button>
+        <button class="chip" onclick="multiChip(this,'trigger')">Pad / blanket</button>
+        <button class="chip" onclick="multiChip(this,'trigger')">Girth + back</button>
+        <button class="chip" onclick="multiChip(this,'trigger')">Multiple</button>
+        <button class="chip" onclick="multiChip(this,'trigger')">Other</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Stops / Stalling</div>
+    <div class="field">
+      <label>Stops today</label>
+      <div class="chip-group">
+        <button class="chip" onclick="oneChip(this,'stops')">None</button>
+        <button class="chip" onclick="oneChip(this,'stops')">Few (1–3)</button>
+        <button class="chip" onclick="oneChip(this,'stops')">Many (4+)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LUNGE -->
+<div class="section" id="s-lunge">
+  <div class="card">
+    <div class="card-title">Canter Quality — Lunge</div>
+    <div class="field">
+      <label>Canter left score</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="1" onclick="setScore(this,'cL','cLHint',CANT)">1</button>
+        <button class="score-btn" data-v="2" onclick="setScore(this,'cL','cLHint',CANT)">2</button>
+        <button class="score-btn" data-v="3" onclick="setScore(this,'cL','cLHint',CANT)">3</button>
+        <button class="score-btn" data-v="4" onclick="setScore(this,'cL','cLHint',CANT)">4</button>
+        <button class="score-btn" data-v="5" onclick="setScore(this,'cL','cLHint',CANT)">5</button>
+      </div>
+      <div class="score-hint" id="cLHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
+    </div>
+    <div class="div"></div>
+    <div class="field">
+      <label>Canter right score</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="1" onclick="setScore(this,'cR','cRHint',CANT)">1</button>
+        <button class="score-btn" data-v="2" onclick="setScore(this,'cR','cRHint',CANT)">2</button>
+        <button class="score-btn" data-v="3" onclick="setScore(this,'cR','cRHint',CANT)">3</button>
+        <button class="score-btn" data-v="4" onclick="setScore(this,'cR','cRHint',CANT)">4</button>
+        <button class="score-btn" data-v="5" onclick="setScore(this,'cR','cRHint',CANT)">5</button>
+      </div>
+      <div class="score-hint" id="cRHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Lunge Add-ons</div>
+    <div class="field">
+      <label>Equibands?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-f="equibands" data-v="Y" onclick="tog(this)">Yes</button>
+        <button class="toggle-btn" data-f="equibands" data-v="N" onclick="tog(this)">No</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Lunge before ride?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="Y" onclick="tog(this)">Yes</button>
+        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="N" onclick="tog(this)">No</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SI -->
+<div class="section" id="s-si">
+  <div class="card">
+    <div class="card-title">SI Palpation</div>
+    <div class="field">
+      <label>SI reactive?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-f="siReactive" data-v="Y" onclick="tog(this,()=>show('siDetail'))">Yes</button>
+        <button class="toggle-btn" data-f="siReactive" data-v="N" onclick="tog(this,()=>hide('siDetail'))">No</button>
+      </div>
+    </div>
+    <div id="siDetail" class="cond">
+      <div class="field">
+        <label>Side</label>
+        <div class="chip-group">
+          <button class="chip" onclick="oneChip(this,'siSide')">Left</button>
+          <button class="chip" onclick="oneChip(this,'siSide')">Right</button>
+          <button class="chip" onclick="oneChip(this,'siSide')">Both</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Severity</label>
+        <div class="sev-group">
+          <div class="sev-opt" onclick="setSev(this,'mild')"><div class="sev-dot"></div><div><div class="sev-label">Mild</div><div class="sev-hint">Mild flinch</div></div></div>
+          <div class="sev-opt" onclick="setSev(this,'moderate')"><div class="sev-dot"></div><div><div class="sev-label">Moderate</div><div class="sev-hint">Clear reaction</div></div></div>
+          <div class="sev-opt severe" onclick="setSev(this,'severe')"><div class="sev-dot"></div><div><div class="sev-label">Severe</div><div class="sev-hint">Jumps away / kicks</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALITIES -->
+<div class="section" id="s-modalities">
+  <div class="card">
+    <div class="card-title">Modalities</div>
+    <div class="field">
+      <label>Bodywork</label>
+      <div class="chip-group">
+        <button class="chip" onclick="oneChip(this,'bodywork')">None</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">Massage</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">PEMF</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF + Other</button>
+      </div>
+    </div>
+    <div class="div"></div>
+    <div class="field">
+      <label>Other modalities used today</label>
+      <div class="chip-group">
+        <button class="chip" data-f="pt"        onclick="multiChip(this,'mod')">PT exercises</button>
+        <button class="chip" data-f="poles"     onclick="multiChip(this,'mod')">Poles</button>
+        <button class="chip" data-f="bemer"     onclick="multiChip(this,'mod')">Bemer</button>
+        <button class="chip" data-f="laser"     onclick="multiChip(this,'mod')">Laser (C4)</button>
+        <button class="chip" data-f="shockwave" onclick="multiChip(this,'mod')">Shockwave</button>
+        <button class="chip" data-f="exgas"     onclick="multiChip(this,'mod')">ExGas</button>
+        <button class="chip" data-f="farrier"   onclick="multiChip(this,'mod')">Farrier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MEDIA -->
+<div class="section" id="s-media">
+  <div class="card">
+    <div class="card-title">Photos &amp; Videos</div>
+    <div class="field">
+      <div class="upload-area">
+        <input type="file" id="mediaInput" accept="image/*,video/*" multiple onchange="handleMedia(event)">
+        <div class="upload-icon">📎</div>
+        <div class="upload-label">Tap to add photos or videos</div>
+        <div class="upload-hint">Camera or photo library · any format</div>
+      </div>
+      <div class="media-grid" id="mediaGrid"></div>
+    </div>
+    <div class="field">
+      <label>Caption / context</label>
+      <input type="text" id="mediaCaption" placeholder="e.g. Trot both directions on lunge">
+    </div>
+  </div>
+  <div id="driveNote" class="info-note" style="display:none">
+    <strong>Google Drive upload</strong>
+    Media will be uploaded to your Maestro Videos folder when you save. Files are named with the TX Day automatically.
+  </div>
+  <div id="driveSetupNote" class="info-note">
+    <strong>Connect Google Drive to enable auto-upload</strong>
+    Go to the Settings tab to add your credentials. Until then, media is saved locally only.
+  </div>
+</div>
+
+<!-- NOTES -->
+<div class="section" id="s-notes">
+  <div class="card">
+    <div class="card-title">Notes</div>
+    <div class="field">
+      <label>Behavior notes</label>
+      <textarea id="behaviorNotes" placeholder="Attitude, energy, specific behaviors, anything that stood out…" rows="4"></textarea>
+    </div>
+    <div class="field">
+      <label>PT / bodywork notes</label>
+      <textarea id="ptNotes" placeholder="Findings, reactions, practitioner observations…" rows="3"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="section" id="s-history">
+  <div id="histList"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="section" id="s-settings">
+  <div class="setup-card">
+    <h3>Google Sheets — Spreadsheet ID</h3>
+    <p>Paste your Google Sheets spreadsheet ID below. You'll find it in the sheet URL:<br>
+    <code style="font-size:11px;word-break:break-all">docs.google.com/spreadsheets/d/<strong>[ID IS HERE]</strong>/edit</code></p>
+    <div class="setup-input">
+      <label>Spreadsheet ID</label>
+      <input type="text" id="sheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
+    </div>
+    <div class="setup-input">
+      <label>Apps Script Web App URL</label>
+      <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
+    </div>
+  </div>
+  <div class="setup-card" style="background:var(--green-bg);border-color:var(--green-border);">
+    <h3 style="color:var(--green)">Google Drive — Folder ID</h3>
+    <p style="color:var(--green)">Paste your Maestro Videos folder ID. Found in the folder URL:<br>
+    <code style="font-size:11px;word-break:break-all">drive.google.com/drive/folders/<strong>[ID IS HERE]</strong></code></p>
+    <div class="setup-input">
+      <label style="color:var(--green)">Drive Folder ID</label>
+      <input type="text" id="driveFolderId" placeholder="1aBcDeFgHiJkLmNoPqRsTuVwXyZ">
+    </div>
+  </div>
+  <button class="save-btn" style="margin-bottom:10px" onclick="saveSettings()">Save Settings</button>
+  <div id="settingsStatus" style="font-size:13px;color:var(--text-muted);text-align:center;padding:4px"></div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">Export local entries to sheet</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.55;margin-bottom:10px">If you've been logging without a connection, tap below to push all saved local entries to your Google Sheet at once.</p>
+    <button class="save-btn" onclick="exportAllToSheets()">Push all local entries to Sheets</button>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="save-bar">
+  <button class="save-btn" id="saveBtn" onclick="saveEntry()">Save Entry</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TX_START = 246;
+const ORIGIN_DATE = new Date('2025-11-20T12:00:00');
+const WILL  = ['','Barely moving','Very reluctant','Reluctant but workable','OK — some encouragement needed','Willing and forward'];
+const CANT  = ['','Refused / very unwilling','Very reluctant — multiple asks','Reluctant but achieved','Willing with minor resistance','Willing / offered freely'];
+
+let S = {
+  date:'', rating:'', dayType:'', totalDur:'',
+  rode:'', saddleType:'', walkMin:'', trotMin:'', canterMin:'',
+  gait:'', will:'', crop:'',
+  cranky:'', trigger:[],
+  stops:'',
+  cL:'', cR:'', equibands:'', lungeBeforeRide:'',
+  siReactive:'', siSide:'', siSeverity:'',
+  bodywork:'', modalities:[],
+  behaviorNotes:'', ptNotes:'',
+  mediaCaption:'', mediaFiles:[]
+};
+
+let CFG = { sheetId:'', scriptUrl:'', driveFolderId:'' };
+
+function loadCfg() {
+  try { CFG = JSON.parse(localStorage.getItem('m_cfg') || '{}'); } catch {}
+  CFG.sheetId = CFG.sheetId || '';
+  CFG.scriptUrl = CFG.scriptUrl || '';
+  CFG.driveFolderId = CFG.driveFolderId || '';
+  if (CFG.sheetId) { document.getElementById('sheetId').value = CFG.sheetId; }
+  if (CFG.scriptUrl) { document.getElementById('scriptUrl').value = CFG.scriptUrl; }
+  if (CFG.driveFolderId) { document.getElementById('driveFolderId').value = CFG.driveFolderId; }
+  updateSyncBadge();
+  updateDriveNote();
+}
+
+function saveSettings() {
+  CFG.sheetId = document.getElementById('sheetId').value.trim();
+  CFG.scriptUrl = document.getElementById('scriptUrl').value.trim();
+  CFG.driveFolderId = document.getElementById('driveFolderId').value.trim();
+  localStorage.setItem('m_cfg', JSON.stringify(CFG));
+  updateSyncBadge();
+  updateDriveNote();
+  document.getElementById('settingsStatus').textContent = 'Settings saved.';
+  toast('Settings saved');
+}
+
+function updateSyncBadge() {
+  const el = document.getElementById('syncStatus');
+  if (CFG.scriptUrl) {
+    el.className = 'sync-status connected';
+    el.textContent = 'Sheets connected';
+  } else {
+    el.className = 'sync-status disconnected';
+    el.textContent = 'Not connected';
+  }
+}
+
+function updateDriveNote() {
+  document.getElementById('driveNote').style.display = CFG.driveFolderId ? 'block' : 'none';
+  document.getElementById('driveSetupNote').style.display = CFG.driveFolderId ? 'none' : 'block';
+}
+
+function txDay(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return TX_START + Math.round((d - ORIGIN_DATE) / 86400000);
+}
+
+function initDate() {
+  const now = new Date();
+  const s = now.toISOString().slice(0,10);
+  document.getElementById('entryDate').value = s;
+  S.date = s;
+  updateBadge(s);
+}
+
+function onDateChange(v) { S.date = v; updateBadge(v); }
+
+function updateBadge(v) {
+  const tx = txDay(v);
+  const pr = tx - TX_START + 1;
+  document.getElementById('dayBadge').textContent = 'TX ' + tx + ' · D' + pr;
+}
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const t = document.querySelector('[data-s="'+id+'"]');
+    if (t) t.classList.add('active');
+  }
+  if (id === 'history') renderHistory();
+}
+
+function show(id) { document.getElementById(id).classList.add('show'); }
+function hide(id) { document.getElementById(id).classList.remove('show'); }
+
+function tog(btn, cb) {
+  const f = btn.dataset.f, v = btn.dataset.v;
+  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('sel-yes','sel-no'));
+  btn.classList.add(v === 'Y' ? 'sel-yes' : 'sel-no');
+  S[f] = v;
+  if (cb) cb();
+}
+
+function setScore(btn, key, hintId, hints) {
+  const v = btn.dataset.v;
+  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S[key] = v;
+  document.getElementById(hintId).textContent = hints[parseInt(v)] || '';
+}
+
+function oneChip(btn, key) {
+  btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+  btn.classList.add('sel');
+  S[key] = btn.textContent.trim();
+}
+
+function multiChip(btn, group) {
+  btn.classList.toggle('sel');
+  if (group === 'trigger') {
+    S.trigger = [...document.querySelectorAll('#triggerChips .chip.sel')].map(c => c.textContent.trim());
+  } else if (group === 'mod') {
+    S.modalities = [...document.querySelectorAll('[data-f].chip.sel')].map(c => c.dataset.f);
+  }
+}
+
+function setRating(btn) {
+  document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S.rating = btn.dataset.r;
+}
+
+function setSev(el, v) {
+  document.querySelectorAll('.sev-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  S.siSeverity = v;
+}
+
+function collectText() {
+  S.dayType       = document.getElementById('dayType').value;
+  S.totalDur      = document.getElementById('totalDur').value;
+  S.saddleType    = document.getElementById('saddleType').value;
+  S.walkMin       = document.getElementById('walkMin').value;
+  S.trotMin       = document.getElementById('trotMin').value;
+  S.canterMin     = document.getElementById('canterMin').value;
+  S.behaviorNotes = document.getElementById('behaviorNotes').value;
+  S.ptNotes       = document.getElementById('ptNotes').value;
+  S.mediaCaption  = document.getElementById('mediaCaption').value;
+}
+
+function handleMedia(e) {
+  Array.from(e.target.files).forEach(f => {
+    const r = new FileReader();
+    r.onload = ev => {
+      S.mediaFiles.push({ name: f.name, type: f.type, data: ev.target.result, driveUrl: '' });
+      renderMediaGrid();
+    };
+    r.readAsDataURL(f);
+  });
+  e.target.value = '';
+}
+
+function renderMediaGrid() {
+  const g = document.getElementById('mediaGrid');
+  g.innerHTML = S.mediaFiles.map((f,i) => {
+    const isVid = f.type.startsWith('video');
+    const status = f.driveUrl
+      ? '<span class="m-badge">&#10003; Drive</span>'
+      : (f.uploading ? '<span class="m-status uploading">uploading…</span>' : '');
+    return `<div class="m-thumb">
+      ${isVid ? `<video src="${f.data}" muted playsinline></video><span class="m-badge">video</span>` : `<img src="${f.data}" alt="">`}
+      ${status}
+      <button class="m-remove" onclick="removeMedia(${i})">×</button>
+    </div>`;
+  }).join('');
+}
+
+function removeMedia(i) { S.mediaFiles.splice(i,1); renderMediaGrid(); }
+
+async function uploadMediaToDrive(mediaFile, txD, dateStr) {
+  if (!CFG.scriptUrl || !CFG.driveFolderId) return null;
+  const ext = mediaFile.name.split('.').pop() || (mediaFile.type.startsWith('video') ? 'mp4' : 'jpg');
+  const fname = `TX${txD}_${dateStr.replace(/-/g,'')}_${mediaFile.name}`;
+  try {
+    const resp = await fetch(CFG.scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'uploadFile',
+        folderId: CFG.driveFolderId,
+        fileName: fname,
+        mimeType: mediaFile.type,
+        data: mediaFile.data.split(',')[1]
+      })
+    });
+    const json = await resp.json();
+    return json.url || null;
+  } catch { return null; }
+}
+
+async function pushToSheets(entry) {
+  if (!CFG.scriptUrl) return false;
+  const tx = txDay(entry.date);
+  const pr = tx - TX_START + 1;
+  const driveLinks = entry.mediaFiles.filter(f => f.driveUrl).map(f => f.driveUrl).join(', ');
+  const row = [
+    tx, pr, entry.date,
+    entry.totalDur || '',
+    entry.dayType || '',
+    entry.rode || '',
+    entry.saddleType || '',
+    entry.walkMin || '',
+    entry.trotMin || '',
+    entry.canterMin || '',
+    entry.gait || '',
+    entry.will || '',
+    entry.crop || '',
+    entry.cranky || '',
+    entry.trigger?.join(', ') || '',
+    entry.stops || '',
+    entry.cL || '',
+    entry.cR || '',
+    entry.siReactive || '',
+    entry.siSide || '',
+    entry.siSeverity || '',
+    entry.equibands || '',
+    entry.modalities?.includes('pt') ? 'Y' : '',
+    entry.modalities?.includes('poles') ? 'Y' : '',
+    entry.modalities?.includes('bemer') ? 'Y' : '',
+    entry.bodywork || '',
+    entry.modalities?.includes('laser') ? 'Y' : '',
+    entry.modalities?.includes('shockwave') ? 'Y' : '',
+    entry.modalities?.includes('farrier') ? 'Y' : '',
+    entry.modalities?.includes('exgas') ? 'Y' : '',
+    entry.behaviorNotes || '',
+    (entry.ptNotes || '') + (driveLinks ? '\nMedia: ' + driveLinks : '')
+  ];
+  try {
+    const resp = await fetch(CFG.scriptUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'appendRow', sheetName: 'Maestro Post-Rehab Tracking', row })
+    });
+    const json = await resp.json();
+    return json.success === true;
+  } catch { return false; }
+}
+
+async function saveEntry() {
+  collectText();
+  if (!S.date) { toast('Please set a date', true); return; }
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  const tx = txDay(S.date);
+  const entry = JSON.parse(JSON.stringify(S));
+  entry.txDay = tx;
+  entry.savedAt = Date.now();
+
+  // Upload media to Drive first
+  if (CFG.scriptUrl && CFG.driveFolderId && S.mediaFiles.length) {
+    setSyncBadgeText('Uploading media…');
+    for (let i = 0; i < S.mediaFiles.length; i++) {
+      if (S.mediaFiles[i].driveUrl) continue;
+      S.mediaFiles[i].uploading = true;
+      renderMediaGrid();
+      const url = await uploadMediaToDrive(S.mediaFiles[i], tx, S.date);
+      S.mediaFiles[i].uploading = false;
+      S.mediaFiles[i].driveUrl = url || '';
+      entry.mediaFiles[i].driveUrl = url || '';
+      renderMediaGrid();
+    }
+  }
+
+  // Save locally
+  const all = getEntries();
+  const idx = all.findIndex(e => e.date === S.date);
+  if (idx >= 0) all[idx] = entry; else all.unshift(entry);
+  localStorage.setItem('m_entries', JSON.stringify(all));
+
+  // Push to Sheets
+  if (CFG.scriptUrl) {
+    setSyncBadgeText('Syncing…');
+    const ok = await pushToSheets(entry);
+    if (ok) {
+      setSyncBadgeText('Sheets connected');
+      toast('Saved + synced to Sheets ✓');
+    } else {
+      toast('Saved locally — Sheets sync failed', true);
+    }
+  } else {
+    toast('Saved locally (connect Sheets in Settings)');
+  }
+
+  updateSyncBadge();
+  btn.disabled = false;
+  btn.textContent = 'Save Entry';
+}
+
+function setSyncBadgeText(t) {
+  const el = document.getElementById('syncStatus');
+  el.className = 'sync-status syncing';
+  el.textContent = t;
+}
+
+async function exportAllToSheets() {
+  if (!CFG.scriptUrl) { toast('Add your Script URL in Settings first', true); return; }
+  const all = getEntries();
+  if (!all.length) { toast('No local entries found'); return; }
+  let ok = 0;
+  for (const e of all) {
+    const res = await pushToSheets(e);
+    if (res) ok++;
+  }
+  toast(`Pushed ${ok}/${all.length} entries to Sheets`);
+}
+
+function getEntries() {
+  try { return JSON.parse(localStorage.getItem('m_entries') || '[]'); } catch { return []; }
+}
+
+function renderHistory() {
+  const all = getEntries();
+  const el = document.getElementById('histList');
+  if (!all.length) {
+    el.innerHTML = `<div class="empty-hist">🐴<br><br>No entries yet.<br>Save your first log above.</div>`;
+    return;
+  }
+  el.innerHTML = all.map((e,i) => {
+    const dotCls = e.rating==='good'?'dot-good':e.rating==='ok'?'dot-ok':e.rating==='bad'?'dot-bad':'dot-none';
+    const d = new Date(e.date+'T12:00:00');
+    const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const meta = [
+      e.rode==='Y' ? 'Rode' : null,
+      e.will ? `W: ${e.will}/5` : null,
+      e.stops ? `Stops: ${e.stops}` : null,
+      e.siReactive==='Y' ? 'SI reactive' : null,
+      e.cL||e.cR ? `Canter L${e.cL||'—'}/R${e.cR||'—'}` : null
+    ].filter(Boolean).map(x=>`<span>${x}</span>`).join('');
+    const noteText = [e.dayType, e.behaviorNotes, e.ptNotes].filter(Boolean).join(' · ');
+    const mediaHTML = (e.mediaFiles||[]).length
+      ? `<div class="hist-media">${e.mediaFiles.map(f=>f.type?.startsWith('video')
+          ?`<video class="hist-media" src="${f.data}" muted></video>`
+          :`<img src="${f.data}">`).join('')}</div>` : '';
+    return `<div class="hist-entry" onclick="this.classList.toggle('open')">
+      <div class="hist-header">
+        <div><div class="hist-date">${dateStr}</div><div class="hist-sub">TX ${e.txDay||''}</div></div>
+        <div class="dot ${dotCls}"></div>
+      </div>
+      <div class="hist-meta">${meta}</div>
+      ${noteText||mediaHTML?`<div class="hist-notes">${noteText?`<div>${noteText}</div>`:''}${mediaHTML}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function toast(msg, isErr) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isErr?' err':'');
+  clearTimeout(t._to);
+  t._to = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+loadCfg();
+initDate();
+</script>
+</body>
+</html>
