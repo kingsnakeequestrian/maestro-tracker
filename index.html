@@ -1245,7 +1245,7 @@ function togProc(el, key) {
   const selected = [...document.querySelectorAll('.proc-item.sel')].map(e=>e.querySelector('.proc-label').textContent.trim());
   VET.procedures = selected;
   // Show/hide conditional cards
-  document.getElementById('vetLamenessCard').style.display = selected.includes('Nerve block') || VET.vetVisitType === 'Lameness eval' ? 'block' : (selected.some(p=>['Injection','Nerve block'].includes(p)) || document.querySelector('[onclick*="vetLameLimb"]') ? 'block' : 'none');
+  document.getElementById('vetLamenessCard').style.display = (selected.includes('Nerve block') || ['Lameness eval','Rehab check-in'].includes(VET.visitType)) ? 'block' : 'none';
   document.getElementById('vetInjectionCard').style.display = selected.includes('Injection') ? 'block' : 'none';
   document.getElementById('vetImagingCard').style.display = selected.includes('Imaging') ? 'block' : 'none';
 }
