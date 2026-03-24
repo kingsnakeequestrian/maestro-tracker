@@ -187,6 +187,30 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.err { background: var(--red); }
 
+/* REMINDER BANNER */
+.reminder-banner { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: var(--radius-sm); padding: 10px 14px; margin: 10px 14px 0; display: none; }
+.reminder-banner.show { display: block; }
+.reminder-banner-title { font-size: 12px; font-weight: 500; color: var(--amber); margin-bottom: 4px; }
+.reminder-item { font-size: 13px; color: var(--amber); line-height: 1.5; padding: 3px 0; border-bottom: 1px solid var(--amber-border); }
+.reminder-item:last-child { border-bottom: none; }
+.reminder-overdue { color: var(--red); }
+
+/* VET / BODYWORK SPECIFIC */
+.procedures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.proc-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s; }
+.proc-item.sel { background: var(--accent-light); border-color: var(--green-border); }
+.proc-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.15s; }
+.proc-item.sel .proc-check { background: var(--accent); border-color: var(--accent); color: white; }
+.proc-label { font-size: 13px; color: var(--text-mid); }
+.proc-item.sel .proc-label { color: var(--accent); font-weight: 500; }
+
+/* MODALITY CHIPS for bodywork */
+.mod-chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* VET save btn secondary */
+.save-btn-secondary { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 13px; cursor: pointer; margin-bottom: 8px; transition: opacity 0.15s; }
+.save-btn-secondary:active { opacity: 0.8; }
+
 /* INFO NOTE */
 .info-note { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; color: var(--blue); line-height: 1.55; }
 .info-note strong { font-weight: 500; display: block; margin-bottom: 3px; }
@@ -216,9 +240,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <button class="nav-tab" data-s="media" onclick="showSection('media',this)">Media</button>
   <button class="nav-tab" data-s="notes" onclick="showSection('notes',this)">Notes</button>
   <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
+  <button class="nav-tab" data-s="vet" onclick="showSection('vet',this)">Vet</button>
+  <button class="nav-tab" data-s="bodywork" onclick="showSection('bodywork',this)">Bodywork</button>
   <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
 </div>
 
+<div id="reminderBanner" class="reminder-banner">
+  <div class="reminder-banner-title">Follow-up reminders</div>
+  <div id="reminderList"></div>
+</div>
 <div class="content">
 
 <!-- RIDDEN -->
@@ -523,6 +553,289 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="card-title">Export local entries to sheet</div>
     <p style="font-size:13px;color:var(--text-mid);line-height:1.55;margin-bottom:10px">If you've been logging without a connection, tap below to push all saved local entries to your Google Sheet at once.</p>
     <button class="save-btn" onclick="exportAllToSheets()">Push all local entries to Sheets</button>
+  </div>
+</div>
+
+
+<!-- VET VISIT -->
+<div class="section" id="s-vet">
+  <div class="card">
+    <div class="card-title">Visit Details</div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="vetDate">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Provider</label>
+        <input type="text" id="vetProvider" placeholder="Dr. Smith">
+      </div>
+      <div class="field">
+        <label>Clinic / Practice</label>
+        <input type="text" id="vetClinic" placeholder="EVCT">
+      </div>
+    </div>
+    <div class="field">
+      <label>Visit type</label>
+      <div class="chip-group">
+        <button class="chip" onclick="oneChip(this,'vetVisitType')">Lameness eval</button>
+        <button class="chip" onclick="oneChip(this,'vetVisitType')">Rehab check-in</button>
+        <button class="chip" onclick="oneChip(this,'vetVisitType')">Routine / wellness</button>
+        <button class="chip" onclick="oneChip(this,'vetVisitType')">Emergency</button>
+        <button class="chip" onclick="oneChip(this,'vetVisitType')">Other</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Procedures Performed</div>
+    <div class="field">
+      <div class="procedures-grid">
+        <div class="proc-item" onclick="togProc(this,'injection')"><div class="proc-check"></div><div class="proc-label">Injection</div></div>
+        <div class="proc-item" onclick="togProc(this,'shockwave')"><div class="proc-check"></div><div class="proc-label">Shockwave</div></div>
+        <div class="proc-item" onclick="togProc(this,'scope')"><div class="proc-check"></div><div class="proc-label">Scope</div></div>
+        <div class="proc-item" onclick="togProc(this,'bloodwork')"><div class="proc-check"></div><div class="proc-label">Bloodwork</div></div>
+        <div class="proc-item" onclick="togProc(this,'imaging')"><div class="proc-check"></div><div class="proc-label">Imaging</div></div>
+        <div class="proc-item" onclick="togProc(this,'vaccination')"><div class="proc-check"></div><div class="proc-label">Vaccination</div></div>
+        <div class="proc-item" onclick="togProc(this,'dental')"><div class="proc-check"></div><div class="proc-label">Dental</div></div>
+        <div class="proc-item" onclick="togProc(this,'nerve_block')"><div class="proc-check"></div><div class="proc-label">Nerve block</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="vetLamenessCard" style="display:none">
+    <div class="card-title">Lameness</div>
+    <div class="field">
+      <label>Lameness grade (AAEP 0–5)</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="0" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">0</button>
+        <button class="score-btn" data-v="1" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">1</button>
+        <button class="score-btn" data-v="2" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">2</button>
+        <button class="score-btn" data-v="3" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">3</button>
+        <button class="score-btn" data-v="4" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">4</button>
+        <button class="score-btn" data-v="5" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">5</button>
+      </div>
+      <div class="score-hint" id="lameHint">0 = sound · 1 = barely perceptible · 3 = consistently lame · 5 = non-weight bearing</div>
+    </div>
+    <div class="field">
+      <label>Affected limb (exam)</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">RF</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">LF</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">RH</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">LH</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">Multiple</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Joint / region</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">SI</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pelvis / gluteal</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Stifle</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hock</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Fetlock</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pastern</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hoof / coffin</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Tendon</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Cervical spine</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Back</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Other region (write in)</label>
+      <input type="text" id="vetLameRegionOther" placeholder="e.g. 3rd trochanter, proximal metatarsus…">
+    </div>
+    <div class="field">
+      <label>Response to nerve block</label>
+      <input type="text" id="vetNerveBlock" placeholder="e.g. 70% improvement distal limb block">
+    </div>
+  </div>
+
+  <div class="card" id="vetInjectionCard" style="display:none">
+    <div class="card-title">Injection Details</div>
+    <div class="field">
+      <label>Injection site(s)</label>
+      <input type="text" id="vetInjSite" placeholder="e.g. Right SI, right stifle, right quadratus femoris">
+    </div>
+    <div class="field">
+      <label>Product</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">PRP</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">ProStride</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Triamcinolone</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Methylprednisolone</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Hyaluronic acid</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Other product (write in)</label>
+      <input type="text" id="vetInjProductOther" placeholder="">
+    </div>
+    <div class="field">
+      <label>Post-injection protocol</label>
+      <textarea id="vetInjProtocol" rows="2" placeholder="e.g. Stall rest 3 days, light work day 4, return to work day 5"></textarea>
+    </div>
+  </div>
+
+  <div class="card" id="vetImagingCard" style="display:none">
+    <div class="card-title">Imaging</div>
+    <div class="field">
+      <label>Imaging type</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Radiograph</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Ultrasound</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Nuclear scintigraphy</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">MRI</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">CT</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Region imaged</label>
+      <input type="text" id="vetImagingRegion" placeholder="e.g. Pelvis, cervical spine, RH stifle">
+    </div>
+    <div class="field">
+      <label>Imaging file link (Drive)</label>
+      <input type="text" id="vetImagingLink" placeholder="https://drive.google.com/…">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Clinical Notes</div>
+    <div class="field">
+      <label>History / presentation</label>
+      <textarea id="vetHistory" rows="3" placeholder="Reason for visit, owner observations…"></textarea>
+    </div>
+    <div class="field">
+      <label>Findings</label>
+      <textarea id="vetFindings" rows="3" placeholder="Exam findings, diagnostic results…"></textarea>
+    </div>
+    <div class="field">
+      <label>Medications administered</label>
+      <input type="text" id="vetMeds" placeholder="e.g. Banamine 10mL IV, Gastrogard 1 tube PO">
+    </div>
+    <div class="field">
+      <label>Recommendations</label>
+      <textarea id="vetRecs" rows="2" placeholder=""></textarea>
+    </div>
+    <div class="field">
+      <label>Plan</label>
+      <textarea id="vetPlan" rows="2" placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Follow-Up</div>
+    <div class="field">
+      <label>Follow-up date</label>
+      <input type="date" id="vetFollowupDate">
+    </div>
+    <div class="field">
+      <label>Follow-up notes</label>
+      <input type="text" id="vetFollowupNotes" placeholder="e.g. Recheck in 4 weeks, schedule scope…">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Files</div>
+    <div class="field">
+      <label>Visit summary PDF (upload to Drive)</label>
+      <div class="upload-area" style="margin-bottom:10px">
+        <input type="file" id="vetPdfInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'pdf')">
+        <div class="upload-icon">📄</div>
+        <div class="upload-label">Tap to upload visit summary</div>
+        <div class="upload-hint">PDF or image</div>
+      </div>
+      <input type="text" id="vetPdfLink" placeholder="Or paste Drive link directly">
+    </div>
+    <div class="field" id="vetVaccCard">
+      <label>Vaccination certificate (upload or link)</label>
+      <div class="upload-area" style="margin-bottom:10px">
+        <input type="file" id="vetVaccInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'vacc')">
+        <div class="upload-icon">💉</div>
+        <div class="upload-label">Tap to upload certificate</div>
+        <div class="upload-hint">PDF or image</div>
+      </div>
+      <input type="text" id="vetVaccLink" placeholder="Or paste Drive link directly">
+    </div>
+  </div>
+
+  <div style="padding: 0 0 12px">
+    <button class="save-btn-secondary" onclick="saveVetEntry()">Save Vet Visit</button>
+  </div>
+</div>
+
+<!-- BODYWORK -->
+<div class="section" id="s-bodywork">
+  <div class="card">
+    <div class="card-title">Session Details</div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="bwDate">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Provider</label>
+        <input type="text" id="bwProvider" placeholder="Aimee M.">
+      </div>
+      <div class="field">
+        <label>Practice</label>
+        <input type="text" id="bwPractice" placeholder="Barrio Performance Therapy">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Modalities Used</div>
+    <div class="field">
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">Massage</button>
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">PEMF</button>
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">Cold Laser</button>
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">KT Tape</button>
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">Stretching</button>
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">Chiro</button>
+        <button class="chip" onclick="toggleChipSet(this,'bwModalities')">Other</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Session Notes</div>
+    <div class="field">
+      <label>Areas of concern / symptoms</label>
+      <input type="text" id="bwConcerns" placeholder="e.g. Continuing care, right gluteal reactivity">
+    </div>
+    <div class="field">
+      <label>PEMF reactivity / massage findings</label>
+      <textarea id="bwFindings" rows="3" placeholder="e.g. Right side slightly more fasciculations than left…"></textarea>
+    </div>
+    <div class="field">
+      <label>Observations / assessment / response</label>
+      <textarea id="bwObservations" rows="3" placeholder="How did he respond to the session?"></textarea>
+    </div>
+    <div class="field">
+      <label>Recommendations</label>
+      <input type="text" id="bwRecs" placeholder="e.g. Massage + PEMF every other week">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Session PDF</div>
+    <div class="field">
+      <div class="upload-area" style="margin-bottom:10px">
+        <input type="file" id="bwPdfInput" accept="application/pdf,image/*" onchange="handleBwFile(event)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-label">Tap to upload session notes PDF</div>
+        <div class="upload-hint">Barrio form or similar</div>
+      </div>
+      <input type="text" id="bwPdfLink" placeholder="Or paste Drive link directly">
+    </div>
+    <div id="bwFilePreview" style="font-size:13px;color:var(--green);margin-top:6px;display:none"></div>
+  </div>
+
+  <div style="padding: 0 0 12px">
+    <button class="save-btn-secondary" style="color:var(--green);background:var(--green-bg);border-color:var(--green-border)" onclick="saveBwEntry()">Save Bodywork Session</button>
   </div>
 </div>
 
@@ -895,8 +1208,278 @@ function toast(msg, isErr) {
   t._to = setTimeout(()=>t.classList.remove('show'), 2600);
 }
 
+
+// ── VET & BODYWORK STATE ─────────────────────────────────────────────
+const LAME = ['Sound — no lameness perceptible','Barely perceptible, not consistently observable','Perceptible at trot in-hand, consistent','Consistently lame, obvious at trot','Obvious at walk, unable to canter','Non-weight bearing'];
+
+let VET = {
+  date:'', provider:'', clinic:'', visitType:'', procedures:[],
+  lameGrade:'', lameLimb:[], lameRegion:[], lameRegionOther:'', nerveBlock:'',
+  injSite:'', injProduct:[], injProductOther:'', injProtocol:'',
+  imagingType:[], imagingRegion:'', imagingLink:'',
+  history:'', findings:'', meds:'', recs:'', plan:'',
+  followupDate:'', followupNotes:'',
+  pdfFile:null, pdfLink:'', vaccFile:null, vaccLink:''
+};
+
+let BW = {
+  date:'', provider:'', practice:'', modalities:[],
+  concerns:'', findings:'', observations:'', recs:'',
+  pdfFile:null, pdfLink:''
+};
+
+// ── CHIP HELPERS (multi-select sets) ────────────────────────────────
+function toggleChipSet(btn, stateKey) {
+  btn.classList.toggle('sel');
+  // rebuild array from all .sel chips in same group parent
+  const selected = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());
+  // figure out which state object owns this key
+  if (stateKey in VET) VET[stateKey] = selected;
+  else if (stateKey in BW) BW[stateKey] = selected;
+}
+
+// ── PROC TOGGLE ──────────────────────────────────────────────────────
+function togProc(el, key) {
+  el.classList.toggle('sel');
+  el.querySelector('.proc-check').textContent = el.classList.contains('sel') ? '✓' : '';
+  const selected = [...document.querySelectorAll('.proc-item.sel')].map(e=>e.querySelector('.proc-label').textContent.trim());
+  VET.procedures = selected;
+  // Show/hide conditional cards
+  document.getElementById('vetLamenessCard').style.display = selected.includes('Nerve block') || VET.vetVisitType === 'Lameness eval' ? 'block' : (selected.some(p=>['Injection','Nerve block'].includes(p)) || document.querySelector('[onclick*="vetLameLimb"]') ? 'block' : 'none');
+  document.getElementById('vetInjectionCard').style.display = selected.includes('Injection') ? 'block' : 'none';
+  document.getElementById('vetImagingCard').style.display = selected.includes('Imaging') ? 'block' : 'none';
+}
+
+// ── COLLECT VET TEXT FIELDS ──────────────────────────────────────────
+function collectVet() {
+  VET.date = document.getElementById('vetDate').value;
+  VET.provider = document.getElementById('vetProvider').value;
+  VET.clinic = document.getElementById('vetClinic').value;
+  VET.lameRegionOther = document.getElementById('vetLameRegionOther').value;
+  VET.nerveBlock = document.getElementById('vetNerveBlock').value;
+  VET.injSite = document.getElementById('vetInjSite').value;
+  VET.injProductOther = document.getElementById('vetInjProductOther').value;
+  VET.injProtocol = document.getElementById('vetInjProtocol').value;
+  VET.imagingRegion = document.getElementById('vetImagingRegion').value;
+  VET.imagingLink = document.getElementById('vetImagingLink').value;
+  VET.history = document.getElementById('vetHistory').value;
+  VET.findings = document.getElementById('vetFindings').value;
+  VET.meds = document.getElementById('vetMeds').value;
+  VET.recs = document.getElementById('vetRecs').value;
+  VET.plan = document.getElementById('vetPlan').value;
+  VET.followupDate = document.getElementById('vetFollowupDate').value;
+  VET.followupNotes = document.getElementById('vetFollowupNotes').value;
+  VET.pdfLink = document.getElementById('vetPdfLink').value;
+  VET.vaccLink = document.getElementById('vetVaccLink').value;
+}
+
+function collectBw() {
+  BW.date = document.getElementById('bwDate').value;
+  BW.provider = document.getElementById('bwProvider').value;
+  BW.practice = document.getElementById('bwPractice').value;
+  BW.concerns = document.getElementById('bwConcerns').value;
+  BW.findings = document.getElementById('bwFindings').value;
+  BW.observations = document.getElementById('bwObservations').value;
+  BW.recs = document.getElementById('bwRecs').value;
+  BW.pdfLink = document.getElementById('bwPdfLink').value;
+}
+
+// ── FILE HANDLERS ────────────────────────────────────────────────────
+function handleVetFile(e, type) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    if (type === 'pdf') VET.pdfFile = { name: f.name, type: f.type, data: ev.target.result };
+    else VET.vaccFile = { name: f.name, type: f.type, data: ev.target.result };
+    toast('File ready — will upload to Drive on save');
+  };
+  r.readAsDataURL(f);
+}
+
+function handleBwFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    BW.pdfFile = { name: f.name, type: f.type, data: ev.target.result };
+    const prev = document.getElementById('bwFilePreview');
+    prev.style.display = 'block';
+    prev.textContent = '✓ ' + f.name + ' ready to upload';
+    toast('File ready — will upload to Drive on save');
+  };
+  r.readAsDataURL(f);
+}
+
+// ── UPLOAD FILE TO DRIVE ─────────────────────────────────────────────
+async function uploadFileToDrive(fileObj, prefix) {
+  if (!CFG.scriptUrl || !CFG.driveFolderId || !fileObj) return null;
+  const fname = prefix + '_' + fileObj.name;
+  try {
+    const params = new URLSearchParams();
+    params.append('payload', JSON.stringify({
+      action: 'uploadFile',
+      folderId: CFG.driveFolderId,
+      fileName: fname,
+      mimeType: fileObj.type,
+      data: fileObj.data.split(',')[1]
+    }));
+    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
+    const json = await resp.json();
+    return json.url || null;
+  } catch { return null; }
+}
+
+// ── PUSH VET ROW TO SHEETS ───────────────────────────────────────────
+async function pushVetToSheets(v) {
+  if (!CFG.scriptUrl) return false;
+  const row = [
+    v.date, v.provider, v.clinic, v.visitType, v.procedures.join(', '),
+    v.lameGrade, v.lameLimb.join(', '), [...(v.lameRegion||[]), v.lameRegionOther].filter(Boolean).join(', '), v.nerveBlock,
+    v.procedures.includes('Scope') ? 'Y' : '', v.procedures.includes('Bloodwork') ? 'Y' : '', '', '', '',
+    v.injSite, [...(v.injProduct||[]), v.injProductOther].filter(Boolean).join(', '), v.injProtocol,
+    v.imagingType.join(', '), v.imagingRegion, v.imagingLink,
+    v.meds, '',
+    v.history, v.findings, v.recs, v.plan,
+    v.followupDate, v.followupNotes,
+    v.pdfLink, v.vaccLink
+  ];
+  try {
+    const params = new URLSearchParams();
+    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Vet Records', row, dateCol: 0 }));
+    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
+    const json = await resp.json();
+    return json.success === true;
+  } catch { return false; }
+}
+
+// ── PUSH BODYWORK ROW TO SHEETS ──────────────────────────────────────
+async function pushBwToSheets(b) {
+  if (!CFG.scriptUrl) return false;
+  const mods = b.modalities || [];
+  const row = [
+    b.date, b.provider, b.practice,
+    mods.includes('Massage') ? 'Y' : '', mods.includes('PEMF') ? 'Y' : '',
+    mods.includes('Cold Laser') ? 'Y' : '', mods.includes('KT Tape') ? 'Y' : '',
+    mods.includes('Stretching') ? 'Y' : '', mods.filter(m=>!['Massage','PEMF','Cold Laser','KT Tape','Stretching'].includes(m)).join(', '),
+    b.concerns, b.findings, b.observations, b.recs, b.pdfLink
+  ];
+  try {
+    const params = new URLSearchParams();
+    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Bodywork Sessions', row, dateCol: 0 }));
+    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
+    const json = await resp.json();
+    return json.success === true;
+  } catch { return false; }
+}
+
+// ── SAVE VET ENTRY ───────────────────────────────────────────────────
+async function saveVetEntry() {
+  collectVet();
+  if (!VET.date) { toast('Please set a visit date', true); return; }
+
+  // Upload files to Drive
+  if (VET.pdfFile && CFG.driveFolderId) {
+    const url = await uploadFileToDrive(VET.pdfFile, 'vet_' + VET.date);
+    if (url) { VET.pdfLink = url; document.getElementById('vetPdfLink').value = url; }
+  }
+  if (VET.vaccFile && CFG.driveFolderId) {
+    const url = await uploadFileToDrive(VET.vaccFile, 'vacc_' + VET.date);
+    if (url) { VET.vaccLink = url; document.getElementById('vetVaccLink').value = url; }
+  }
+
+  // Save locally
+  const all = getVetEntries();
+  all.unshift({ ...VET, savedAt: Date.now() });
+  localStorage.setItem('m_vet', JSON.stringify(all));
+
+  // Push to Sheets
+  if (CFG.scriptUrl) {
+    const ok = await pushVetToSheets(VET);
+    toast(ok ? 'Vet visit saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
+  } else {
+    toast('Vet visit saved locally');
+  }
+
+  // Refresh reminders
+  checkReminders();
+}
+
+// ── SAVE BODYWORK ENTRY ──────────────────────────────────────────────
+async function saveBwEntry() {
+  collectBw();
+  if (!BW.date) { toast('Please set a session date', true); return; }
+
+  // Upload PDF to Drive
+  if (BW.pdfFile && CFG.driveFolderId) {
+    const url = await uploadFileToDrive(BW.pdfFile, 'bodywork_' + BW.date);
+    if (url) { BW.pdfLink = url; document.getElementById('bwPdfLink').value = url; }
+  }
+
+  // Save locally
+  const all = getBwEntries();
+  all.unshift({ ...BW, savedAt: Date.now() });
+  localStorage.setItem('m_bw', JSON.stringify(all));
+
+  if (CFG.scriptUrl) {
+    const ok = await pushBwToSheets(BW);
+    toast(ok ? 'Bodywork session saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
+  } else {
+    toast('Bodywork session saved locally');
+  }
+}
+
+function getVetEntries() { try { return JSON.parse(localStorage.getItem('m_vet')||'[]'); } catch { return []; } }
+function getBwEntries()  { try { return JSON.parse(localStorage.getItem('m_bw') ||'[]'); } catch { return []; } }
+
+// ── FOLLOW-UP REMINDERS ──────────────────────────────────────────────
+function checkReminders() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const in7 = new Date(today); in7.setDate(in7.getDate()+7);
+  const items = [];
+
+  getVetEntries().forEach(e => {
+    if (!e.followupDate) return;
+    const d = new Date(e.followupDate + 'T12:00:00');
+    if (d <= in7) {
+      const overdue = d < today;
+      const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      items.push({ text: label + ' — ' + (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : ''), overdue });
+    }
+  });
+
+  const banner = document.getElementById('reminderBanner');
+  const list   = document.getElementById('reminderList');
+  if (items.length) {
+    list.innerHTML = items.map(i => `<div class="reminder-item${i.overdue?' reminder-overdue':''}">${i.overdue?'⚠ OVERDUE: ':''}${i.text}</div>`).join('');
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+// Set default dates for vet/bw forms
+function initVetBwDates() {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('vetDate').value = today;
+  document.getElementById('bwDate').value = today;
+}
+
+// Show lameness card whenever visit type is lameness eval
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('chip') && e.target.closest('#s-vet')) {
+    const txt = e.target.textContent.trim();
+    if (['Lameness eval','Rehab check-in'].includes(txt)) {
+      setTimeout(() => { document.getElementById('vetLamenessCard').style.display = 'block'; }, 50);
+    }
+  }
+});
+
 loadCfg();
 initDate();
+initVetBwDates();
+checkReminders();
+
 </script>
 </body>
 </html>
