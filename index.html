@@ -578,11 +578,11 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="field">
       <label>Visit type</label>
       <div class="chip-group">
-        <button class="chip" onclick="oneChip(this,'vetVisitType')">Lameness eval</button>
-        <button class="chip" onclick="oneChip(this,'vetVisitType')">Rehab check-in</button>
-        <button class="chip" onclick="oneChip(this,'vetVisitType')">Routine / wellness</button>
-        <button class="chip" onclick="oneChip(this,'vetVisitType')">Emergency</button>
-        <button class="chip" onclick="oneChip(this,'vetVisitType')">Other</button>
+        <button class="chip" onclick="selectVetVisitType(this)">Lameness eval</button>
+        <button class="chip" onclick="selectVetVisitType(this)">Rehab check-in</button>
+        <button class="chip" onclick="selectVetVisitType(this)">Routine / wellness</button>
+        <button class="chip" onclick="selectVetVisitType(this)">Emergency</button>
+        <button class="chip" onclick="selectVetVisitType(this)">Other</button>
       </div>
     </div>
   </div>
@@ -1248,6 +1248,16 @@ function togProc(el, key) {
   document.getElementById('vetLamenessCard').style.display = selected.includes('Nerve block') || VET.vetVisitType === 'Lameness eval' ? 'block' : (selected.some(p=>['Injection','Nerve block'].includes(p)) || document.querySelector('[onclick*="vetLameLimb"]') ? 'block' : 'none');
   document.getElementById('vetInjectionCard').style.display = selected.includes('Injection') ? 'block' : 'none';
   document.getElementById('vetImagingCard').style.display = selected.includes('Imaging') ? 'block' : 'none';
+}
+
+// ── VET VISIT TYPE SELECTOR ─────────────────────────────────────────
+function selectVetVisitType(btn) {
+  btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+  btn.classList.add('sel');
+  VET.visitType = btn.textContent.trim();
+  // Show lameness card for relevant visit types
+  const showLame = ['Lameness eval','Rehab check-in'].includes(VET.visitType);
+  document.getElementById('vetLamenessCard').style.display = showLame ? 'block' : 'none';
 }
 
 // ── COLLECT VET TEXT FIELDS ──────────────────────────────────────────
