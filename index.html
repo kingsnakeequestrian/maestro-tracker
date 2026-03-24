@@ -1343,16 +1343,17 @@ async function uploadFileToDrive(fileObj, prefix) {
 // ── PUSH VET ROW TO SHEETS ───────────────────────────────────────────
 async function pushVetToSheets(v) {
   if (!CFG.scriptUrl) return false;
+  const arr = (x) => Array.isArray(x) ? x : [];
   const row = [
-    v.date, v.provider, v.clinic, v.visitType, v.procedures.join(', '),
-    v.lameGrade, v.lameLimb.join(', '), [...(v.lameRegion||[]), v.lameRegionOther].filter(Boolean).join(', '), v.nerveBlock,
-    v.procedures.includes('Scope') ? 'Y' : '', v.procedures.includes('Bloodwork') ? 'Y' : '', '', '', '',
-    v.injSite, [...(v.injProduct||[]), v.injProductOther].filter(Boolean).join(', '), v.injProtocol,
-    v.imagingType.join(', '), v.imagingRegion, v.imagingLink,
-    v.meds, '',
-    v.history, v.findings, v.recs, v.plan,
-    v.followupDate, v.followupNotes,
-    v.pdfLink, v.vaccLink
+    v.date || '', v.provider || '', v.clinic || '', v.visitType || '', arr(v.procedures).join(', '),
+    v.lameGrade || '', arr(v.lameLimb).join(', '), [...arr(v.lameRegion), v.lameRegionOther || ''].filter(Boolean).join(', '), v.nerveBlock || '',
+    arr(v.procedures).includes('Scope') ? 'Y' : '', arr(v.procedures).includes('Bloodwork') ? 'Y' : '', '', '', '',
+    v.injSite || '', [...arr(v.injProduct), v.injProductOther || ''].filter(Boolean).join(', '), v.injProtocol || '',
+    arr(v.imagingType).join(', '), v.imagingRegion || '', v.imagingLink || '',
+    v.meds || '', '',
+    v.history || '', v.findings || '', v.recs || '', v.plan || '',
+    v.followupDate || '', v.followupNotes || '',
+    v.pdfLink || '', v.vaccLink || ''
   ];
   try {
     const params = new URLSearchParams();
