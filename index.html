@@ -938,6 +938,9 @@ function showSection(id, btn) {
     if (t) t.classList.add('active');
   }
   if (id === 'history') renderHistory();
+  // Hide main Save Entry bar on tabs that have their own save button
+  const hideSaveBar = ['vet','bodywork','history','settings'].includes(id);
+  document.querySelector('.save-bar').style.display = hideSaveBar ? 'none' : 'block';
 }
 
 function show(id) { document.getElementById(id).classList.add('show'); }
