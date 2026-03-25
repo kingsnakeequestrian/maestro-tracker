@@ -1125,8 +1125,13 @@ async function saveEntry() {
   if (idx >= 0) all[idx] = entry; else all.unshift(entry);
   localStorage.setItem('m_entries', JSON.stringify(all));
 
-  // Push to Sheets
-  if (CFG.scriptUrl) {
+  // Only push to Sheets if meaningful data was entered
+  // (prevent blank saves from overwriting real data for the same date)
+  const hasMeaningfulData = entry.rode || entry.will || entry.stops || entry.dayType ||
+    entry.cranky || entry.siReactive || entry.behaviorNotes || entry.rating ||
+    entry.cL || entry.cR || entry.modalities?.length;
+
+  if (CFG.scriptUrl && hasMeaningfulData) {
     setSyncBadgeText('Syncing…');
     const ok = await pushToSheets(entry);
     if (ok) {
@@ -1135,6 +1140,9 @@ async function saveEntry() {
     } else {
       toast('Saved locally — Sheets sync failed', true);
     }
+  } else if (!hasMeaningfulData) {
+    toast('Nothing to sync — fill in some fields first');
+    updateSyncBadge();
   } else {
     toast('Saved locally (connect Sheets in Settings)');
   }
@@ -1389,30 +1397,53 @@ async function saveVetEntry() {
   collectVet();
   if (!VET.date) { toast('Please set a visit date', true); return; }
 
+  const btn = document.querySelector('#s-vet .save-btn-secondary');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
   // Upload files to Drive
-  if (VET.pdfFile && CFG.driveFolderId) {
-    const url = await uploadFileToDrive(VET.pdfFile, 'vet_' + VET.date);
-    if (url) { VET.pdfLink = url; document.getElementById('vetPdfLink').value = url; }
-  }
-  if (VET.vaccFile && CFG.driveFolderId) {
-    const url = await uploadFileToDrive(VET.vaccFile, 'vacc_' + VET.date);
-    if (url) { VET.vaccLink = url; document.getElementById('vetVaccLink').value = url; }
+  try {
+    if (VET.pdfFile && CFG.driveFolderId) {
+      const url = await uploadFileToDrive(VET.pdfFile, 'vet_' + VET.date);
+      if (url) { VET.pdfLink = url; document.getElementById('vetPdfLink').value = url; }
+    }
+    if (VET.vaccFile && CFG.driveFolderId) {
+      const url = await uploadFileToDrive(VET.vaccFile, 'vacc_' + VET.date);
+      if (url) { VET.vaccLink = url; document.getElementById('vetVaccLink').value = url; }
+    }
+  } catch(uploadErr) {
+    console.error('File upload error:', uploadErr);
   }
 
-  // Save locally
-  const all = getVetEntries();
-  all.unshift({ ...VET, savedAt: Date.now() });
-  localStorage.setItem('m_vet', JSON.stringify(all));
+  // Save locally — vet entries are separate from daily log, always append
+  try {
+    const all = getVetEntries();
+    all.unshift({ ...VET, savedAt: Date.now() });
+    localStorage.setItem('m_vet', JSON.stringify(all));
+  } catch(localErr) {
+    console.error('Local save error:', localErr);
+    toast('Local save failed: ' + localErr.message, true);
+    if (btn) { btn.disabled = false; btn.textContent = 'Save Vet Visit'; }
+    return;
+  }
 
   // Push to Sheets
   if (CFG.scriptUrl) {
-    const ok = await pushVetToSheets(VET);
-    toast(ok ? 'Vet visit saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
+    try {
+      const ok = await pushVetToSheets(VET);
+      if (ok) {
+        toast('Vet visit saved + synced ✓');
+      } else {
+        toast('Saved locally — Sheets sync failed', true);
+      }
+    } catch(sheetErr) {
+      console.error('Sheets push error:', sheetErr);
+      toast('Saved locally — Sheets error: ' + sheetErr.message, true);
+    }
   } else {
-    toast('Vet visit saved locally');
+    toast('Vet visit saved locally (no Sheets connection)');
   }
 
-  // Refresh reminders
+  if (btn) { btn.disabled = false; btn.textContent = 'Save Vet Visit'; }
   checkReminders();
 }
 
