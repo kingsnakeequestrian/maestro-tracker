@@ -1471,6 +1471,10 @@ async function saveBwEntry() {
   all.unshift({ ...BW, savedAt: Date.now() });
   localStorage.setItem('m_bw', JSON.stringify(all));
 
+  // Debug: show what modalities were captured
+  toast('Modalities: ' + JSON.stringify(BW.modalities) + ' | date: ' + BW.date);
+  await new Promise(r => setTimeout(r, 3000));
+
   if (CFG.scriptUrl) {
     const ok = await pushBwToSheets(BW);
     toast(ok ? 'Bodywork session saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
