@@ -789,13 +789,13 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="card-title">Modalities Used</div>
     <div class="field">
       <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">Massage</button>
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">PEMF</button>
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">Cold Laser</button>
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">KT Tape</button>
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">Stretching</button>
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">Chiro</button>
-        <button class="chip" onclick="toggleChipSet(this,'modalities')">Other</button>
+        <button class="chip" onclick="togBwMod(this)">Massage</button>
+        <button class="chip" onclick="togBwMod(this)">PEMF</button>
+        <button class="chip" onclick="togBwMod(this)">Cold Laser</button>
+        <button class="chip" onclick="togBwMod(this)">KT Tape</button>
+        <button class="chip" onclick="togBwMod(this)">Stretching</button>
+        <button class="chip" onclick="togBwMod(this)">Chiro</button>
+        <button class="chip" onclick="togBwMod(this)">Other</button>
       </div>
     </div>
   </div>
@@ -1292,6 +1292,11 @@ function collectVet() {
   VET.followupNotes = document.getElementById('vetFollowupNotes').value;
   VET.pdfLink = document.getElementById('vetPdfLink').value;
   VET.vaccLink = document.getElementById('vetVaccLink').value;
+}
+
+function togBwMod(btn) {
+  btn.classList.toggle('sel');
+  BW.modalities = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
 }
 
 function collectBw() {
