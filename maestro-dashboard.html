@@ -183,13 +183,18 @@ async function refreshData(){
   if(btn){btn.disabled=true;btn.textContent='Refreshing…';}
   setStatus('Fetching…');
   try{
+    console.log('[Dashboard] Fetching from:', url);
     const resp=await fetch(url+'?action=read&sheet=daily');
+    console.log('[Dashboard] Response status:', resp.status);
     const json=await resp.json();
+    console.log('[Dashboard] JSON success:', json.success, 'rows:', json.data?.rows?.length);
     if(!json.success) throw new Error(json.error||'Unknown error');
     processRawRows(json.data.headers, json.data.rows);
+    console.log('[Dashboard] After processing — W:', W.length, 'M:', M.length, 'GAPS:', GAPS.length);
     setStatus('Updated '+new Date().toLocaleTimeString());
     buildAll();
   }catch(err){
+    console.error('[Dashboard] Error:', err);
     setStatus('Refresh failed: '+err.message, true);
   }finally{
     if(btn){btn.disabled=false;btn.textContent='Refresh data';}
@@ -541,6 +546,7 @@ function buildGap(){
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
+  console.log('[Dashboard] buildAll — view:', view, 'data points:', data.length);
   buildStats(data);
   if(data.length){
     buildWorkload(data,labels);
