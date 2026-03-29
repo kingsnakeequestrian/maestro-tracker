@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maestro — Treatment Timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F2EC;
+  --card:#FFFFFF;
+  --text:#1A1814;
+  --muted:#7A7468;
+  --border:rgba(0,0,0,0.09);
+  --radius:12px;
+
+  --sw:#C0392B;   --sw-bg:#FDF0EF;   --sw-border:#E8A09B;
+  --inj:#1A5FA8;  --inj-bg:#EAF1FB;  --inj-border:#92B8E8;
+  --laser:#6B4FA8;--laser-bg:#F2EEF9;--laser-border:#B09FD8;
+  --bw:#2E7D52;   --bw-bg:#EAF4EE;   --bw-border:#8EC9A6;
+  --vet:#8B5E14;  --vet-bg:#FBF3E4;  --vet-border:#D4A85A;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);padding:32px 20px 80px;max-width:900px;margin:0 auto;line-height:1.5}
+
+/* HEADER */
+.header{margin-bottom:36px}
+.header h1{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:400;letter-spacing:-0.3px;margin-bottom:4px}
+.header p{font-size:13px;color:var(--muted)}
+
+/* LEGEND */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:5px 10px;background:var(--card);border-radius:20px;border:1px solid var(--border)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* UPCOMING ALERT CARDS */
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:36px}
+.alert-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;border:1px solid var(--border);border-left:4px solid var(--sw)}
+.alert-card.laser{border-left-color:var(--laser)}
+.alert-card.inj{border-left-color:var(--inj)}
+.alert-card.ok{border-left-color:var(--bw)}
+.alert-title{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px}
+.alert-main{font-size:18px;font-weight:500;margin-bottom:2px}
+.alert-sub{font-size:12px;color:var(--muted)}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;margin-top:6px;letter-spacing:0.04em}
+.badge.due{background:#FFF0EE;color:var(--sw)}
+.badge.soon{background:#FFF8EC;color:var(--vet)}
+.badge.on-track{background:#EAF4EE;color:var(--bw)}
+
+/* SECTION */
+.section{margin-bottom:40px}
+.section-title{font-family:'Libre Baskerville',serif;font-size:16px;font-weight:400;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.section-dot{width:10px;height:10px;border-radius:50%}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:0;width:1.5px;background:linear-gradient(to bottom,var(--border),transparent)}
+
+.tl-item{position:relative;margin-bottom:20px}
+.tl-dot{position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 0 1.5px currentColor;flex-shrink:0}
+.tl-dot.sw{color:var(--sw);background:var(--sw)}
+.tl-dot.inj{color:var(--inj);background:var(--inj)}
+.tl-dot.laser{color:var(--laser);background:var(--laser)}
+.tl-dot.bw{color:var(--bw);background:var(--bw)}
+.tl-dot.vet{color:var(--vet);background:var(--vet)}
+.tl-dot.future{background:white}
+
+.tl-card{background:var(--card);border-radius:10px;padding:14px 16px;border:1px solid var(--border);transition:box-shadow 0.15s}
+.tl-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.tl-card.sw{border-left:3px solid var(--sw)}
+.tl-card.inj{border-left:3px solid var(--inj)}
+.tl-card.laser{border-left:3px solid var(--laser)}
+.tl-card.bw{border-left:3px solid var(--bw)}
+.tl-card.vet{border-left:3px solid var(--vet)}
+.tl-card.future{border-left:3px solid #D0CBC2;border-style:dashed;background:transparent}
+
+.tl-date{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:3px}
+.tl-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.tl-site{font-size:12px;color:var(--muted);margin-bottom:4px}
+.tl-note{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5}
+
+.tl-window{margin-top:8px;padding:8px 10px;border-radius:7px;font-size:11px;line-height:1.6}
+.tl-window.sw{background:var(--sw-bg);color:var(--sw)}
+.tl-window.inj{background:var(--inj-bg);color:var(--inj)}
+.tl-window.laser{background:var(--laser-bg);color:var(--laser)}
+
+.tl-gap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin:6px 0 6px -24px;padding-left:24px}
+.tl-gap-line{flex:1;height:1px;background:var(--border);max-width:40px}
+
+/* PROGRESS BAR (for laser compliance) */
+.compliance-wrap{margin-top:8px}
+.compliance-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px;color:var(--muted)}
+.compliance-track{flex:1;height:5px;background:#EDE9E0;border-radius:3px;overflow:hidden}
+.compliance-fill{height:100%;border-radius:3px}
+
+/* NEXT TREATMENT CHIP */
+.next-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:10px;margin-top:6px}
+.next-chip.sw{background:var(--sw-bg);color:var(--sw)}
+.next-chip.laser{background:var(--laser-bg);color:var(--laser)}
+.next-chip.inj{background:var(--inj-bg);color:var(--inj)}
+
+/* FUTURE SECTION */
+.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.future-item{background:var(--card);border-radius:10px;padding:12px 14px;border:1px dashed var(--border)}
+.future-item-type{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.future-item-date{font-size:16px;font-weight:500;margin-bottom:2px}
+.future-item-sub{font-size:11px;color:var(--muted)}
+</style>
+
+<style id="maestro-nav-style">
+.mnav{
+  position:sticky;top:0;z-index:999;
+  display:flex;align-items:center;gap:0;
+  background:#1A1814;
+  padding:0 16px;
+  height:46px;
+  font-family:'DM Sans',sans-serif;
+}
+.mnav-brand{
+  font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
+  margin-right:auto;letter-spacing:0.02em;white-space:nowrap;
+}
+.mnav-brand span{color:white}
+.mnav-links{display:flex;gap:2px}
+.mnav-link{
+  font-size:12px;color:rgba(255,255,255,0.55);
+  text-decoration:none;padding:6px 12px;border-radius:6px;
+  transition:all 0.15s;white-space:nowrap;
+}
+.mnav-link:hover{color:white;background:rgba(255,255,255,0.1)}
+.mnav-link.active{color:white;background:rgba(255,255,255,0.15);font-weight:500}
+@media(max-width:480px){
+  .mnav-brand{display:none}
+  .mnav-links{gap:0}
+  .mnav-link{padding:6px 9px;font-size:11px}
+}
+</style>
+</head>
+<body>
+<nav class="mnav">
+  <span class="mnav-brand">Maestro <span>Djinto</span></span>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">Tracker</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link active">Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
+</nav>
+
+<div class="header">
+  <h1>Maestro — Treatment Timeline</h1>
+  <p>Ongoing treatment tracking · Shockwave · PRP / Injections · Class C Laser · Bodywork</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="leg"><span class="leg-dot" style="background:var(--sw)"></span>Shockwave</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--inj)"></span>Injection / PRP</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--laser)"></span>Class C Laser</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--bw)"></span>Bodywork</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--vet)"></span>Lameness Eval</span>
+</div>
+
+<!-- UPCOMING ALERTS -->
+<div class="alerts">
+  <div class="alert-card">
+    <div class="alert-title">Next shockwave</div>
+    <div class="alert-main">~Apr 26, 2026</div>
+    <div class="alert-sub">30 days from Mar 26 · monthly cadence</div>
+    <span class="badge soon">Due in ~4 weeks</span>
+  </div>
+  <div class="alert-card laser">
+    <div class="alert-title">Laser — this week</div>
+    <div class="alert-main">Session due</div>
+    <div class="alert-sub">Weekly Class C · last session Mar 20</div>
+    <span class="badge due">Schedule now</span>
+  </div>
+  <div class="alert-card inj">
+    <div class="alert-title">PRP re-eval window</div>
+    <div class="alert-main">May 6, 2026</div>
+    <div class="alert-sub">2 months from Mar 6 · decide on repeat</div>
+    <span class="badge soon">~5 weeks away</span>
+  </div>
+  <div class="alert-card inj" style="border-left-color:#5B8DB8">
+    <div class="alert-title">6-month injection review</div>
+    <div class="alert-main">Sep 6, 2026</div>
+    <div class="alert-sub">Right SI · stifle · QF — consider repeat</div>
+    <span class="badge on-track">Mark calendar now</span>
+  </div>
+</div>
+
+<!-- POST-REHAB SHOCKWAVE -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:var(--sw)"></span>
+    Post-rehab shockwave — monthly cadence
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Dec 5, 2025 · Session 1</div>
+        <div class="tl-title">Shockwave — EVCT / Dr. Smith</div>
+        <div class="tl-note">First post-rehab session. 30 days after return home.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Dec 30, 2025 · Session 2</div>
+        <div class="tl-title">Shockwave — EVCT / Dr. Smith</div>
+        <div class="tl-note">25 days after session 1. Lameness eval same day.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Jan 29, 2026 · Session 3</div>
+        <div class="tl-title">Shockwave — EVCT / Dr. Smith</div>
+        <div class="tl-note">30 days after session 2. Same day as lunge + bareback ride (willingness 5).</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Feb 24, 2026 · Session 4</div>
+        <div class="tl-title">Shockwave + Lameness Eval — EVCT / Dr. Smith</div>
+        <div class="tl-note">26 days after session 3. Combined with full lameness evaluation.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Mar 26, 2026 · Session 5</div>
+        <div class="tl-title">Shockwave — EVCT / Dr. Smith</div>
+        <div class="tl-note">30 days after session 4.</div>
+        <div class="tl-window sw">Next recommended: ~Apr 26, 2026 (30 days) · 60-day check pre-logged Apr 24</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot future sw"></div>
+      <div class="tl-card future">
+        <div class="tl-date">~Apr 26, 2026 · Session 6 (planned)</div>
+        <div class="tl-title">Shockwave — due</div>
+        <div class="tl-note">Monthly cadence. 90-day check pre-logged May 24, 2026.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CLASS C LASER -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:var(--laser)"></span>
+    Class C Laser — weekly cadence (started Mar 2026)
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot laser"></div>
+      <div class="tl-card laser">
+        <div class="tl-date">Mar 15, 2026 · Session 1</div>
+        <div class="tl-title">Class C Laser (C4) — new barn</div>
+        <div class="tl-note">First laser session. Available at new barn post Mar 17 move.</div>
+        <div class="tl-window laser">Target: weekly sessions. Next due ~Mar 22 and ongoing.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot future laser"></div>
+      <div class="tl-card future">
+        <div class="tl-date">Week of Mar 29, 2026 (due)</div>
+        <div class="tl-title">Class C Laser — session due this week</div>
+        <div class="tl-note">Last logged: Mar 20. Weekly cadence = due by Mar 27.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top:12px;background:var(--card);border-radius:10px;padding:14px 16px;border:1px solid var(--border)">
+    <div style="font-size:12px;font-weight:500;margin-bottom:10px;color:var(--muted)">Laser compliance — weeks since start</div>
+    <div class="compliance-wrap">
+      <div class="compliance-row">
+        <span style="width:64px">Mar 15</span>
+        <div class="compliance-track"><div class="compliance-fill" style="width:100%;background:var(--laser)"></div></div>
+        <span>✓ done</span>
+      </div>
+      <div class="compliance-row">
+        <span style="width:64px">Mar 22</span>
+        <div class="compliance-track"><div class="compliance-fill" style="width:0%;background:var(--laser)"></div></div>
+        <span style="color:var(--sw)">⚠ not logged</span>
+      </div>
+      <div class="compliance-row">
+        <span style="width:64px">Mar 29</span>
+        <div class="compliance-track"><div class="compliance-fill" style="width:0%;background:var(--laser)"></div></div>
+        <span style="color:var(--muted)">upcoming</span>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px;font-style:italic">Note: laser not yet reliably logged in daily tracker — log each session to auto-update this section on next dashboard refresh.</div>
+  </div>
+</div>
+
+<!-- PRP / INJECTIONS -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:var(--inj)"></span>
+    Injections &amp; PRP — full history
+  </div>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">Jan 2024 · Pre-rehab</div>
+        <div class="tl-title">SI Injection — bilateral</div>
+        <div class="tl-site">Site: SI bilateral · Product: unknown</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">May 10, 2024 · Pre-rehab</div>
+        <div class="tl-title">PRP / ProStride — right stifle + SI</div>
+        <div class="tl-site">Site: Right stifle, SI · Product: ProStride (PRP)</div>
+        <div class="tl-note">First stifle injection. Combined with SI.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">Jul 2024 · Pre-rehab</div>
+        <div class="tl-title">Hock injections + SI injection</div>
+        <div class="tl-site">Site: Hocks bilateral, SI · Product: unknown</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">Jan 2025 · Pre-rehab</div>
+        <div class="tl-title">SI Injection</div>
+        <div class="tl-site">Site: SI · Product: unknown</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">Jan 17, 2025 · Pre-rehab</div>
+        <div class="tl-title">SI Injection (steroid) + Adequan series started</div>
+        <div class="tl-site">Site: SI · Product: Steroid + Adequan IM</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">Feb 28, 2025 · Pre-ESMR</div>
+        <div class="tl-title">ProStride — right stifle</div>
+        <div class="tl-site">Site: Right stifle · Product: ProStride</div>
+        <div class="tl-note">Day after first forward refusal episode.</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot inj"></div>
+      <div class="tl-card inj">
+        <div class="tl-date">Mar 6, 2026 · Post-rehab</div>
+        <div class="tl-title">PRP — right SI + right stifle + right quadratus femoris</div>
+        <div class="tl-site">Site: Right SI · Right stifle · Right quadratus femoris · Product: PRP</div>
+        <div class="tl-note">3 sites injected same day. First post-ESMR injection series.</div>
+        <div class="tl-window inj">
+          Expected improvement window: 4–8 weeks post-injection (by ~Apr 3 – May 1, 2026)<br>
+          Re-eval window: 2 months → <strong>May 6, 2026</strong> — decide on repeat injections<br>
+          6-month biannual review: Sep 6, 2026 — right SI, stifle, quadratus femoris<br>
+          <strong>Left 3rd trochanter entheseopathy: not directly treated — discuss with Dr. Smith</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot future inj"></div>
+      <div class="tl-card future">
+        <div class="tl-date">May 6, 2026 · 2-month re-eval</div>
+        <div class="tl-title">PRP re-eval — decide on repeat injections</div>
+        <div class="tl-note">2 months from Mar 6. Assess response and decide whether to repeat any of the 3 sites (right SI, stifle, quadratus femoris).</div>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot future inj"></div>
+      <div class="tl-card future">
+        <div class="tl-date">Sep 6, 2026 · 6-month biannual review</div>
+        <div class="tl-title">Biannual injection review — right SI, stifle, quadratus femoris</div>
+        <div class="tl-note">6-month window from Mar 6. All pre-rehab injection sites also past their 6-month windows — hocks (last Jul 2024), stifle (last Feb 2025), SI (last Mar 2026). Consolidate review with Dr. Smith.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LEFT TROCHANTER NOTE -->
+<div style="background:#FDF6EE;border-radius:12px;padding:18px 20px;border:1px solid #E8C97A;border-left:4px solid var(--vet);margin-bottom:40px">
+  <div style="font-size:13px;font-weight:500;margin-bottom:6px;color:var(--vet)">⚠ Untreated finding — Left 3rd trochanter entheseopathy</div>
+  <div style="font-size:12px;color:#5A4A3A;line-height:1.7">
+    Bone scan (ESMR) showed <strong>focal, very intense IRU</strong> at left mid-femur (3rd trochanter region), with ultrasound confirming entheseous remodeling. This finding has <strong>never been directly treated</strong>. Right-side primary injury has driven compensatory left-side loading. Shockwave has stronger published evidence for enthesopathies than mesotherapy. Raise directly with Dr. Smith at next appointment.
+  </div>
+</div>
+
+<!-- SHOCKWAVE PRE-REHAB HISTORY -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:var(--sw)"></span>
+    Pre-rehab shockwave history
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Jan 30, 2025</div>
+        <div class="tl-title">Shockwave — EVCT / Dr. Smith</div>
+        <div class="tl-note">Pre-ESMR admission.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">May 18 / Jun 4 / Jun 18, 2024</div>
+        <div class="tl-title">Shockwave series — 3 sessions</div>
+        <div class="tl-note">Pre-diagnosis shockwave series for pelvic / gluteal region.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPCOMING SCHEDULE -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:#D0CBC2"></span>
+    Upcoming schedule
+  </div>
+  <div class="future-grid">
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--laser)">Class C Laser</div>
+      <div class="future-item-date">Weekly</div>
+      <div class="future-item-sub">Every week — log each session in tracker</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--sw)">Shockwave</div>
+      <div class="future-item-date">~Apr 26</div>
+      <div class="future-item-sub">Monthly · 30 days from Mar 26</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">PRP re-eval</div>
+      <div class="future-item-date">May 6</div>
+      <div class="future-item-sub">2 months from Mar 6 · decide on repeat</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">6-month inj. review</div>
+      <div class="future-item-date">Sep 6</div>
+      <div class="future-item-sub">All sites: right SI, stifle, QF, hocks</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--vet)">Left trochanter</div>
+      <div class="future-item-date">Discuss ASAP</div>
+      <div class="future-item-sub">Never treated — raise with Dr. Smith</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
