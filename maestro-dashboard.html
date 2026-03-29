@@ -76,7 +76,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 <p class="sub">Post-rehab tracking · Nov 20, 2025 – Mar 28, 2026 · 129 days</p>
 
 
-<div class="card" style="margin-bottom:24px;border-left:3px solid #3B6D11">
+<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11">
   <div class="card-title">This week — Mar 22–28</div>
   <div class="card-sub">Current week at a glance (7 days logged)</div>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px">
@@ -97,9 +97,15 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   </div>
 </div>
 
-<div class="toggle-row">
-  <button class="tbtn on" onclick="setView('weekly',this)">Weekly</button>
-  <button class="tbtn" onclick="setView('monthly',this)">Monthly</button>
+<div class="toggle-row" style="justify-content:space-between;align-items:center">
+  <div style="display:flex;gap:8px">
+    <button class="tbtn on" onclick="setView('weekly',this)">Weekly</button>
+    <button class="tbtn" onclick="setView('monthly',this)">Monthly</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="refreshStatus" style="font-size:11px;color:var(--muted)"></span>
+    <button id="refreshBtn" onclick="refreshData()" style="font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Refresh data</button>
+  </div>
 </div>
 
 <div class="sg" id="sg"></div>
@@ -151,227 +157,208 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 </div>
 
 <script>
-const W=[{"period": "2025-11-16", "will": null, "walk": 0, "trot": 0, "canter": 0, "pt": 1, "poles": 0, "equi": 0, "shockwave": 0, "bodywork": 1, "laser": 0, "cranky_rate": null, "si": 0, "stops": 1.0, "days": 3, "rode": 0}, {"period": "2025-11-23", "will": null, "walk": 0, "trot": 0, "canter": 0, "pt": 6, "poles": 0, "equi": 0, "shockwave": 0, "bodywork": 0, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 2.0, "days": 7, "rode": 1}, {"period": "2025-11-30", "will": 5.0, "walk": 15, "trot": 15, "canter": 5, "pt": 7, "poles": 0, "equi": 1, "shockwave": 1, "bodywork": 0, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.0, "days": 7, "rode": 1}, {"period": "2025-12-07", "will": 4.25, "walk": 75, "trot": 21, "canter": 0, "pt": 6, "poles": 0, "equi": 1, "shockwave": 0, "bodywork": 0, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.25, "days": 7, "rode": 4}, {"period": "2025-12-14", "will": 3.67, "walk": 65, "trot": 5, "canter": 0, "pt": 5, "poles": 1, "equi": 0, "shockwave": 0, "bodywork": 1, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 1.0, "days": 6, "rode": 4}, {"period": "2025-12-21", "will": 4.5, "walk": 45, "trot": 5, "canter": 0, "pt": 5, "poles": 3, "equi": 0, "shockwave": 0, "bodywork": 0, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.5, "days": 7, "rode": 2}, {"period": "2025-12-28", "will": 2.5, "walk": 185, "trot": 10, "canter": 0, "pt": 3, "poles": 5, "equi": 1, "shockwave": 1, "bodywork": 4, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 1.0, "days": 7, "rode": 2}, {"period": "2026-01-04", "will": 4.0, "walk": 55, "trot": 0, "canter": 0, "pt": 6, "poles": 5, "equi": 3, "shockwave": 0, "bodywork": 3, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.33, "days": 7, "rode": 1}, {"period": "2026-01-11", "will": 3.0, "walk": 60, "trot": 25, "canter": 0, "pt": 4, "poles": 1, "equi": 1, "shockwave": 0, "bodywork": 3, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.57, "days": 7, "rode": 2}, {"period": "2026-01-18", "will": 4.0, "walk": 55, "trot": 10, "canter": 0, "pt": 5, "poles": 3, "equi": 2, "shockwave": 0, "bodywork": 2, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.33, "days": 7, "rode": 1}, {"period": "2026-01-25", "will": 5.0, "walk": 140, "trot": 30, "canter": 5, "pt": 5, "poles": 3, "equi": 0, "shockwave": 1, "bodywork": 1, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.67, "days": 7, "rode": 2}, {"period": "2026-02-01", "will": 2.67, "walk": 80, "trot": 45, "canter": 15, "pt": 6, "poles": 5, "equi": 1, "shockwave": 0, "bodywork": 0, "laser": 0, "cranky_rate": 100, "si": 2, "stops": 0.75, "days": 7, "rode": 3}, {"period": "2026-02-08", "will": 4.0, "walk": 140, "trot": 65, "canter": 15, "pt": 5, "poles": 4, "equi": 2, "shockwave": 1, "bodywork": 1, "laser": 0, "cranky_rate": 50, "si": 5, "stops": 0.75, "days": 7, "rode": 3}, {"period": "2026-02-15", "will": 2.0, "walk": 110, "trot": 20, "canter": 5, "pt": 4, "poles": 2, "equi": 1, "shockwave": 0, "bodywork": 1, "laser": 0, "cranky_rate": 100, "si": 4, "stops": 1.6, "days": 7, "rode": 2}, {"period": "2026-02-22", "will": 4.0, "walk": 27, "trot": 0, "canter": 0, "pt": 6, "poles": 4, "equi": 3, "shockwave": 1, "bodywork": 1, "laser": 0, "cranky_rate": 100, "si": 2, "stops": 0.67, "days": 7, "rode": 2}, {"period": "2026-03-01", "will": 3.5, "walk": 140, "trot": 20, "canter": 7, "pt": 4, "poles": 1, "equi": 2, "shockwave": 0, "bodywork": 1, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 1.0, "days": 7, "rode": 2}, {"period": "2026-03-08", "will": 5.0, "walk": 150, "trot": 20, "canter": 6, "pt": 4, "poles": 1, "equi": 1, "shockwave": 0, "bodywork": 1, "laser": 0, "cranky_rate": 50, "si": 0, "stops": 0.0, "days": 7, "rode": 1}, {"period": "2026-03-15", "will": 5.0, "walk": 235, "trot": 15, "canter": 2, "pt": 5, "poles": 1, "equi": 1, "shockwave": 0, "bodywork": 1, "laser": 1, "cranky_rate": 50, "si": 4, "stops": 2.0, "days": 7, "rode": 1}, {"period": "2026-03-22", "will": 5.0, "walk": 160, "trot": 20, "canter": 0, "pt": 5, "poles": 4, "equi": 2, "shockwave": 1, "bodywork": 2, "laser": 0, "cranky_rate": 50, "si": 5, "stops": 0.17, "days": 7, "rode": 3}];
+// ── DATA & REFRESH ────────────────────────────────────────────────────
+let W=[], M=[], GAPS=[];
+let lastRefreshed = null;
 
-const M=[{"period": "2025-11-01", "will": null, "walk": 0, "trot": 0, "canter": 0, "pt": 8, "poles": 0, "equi": 0, "shockwave": 0, "bodywork": 1, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 1.5, "days": 11, "rode": 1}, {"period": "2025-12-01", "will": 3.91, "walk": 255, "trot": 56, "canter": 5, "pt": 24, "poles": 6, "equi": 2, "shockwave": 2, "bodywork": 3, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.77, "days": 30, "rode": 12}, {"period": "2026-01-01", "will": 4.0, "walk": 440, "trot": 65, "canter": 5, "pt": 21, "poles": 15, "equi": 7, "shockwave": 1, "bodywork": 11, "laser": 0, "cranky_rate": 100, "si": 0, "stops": 0.45, "days": 31, "rode": 7}, {"period": "2026-02-01", "will": 3.0, "walk": 357, "trot": 130, "canter": 35, "pt": 21, "poles": 15, "equi": 7, "shockwave": 2, "bodywork": 3, "laser": 0, "cranky_rate": 86, "si": 13, "stops": 1.0, "days": 28, "rode": 10}, {"period": "2026-03-01", "will": 4.7, "walk": 685, "trot": 75, "canter": 15, "pt": 18, "poles": 7, "equi": 6, "shockwave": 1, "bodywork": 5, "laser": 1, "cranky_rate": 60, "si": 9, "stops": 0.5, "days": 28, "rode": 7}];
-
-const GAPS=[{"gap":10,"will":5.0},{"gap":1,"will":5.0},{"gap":2,"will":4.0},{"gap":2,"will":4.0},{"gap":2,"will":4.0},{"gap":3,"will":3.0},{"gap":1,"will":4.0},{"gap":1,"will":4.0},{"gap":4,"will":4.0},{"gap":4,"will":5.0},{"gap":1,"will":1.0},{"gap":6,"will":4.0},{"gap":3,"will":4.0},{"gap":9,"will":2.0},{"gap":2,"will":4.0},{"gap":3,"will":4.0},{"gap":7,"will":5.0},{"gap":2,"will":5.0},{"gap":5,"will":5.0},{"gap":2,"will":1.0},{"gap":2,"will":2.0},{"gap":1,"will":4.0},{"gap":4,"will":3.0},{"gap":2,"will":5.0},{"gap":1,"will":1.0},{"gap":5,"will":2.0},{"gap":5,"will":5.0},{"gap":3,"will":3.0},{"gap":3,"will":3.0},{"gap":2,"will":4.0},{"gap":7,"will":5.0},{"gap":3,"will":5.0},{"gap":7,"will":5.0},{"gap":3,"will":5.0}];
-
-// Update LASER_START once exact date confirmed — currently set to week of Mar 16
-const LASER_START='2026-03-15';
-
-let view='weekly', CH={};
-
-function D(){ return view==='weekly'?W:M; }
-function L(d){ const dt=new Date(d.period+'T12:00:00'); return view==='weekly'?(dt.getMonth()+1)+'/'+dt.getDate():dt.toLocaleDateString('en-US',{month:'short',year:'2-digit'}); }
-function kill(){ Object.values(CH).forEach(c=>c&&c.destroy()); CH={}; }
-
-function bandPlugin(data){
-  return {id:'bands',beforeDraw(chart){
-    const {ctx,chartArea,scales}=chart;
-    if(!chartArea) return;
-    const bw=chartArea.width/data.length;
-    data.forEach((d,i)=>{
-      let col=null;
-      if(d.shockwave>0)               col='rgba(226,75,74,0.10)';
-      else if(d.period==='2026-03-02') col='rgba(24,95,165,0.10)';
-      else if(d.period>=LASER_START)   col='rgba(83,74,183,0.10)';
-      if(d.period==='2026-03-16'&&!col) col='rgba(133,79,11,0.10)';
-      if(!col) return;
-      ctx.save(); ctx.fillStyle=col;
-      ctx.fillRect(chartArea.left+i*bw,chartArea.top,bw,chartArea.height);
-      ctx.restore();
-    });
-  }};
+function getScriptUrl(){
+  try { return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||''; } catch{ return ''; }
 }
 
-function base(){
-  return {
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},padding:9}},
-    scales:{
-      x:{ticks:{font:{family:'DM Mono',size:9},maxRotation:45,color:'#706E67'},grid:{color:'rgba(0,0,0,0.04)'}},
-      y:{ticks:{font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
-    }
-  };
+function setStatus(msg, isErr){
+  const el = document.getElementById('refreshStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = isErr ? '#C0392B' : '#706E67';
 }
 
-function buildStats(data){
-  const vw=data.filter(d=>d.will!==null);
-  const aw=vw.length?(vw.reduce((s,d)=>s+d.will,0)/vw.length).toFixed(1):'—';
-  const tw=data.reduce((s,d)=>s+d.walk,0);
-  const tt=data.reduce((s,d)=>s+d.trot,0);
-  const tc=data.reduce((s,d)=>s+d.canter,0);
-  const pm=data.filter(d=>d.pt>=3).length;
-  const pt=data.filter(d=>d.pt>0).length;
-  const si=data.filter(d=>d.si>0).length;
-  const totalRides=data.reduce((s,d)=>s+d.rode,0);
-  const items=[
-    {l:'Avg willingness',v:aw,c:parseFloat(aw)>=4?'g':parseFloat(aw)>=3?'w':'b'},
-    {l:'Total rides',v:totalRides,c:''},
-    {l:'Walk (min)',v:tw,c:''},
-    {l:'Trot (min)',v:tt,c:''},
-    {l:'Canter (min)',v:tc,c:''},
-    {l:'PT target met',v:pt?pm+'/'+pt+(view==='weekly'?' wks':' mo'):'—',c:pm/Math.max(pt,1)>=0.7?'g':'w'},
-    {l:'SI reactive',v:si+(view==='weekly'?' wks':' mo'),c:si===0?'g':si<=2?'w':'b'},
-  ];
-  document.getElementById('sg').innerHTML=items.map(s=>`<div class="sc ${s.c}"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+async function refreshData(){
+  const url = getScriptUrl();
+  if(!url){ setStatus('No script URL — check Settings in the Tracker app', true); return; }
+
+  const btn = document.getElementById('refreshBtn');
+  if(btn){ btn.disabled=true; btn.textContent='Refreshing…'; }
+  setStatus('Fetching latest data…');
+
+  try {
+    const resp = await fetch(url + '?action=read&sheet=daily');
+    const json = await resp.json();
+    if(!json.success) throw new Error(json.error||'Unknown error');
+
+    const {headers, rows} = json.data;
+    processRawRows(headers, rows);
+    lastRefreshed = new Date();
+    setStatus('Updated ' + lastRefreshed.toLocaleTimeString());
+    buildAll();
+  } catch(err) {
+    setStatus('Refresh failed: ' + err.message, true);
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='Refresh data'; }
+  }
 }
 
-function buildWorkload(data,labels){
-  const o=base();
-  o.plugins.legend={display:true,position:'top',labels:{font:{family:'DM Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
-  o.scales.y.stacked=true; o.scales.x.stacked=true;
-  o.scales.y.title={display:true,text:'minutes',font:{family:'DM Sans',size:10},color:'#706E67'};
-  CH.wl=new Chart(document.getElementById('cWorkload'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(59,109,17,0.65)', borderColor:'#3B6D11',borderWidth:.5,borderRadius:2},
-      {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(186,117,23,0.65)',borderColor:'#BA7517',borderWidth:.5,borderRadius:2},
-      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(162,45,45,0.65)', borderColor:'#A32D2D',borderWidth:.5,borderRadius:2},
-    ]},options:o
-  });
-}
+function processRawRows(headers, rows){
+  // Column indices
+  const ci = (name) => headers.findIndex(h => h.replace(/\n/g,' ').trim() === name.trim());
+  const DATE_I=2, RODE_I=5, WALK_I=7, TROT_I=8, CANT_I=9, WILL_I=11;
+  const CRANKY_I=13, STOPS_I=15, SI_I=18, EQUI_I=21, PT_I=22;
+  const POLES_I=23, BEMER_I=24, BW_I=25, LASER_I=26, SW_I=27;
 
-function buildWellness(data,labels){
-  const o=base();
-  o.scales.y={min:0,max:5,ticks:{font:{family:'DM Sans',size:10},color:'#706E67',stepSize:1},grid:{color:'rgba(0,0,0,0.05)'}};
-  o.scales.y2={position:'right',min:0,max:110,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9},color:'#854F0B'},grid:{drawOnChartArea:false}};
-  o.scales.y3={display:false,min:0,max:5};
-  o.plugins.tooltip={...o.plugins.tooltip,callbacks:{label:ctx=>{
-    const lb=ctx.dataset.label;
-    if(lb==='Willingness') return ' Willingness: '+(ctx.raw||'—');
-    if(lb==='Stops') return ' Stops score: '+(ctx.raw||'—');
-    if(lb==='SI') return ' SI reactive days: '+ctx.raw;
-    if(lb==='Cranky %') return ' Cranky tack-up: '+ctx.raw+'%';
-  }}};
-  CH.wn=new Chart(document.getElementById('cWellness'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Willingness',data:data.map(d=>d.will),borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.06)',borderWidth:2.5,pointBackgroundColor:'#3B6D11',pointRadius:4,tension:.35,fill:true,yAxisID:'y',spanGaps:true},
-      {label:'Stops',data:data.map(d=>d.stops),borderColor:'#E24B4A',backgroundColor:'transparent',borderWidth:1.8,pointBackgroundColor:'#E24B4A',pointRadius:3,tension:.3,borderDash:[4,3],yAxisID:'y',spanGaps:true},
-      {label:'SI',data:data.map(d=>d.si),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:4,tension:.2,fill:true,yAxisID:'y3',spanGaps:false},
-      {label:'Cranky %',data:data.map(d=>d.cranky_rate),borderColor:'#854F0B',backgroundColor:'transparent',borderWidth:1.8,pointBackgroundColor:'#854F0B',pointRadius:3,tension:.3,borderDash:[3,4],yAxisID:'y2',spanGaps:true},
-    ]},options:o
-  });
-}
-
-function buildPT(data,labels){
-  const el=document.getElementById('ptBars');
-  const mx=Math.max(...data.map(d=>d.pt),5);
-  el.innerHTML=data.map((d,i)=>{
-    if(d.pt===0&&d.days<3) return '';
-    const pct=Math.round(d.pt/mx*100);
-    const col=d.pt>=3?'#3B6D11':d.pt>=2?'#854F0B':'#A32D2D';
-    const tp=Math.round(3/mx*100);
-    return `<div class="pb"><span class="pl">${labels[i]}</span><div class="pt"><div class="pf" style="width:${pct}%;background:${col}"></div><div style="position:absolute;top:0;left:${tp}%;width:1.5px;height:100%;background:rgba(0,0,0,0.22)"></div></div><span class="pc">${d.pt}x</span></div>`;
-  }).join('');
-  el.innerHTML+=`<div class="ph"><span style="width:2px;height:10px;background:rgba(0,0,0,0.22);display:inline-block"></span>Vertical line = 3× minimum target</div>`;
-}
-
-function buildFreq(data,labels){
-  const o=base();
-  o.plugins.legend={display:true,position:'top',labels:{font:{family:'DM Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
-  o.scales.y.ticks={...o.scales.y.ticks,stepSize:1};
-  CH.fr=new Chart(document.getElementById('cFreq'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Poles',    data:data.map(d=>d.poles),   backgroundColor:'rgba(59,109,17,0.6)', borderRadius:2},
-      {label:'Equibands',data:data.map(d=>d.equi),    backgroundColor:'rgba(186,117,23,0.6)',borderRadius:2},
-      {label:'Bodywork', data:data.map(d=>d.bodywork),backgroundColor:'rgba(24,95,165,0.6)', borderRadius:2},
-    ]},options:o
-  });
-}
-
-function buildTrend(){
-  const data=W; // always weekly
-  const labels=data.map(d=>L(d));
-  const bp=bandPlugin(data);
-  const bwPts=data.map(d=>d.bodywork>0&&d.will!==null?d.will:null);
-  const o=base();
-  o.scales.y={min:1,max:5.5,ticks:{stepSize:.5,font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}};
-  o.plugins.tooltip={...o.plugins.tooltip,callbacks:{label:ctx=>{
-    const d=data[ctx.dataIndex];
-    if(ctx.datasetIndex===0){
-      const p=[' Willingness: '+(ctx.raw||'—')];
-      if(d.shockwave>0)               p.push(' ⚡ Shockwave');
-      if(d.period==='2026-03-02')      p.push(' 💉 PRP injections');
-      if(d.period>=LASER_START)        p.push(' 🔦 Laser started');
-      if(d.bodywork>0)                 p.push(' 🤲 Bodywork ('+d.bodywork+' sessions)');
-      return p;
-    }
-    if(ctx.datasetIndex===1&&ctx.raw!==null) return ' Bodywork: '+data[ctx.dataIndex].bodywork+' sessions this week';
+  function toF(v){ const n=parseFloat(v); return isNaN(n)?null:n; }
+  function stopsN(v){
+    if(v===null||v===undefined) return null;
+    const s=String(v);
+    if(s.includes('None')) return 0;
+    if(s.includes('Many')) return 2;
+    if(s.includes('Few')) return 1;
     return null;
-  }}};
-  CH.tr=new Chart(document.getElementById('cTrend'),{
-    type:'line',plugins:[bp],
-    data:{labels,datasets:[
-      {
-        label:'Willingness',data:data.map(d=>d.will),
-        borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.07)',
-        borderWidth:2.5,
-        pointBackgroundColor:data.map(d=>d.shockwave>0?'#E24B4A':d.period==='2026-03-02'?'#185FA5':d.period>=LASER_START?'#534AB7':'#3B6D11'),
-        pointRadius:data.map(d=>d.shockwave>0||d.period==='2026-03-02'||d.period>=LASER_START?7:4),
-        tension:.35,fill:true,spanGaps:true,yAxisID:'y'
-      },
-      {
-        label:'Bodywork',data:bwPts,type:'scatter',
-        backgroundColor:'rgba(255,255,255,0)',borderColor:'#3B6D11',
-        borderWidth:2.2,pointStyle:'circle',pointRadius:9,pointHoverRadius:11,
-        yAxisID:'y'
-      }
-    ]},options:o
+  }
+  function parseDate(v){
+    if(!v) return null;
+    const s=String(v).slice(0,10);
+    const d=new Date(s+'T12:00:00');
+    return isNaN(d)?null:d;
+  }
+  function weekStart(d){
+    const day=d.getDay(); // 0=Sun
+    const diff=d.getDate()-day;
+    return new Date(d.getFullYear(),d.getMonth(),diff);
+  }
+  function monthStart(d){ return new Date(d.getFullYear(),d.getMonth(),1); }
+  function dFmt(d){ return d.toISOString().slice(0,10); }
+
+  // Filter to rows with real dates from Nov 20 2025 onward
+  const START = new Date('2025-11-20');
+  const valid = rows.filter(r => {
+    const d = parseDate(r[DATE_I]);
+    return d && d >= START;
+  }).map(r => ({ d: parseDate(r[DATE_I]), r }))
+    .sort((a,b) => a.d-b.d);
+
+  // Group by week and month
+  const wMap={}, mMap={};
+  valid.forEach(({d,r}) => {
+    const wk = dFmt(weekStart(d));
+    const mo = dFmt(monthStart(d));
+    (wMap[wk]=wMap[wk]||[]).push({d,r});
+    (mMap[mo]=mMap[mo]||[]).push({d,r});
   });
-}
 
-function buildGap(){
-  const grouped={};
-  GAPS.forEach(g=>{ const k=Math.min(g.gap,10); (grouped[k]=grouped[k]||[]).push(g.will); });
-  const avgs=Object.entries(grouped).map(([k,v])=>({x:+k,y:parseFloat((v.reduce((s,x)=>s+x,0)/v.length).toFixed(1)),n:v.length})).sort((a,b)=>a.x-b.x);
-  const raw=GAPS.map(g=>({x:Math.min(g.gap,10),y:g.will}));
-  CH.gp=new Chart(document.getElementById('cGap'),{
-    type:'scatter',
-    data:{datasets:[
-      {label:'Individual rides',data:raw,backgroundColor:'rgba(59,109,17,0.35)',borderColor:'rgba(59,109,17,0.6)',pointRadius:5,pointHoverRadius:7},
-      {label:'Avg by gap',data:avgs,backgroundColor:'#1C1A16',borderColor:'#1C1A16',pointRadius:5,showLine:true,borderWidth:1.5,tension:.3},
-    ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{family:'DM Sans',size:10},boxWidth:10,padding:10}},
-        tooltip:{backgroundColor:'#1C1A16',bodyFont:{family:'DM Sans',size:11},padding:8,callbacks:{
-          label:ctx=>ctx.datasetIndex===0?' Gap: '+ctx.raw.x+'d, Will: '+ctx.raw.y:' Avg will: '+ctx.raw.y+' (n='+(grouped[ctx.raw.x]||[]).length+')'
-        }}
-      },
-      scales:{
-        x:{title:{display:true,text:'Days since last ride',font:{family:'DM Sans',size:10}},min:0,max:11,ticks:{font:{family:'DM Mono',size:9},color:'#706E67',callback:v=>v>=10?'10+':v}},
-        y:{title:{display:true,text:'Willingness (1–5)',font:{family:'DM Sans',size:10}},min:1,max:5,ticks:{stepSize:1,font:{family:'DM Sans',size:10},color:'#706E67'}}
-      }
-    }
+  function agg(groups){
+    return Object.entries(groups).map(([period, items]) => {
+      const hasData = items.some(({r}) =>
+        r[PT_I]==='Y'||r[POLES_I]==='Y'||r[EQUI_I]==='Y'||r[RODE_I]==='Y'||r[BW_I]!=null
+      );
+      if(!hasData) return null;
+      const willV = items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
+      const stopsV = items.map(({r})=>stopsN(r[STOPS_I])).filter(v=>v!==null);
+      const crankyD = items.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
+      const crankyY = crankyD.filter(v=>v==='Y').length;
+      const bwItems = items.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!==''&&r[BW_I]!==false);
+      return {
+        period,
+        will: willV.length ? Math.round(willV.reduce((s,v)=>s+v,0)/willV.length*100)/100 : null,
+        walk: items.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0),
+        trot: items.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0),
+        canter: items.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0),
+        rode: items.filter(({r})=>r[RODE_I]==='Y').length,
+        pt: items.filter(({r})=>r[PT_I]==='Y').length,
+        poles: items.filter(({r})=>r[POLES_I]==='Y').length,
+        equi: items.filter(({r})=>r[EQUI_I]==='Y').length,
+        shockwave: items.filter(({r})=>r[SW_I]==='Y').length,
+        bodywork: bwItems.length,
+        laser: items.filter(({r})=>r[LASER_I]==='Y').length,
+        cranky_rate: crankyD.length ? Math.round(crankyY/crankyD.length*100) : null,
+        si: items.filter(({r})=>r[SI_I]==='Y').length,
+        stops: stopsV.length ? Math.round(stopsV.reduce((s,v)=>s+v,0)/stopsV.length*100)/100 : null,
+        days: items.length,
+      };
+    }).filter(Boolean).sort((a,b)=>a.period.localeCompare(b.period));
+  }
+
+  W = agg(wMap);
+  M = agg(mMap);
+
+  // Days-between-rides for scatter
+  const rideDates = valid.filter(({r})=>r[RODE_I]==='Y').map(({d,r})=>({d,will:toF(r[WILL_I])}));
+  GAPS = [];
+  rideDates.forEach(({d,will},i) => {
+    if(i===0||will===null) return;
+    const gap = Math.round((d - rideDates[i-1].d)/(1000*60*60*24));
+    if(gap!==null) GAPS.push({gap,will});
   });
-  const n=GAPS.length,xs=GAPS.map(g=>g.gap),ys=GAPS.map(g=>g.will);
-  const mx=xs.reduce((s,v)=>s+v,0)/n,my=ys.reduce((s,v)=>s+v,0)/n;
-  const r=(xs.reduce((s,v,i)=>s+(v-mx)*(ys[i]-my),0)/Math.sqrt(xs.reduce((s,v)=>s+(v-mx)**2,0)*ys.reduce((s,v)=>s+(v-my)**2,0))).toFixed(2);
-  document.getElementById('gapNote').textContent=`Pearson r = ${r} — ${Math.abs(r)<0.2?'little to no':'moderate'} correlation. ${Math.abs(r)<0.2?`Rest duration alone doesn't predict willingness — other factors (pain level, what was asked) appear to matter more.`:`Longer gaps tend to ${parseFloat(r)>0?'increase':'decrease'} willingness slightly.`} Based on ${n} ridden sessions.`;
+
+  // Update current week card
+  updateThisWeekCard(valid);
 }
 
-function buildAll(){
-  kill();
-  const data=D(), labels=data.map(d=>L(d));
-  buildStats(data);
-  buildWorkload(data,labels);
-  buildWellness(data,labels);
-  buildPT(data,labels);
-  buildFreq(data,labels);
-  buildTrend();
-  buildGap();
+function updateThisWeekCard(valid){
+  const today = new Date();
+  const sun = new Date(today); sun.setDate(today.getDate()-today.getDay());
+  sun.setHours(0,0,0,0);
+  const sat = new Date(sun); sat.setDate(sun.getDate()+6);
+
+  const thisWeek = valid.filter(({d}) => d >= sun && d <= sat);
+  if(!thisWeek.length) return;
+
+  const RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
+  const CRANKY_I=13,SI_I=18,EQUI_I=21,PT_I=22,POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
+  function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+
+  const rides = thisWeek.filter(({r})=>r[RODE_I]==='Y').length;
+  const walk = thisWeek.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0);
+  const trot = thisWeek.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0);
+  const cant = thisWeek.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0);
+  const willV = thisWeek.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
+  const avgWill = willV.length ? (willV.reduce((s,v)=>s+v,0)/willV.length).toFixed(1) : '—';
+  const pt = thisWeek.filter(({r})=>r[PT_I]==='Y').length;
+  const equi = thisWeek.filter(({r})=>r[EQUI_I]==='Y').length;
+  const poles = thisWeek.filter(({r})=>r[POLES_I]==='Y').length;
+  const bw = thisWeek.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!=='').length;
+  const sw = thisWeek.filter(({r})=>r[SW_I]==='Y').length;
+  const laser = thisWeek.filter(({r})=>r[LASER_I]==='Y').length;
+  const crankyD = thisWeek.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
+  const crankyY = crankyD.filter(v=>v==='Y').length;
+
+  // Format week label
+  const opts = {month:'short',day:'numeric'};
+  const wkLabel = sun.toLocaleDateString('en-US',opts) + ' – ' + sat.toLocaleDateString('en-US',opts);
+
+  const el = document.getElementById('thisWeekCard');
+  if(!el) return;
+  el.innerHTML = `
+    <div class="card-title">This week — ${wkLabel}</div>
+    <div class="card-sub">${thisWeek.length} days logged</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px">
+      <div class="sc ${parseFloat(avgWill)>=4?'g':parseFloat(avgWill)>=3?'w':'b'}"><div class="sv">${avgWill}</div><div class="sl">Avg willingness</div></div>
+      <div class="sc"><div class="sv">${rides}</div><div class="sl">Rides</div></div>
+      <div class="sc"><div class="sv">${walk}</div><div class="sl">Walk (min)</div></div>
+      <div class="sc"><div class="sv">${trot}</div><div class="sl">Trot (min)</div></div>
+      <div class="sc"><div class="sv">${cant}</div><div class="sl">Canter (min)</div></div>
+      <div class="sc"><div class="sv">${pt}x</div><div class="sl">PT exercises</div></div>
+      <div class="sc"><div class="sv">${equi}x</div><div class="sl">Equibands</div></div>
+      <div class="sc"><div class="sv">${poles}x</div><div class="sl">Poles</div></div>
+      <div class="sc"><div class="sv">${bw}x</div><div class="sl">Bodywork</div></div>
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
+      <span>${pt>=3?'🟢':'🔴'} PT ${pt}x ${pt>=3?'(target met)':'(below 3x target)'}</span>
+      ${crankyD.length?`<span>🟡 Cranky: ${crankyY}/${crankyD.length} days</span>`:''}
+      ${sw?`<span>⚡ Shockwave this week</span>`:''}
+      ${laser?`<span>🔦 Laser: ${laser} session${laser>1?'s':''}</span>`:''}
+    </div>`;
 }
 
-function setView(v,btn){
-  view=v;
-  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  buildAll();
+// Auto-refresh on load if script URL exists
+window.addEventListener('load', () => {
+  const url = getScriptUrl();
+  if(url){ refreshData(); }
+  else {
+    setStatus('No script URL saved — open Tracker → Settings to connect');
+    buildAll(); // render with empty data
+  }
+});
+
+buildAll();
 }
 
 buildAll();
