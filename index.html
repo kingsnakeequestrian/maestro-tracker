@@ -1517,6 +1517,8 @@ async function saveBwEntry() {
   localStorage.setItem('m_bw', JSON.stringify(all));
 
   if (CFG.scriptUrl) {
+    toast('DEBUG — ktArea: "' + BW.ktArea + '" | findings: "' + BW.findings + '"');
+    await new Promise(r => setTimeout(r, 4000));
     const ok = await pushBwToSheets(BW);
     toast(ok ? 'Bodywork session saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
   } else {
