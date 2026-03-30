@@ -1427,7 +1427,9 @@ async function pushVetToSheets(v) {
 async function pushBwToSheets(b) {
   if (!CFG.scriptUrl) return false;
   const mods = b.modalities || [];
-  const ktStr = b.ktArea ? 'KT tape: ' + b.ktArea : '';
+  const ktInput = document.getElementById('ktAreaInput');
+  const ktVal = (ktInput && ktInput.value) ? ktInput.value.trim() : (b.ktArea || '');
+  const ktStr = ktVal ? 'KT tape: ' + ktVal : '';
   const findingsWithKt = [b.findings, ktStr].filter(Boolean).join(' | ');
   const row = [
     b.date, b.provider, b.practice,
@@ -1517,8 +1519,6 @@ async function saveBwEntry() {
   localStorage.setItem('m_bw', JSON.stringify(all));
 
   if (CFG.scriptUrl) {
-    toast('DEBUG — ktArea: "' + BW.ktArea + '" | findings: "' + BW.findings + '"');
-    await new Promise(r => setTimeout(r, 4000));
     const ok = await pushBwToSheets(BW);
     toast(ok ? 'Bodywork session saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
   } else {
