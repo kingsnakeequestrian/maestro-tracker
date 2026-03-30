@@ -833,25 +833,10 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     </div>
   </div>
 
-  <div class="card" id="ktAreaCard" style="display:none">
-    <div class="card-title">KT Tape — area(s) applied</div>
-    <div class="field">
-      <div class="chip-group">
-        <button class="chip" onclick="togKtArea(this)">Poll / neck</button>
-        <button class="chip" onclick="togKtArea(this)">Shoulder L</button>
-        <button class="chip" onclick="togKtArea(this)">Shoulder R</button>
-        <button class="chip" onclick="togKtArea(this)">Withers</button>
-        <button class="chip" onclick="togKtArea(this)">Mid back</button>
-        <button class="chip" onclick="togKtArea(this)">Low back</button>
-        <button class="chip" onclick="togKtArea(this)">SI L</button>
-        <button class="chip" onclick="togKtArea(this)">SI R</button>
-        <button class="chip" onclick="togKtArea(this)">Glutes L</button>
-        <button class="chip" onclick="togKtArea(this)">Glutes R</button>
-        <button class="chip" onclick="togKtArea(this)">Stifle L</button>
-        <button class="chip" onclick="togKtArea(this)">Stifle R</button>
-        <button class="chip" onclick="togKtArea(this)">Hind limb L</button>
-        <button class="chip" onclick="togKtArea(this)">Hind limb R</button>
-      </div>
+  <div id="ktAreaCard" style="display:none;padding:0 0 4px">
+    <div class="field" style="background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:8px">
+      <label>KT Tape — area(s) applied</label>
+      <input type="text" id="ktAreaInput" placeholder="e.g. Left shoulder, SI right">
     </div>
   </div>
 
@@ -1289,7 +1274,7 @@ let VET = {
 };
 
 let BW = {
-  date:'', provider:'', practice:'', modalities:[], ktAreas:[],
+  date:'', provider:'', practice:'', modalities:[], ktArea:'',
   concerns:'', findings:'', observations:'', recs:'',
   pdfFile:null, pdfLink:''
 };
@@ -1352,20 +1337,15 @@ function collectVet() {
 function togBwMod(btn) {
   btn.classList.toggle('sel');
   BW.modalities = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
-  // Show/hide KT tape area selector
   const ktCard = document.getElementById('ktAreaCard');
   if(ktCard) ktCard.style.display = BW.modalities.includes('KT Tape') ? 'block' : 'none';
-}
-
-function togKtArea(btn) {
-  btn.classList.toggle('sel');
-  BW.ktAreas = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
 }
 
 function collectBw() {
   BW.date = document.getElementById('bwDate').value;
   BW.provider = document.getElementById('bwProvider').value;
   BW.practice = document.getElementById('bwPractice').value;
+  BW.ktArea = (document.getElementById('ktAreaInput') || {}).value || '';
   BW.concerns = document.getElementById('bwConcerns').value;
   BW.findings = document.getElementById('bwFindings').value;
   BW.observations = document.getElementById('bwObservations').value;
@@ -1447,7 +1427,7 @@ async function pushVetToSheets(v) {
 async function pushBwToSheets(b) {
   if (!CFG.scriptUrl) return false;
   const mods = b.modalities || [];
-  const ktStr = (b.ktAreas && b.ktAreas.length) ? 'KT tape: ' + b.ktAreas.join(', ') : '';
+  const ktStr = b.ktArea ? 'KT tape: ' + b.ktArea : '';
   const findingsWithKt = [b.findings, ktStr].filter(Boolean).join(' | ');
   const row = [
     b.date, b.provider, b.practice,
@@ -1531,9 +1511,10 @@ async function saveBwEntry() {
     if (url) { BW.pdfLink = url; document.getElementById('bwPdfLink').value = url; }
   }
 
-  // Reset KT areas
-  BW.ktAreas = [];
-  document.querySelectorAll('#ktAreaCard .chip.sel').forEach(c => c.classList.remove('sel'));
+  // Reset KT area
+  BW.ktArea = '';
+  const ktInput = document.getElementById('ktAreaInput');
+  if(ktInput) ktInput.value = '';
   const ktCard = document.getElementById('ktAreaCard');
   if(ktCard) ktCard.style.display = 'none';
 
