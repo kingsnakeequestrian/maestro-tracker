@@ -1511,13 +1511,6 @@ async function saveBwEntry() {
     if (url) { BW.pdfLink = url; document.getElementById('bwPdfLink').value = url; }
   }
 
-  // Reset KT area
-  BW.ktArea = '';
-  const ktInput = document.getElementById('ktAreaInput');
-  if(ktInput) ktInput.value = '';
-  const ktCard = document.getElementById('ktAreaCard');
-  if(ktCard) ktCard.style.display = 'none';
-
   // Save locally
   const all = getBwEntries();
   all.unshift({ ...BW, savedAt: Date.now() });
@@ -1529,6 +1522,13 @@ async function saveBwEntry() {
   } else {
     toast('Bodywork session saved locally');
   }
+
+  // Reset KT area after save
+  BW.ktArea = '';
+  const ktInput = document.getElementById('ktAreaInput');
+  if(ktInput) ktInput.value = '';
+  const ktCard = document.getElementById('ktAreaCard');
+  if(ktCard) ktCard.style.display = 'none';
 }
 
 function getVetEntries() { try { return JSON.parse(localStorage.getItem('m_vet')||'[]'); } catch { return []; } }
