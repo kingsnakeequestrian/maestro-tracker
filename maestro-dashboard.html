@@ -201,6 +201,7 @@ function processRawRows(headers, rows){
   const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
   const CRANKY_I=13,STOPS_I=15,SI_I=18,EQUI_I=21,PT_I=22;
   const POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
+  const STRADDLE_I=32,TREADMILL_I=33;
 
   function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
   function stopsN(v){
@@ -255,6 +256,8 @@ function processRawRows(headers, rows){
         cranky_rate:crankyD.length?Math.round(crankyD.filter(v=>v==='Y').length/crankyD.length*100):null,
         si:items.filter(({r})=>r[SI_I]==='Y').length,
         stops:stopsV.length?Math.round(stopsV.reduce((s,v)=>s+v,0)/stopsV.length*100)/100:null,
+        straddlepoles:items.filter(({r})=>r[STRADDLE_I]==='Y').length,
+        treadmill:items.filter(({r})=>r[TREADMILL_I]==='Y').length,
         days:items.length,
       };
     }).filter(Boolean).sort((a,b)=>a.period.localeCompare(b.period));
@@ -284,6 +287,7 @@ function updateThisWeekCard(valid){
   const sat=new Date(sun); sat.setDate(sun.getDate()+6);
   const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
   const CRANKY_I=13,EQUI_I=21,PT_I=22,POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
+  const STRADDLE_I=32,TREADMILL_I=33;
   function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
   const tw=valid.filter(({d})=>d>=sun&&d<=sat);
   if(!tw.length) return;
@@ -299,6 +303,8 @@ function updateThisWeekCard(valid){
   const bw=tw.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!=='').length;
   const sw=tw.filter(({r})=>r[SW_I]==='Y').length;
   const laser=tw.filter(({r})=>r[LASER_I]==='Y').length;
+  const straddle=tw.filter(({r})=>r[STRADDLE_I]==='Y').length;
+  const treadmill=tw.filter(({r})=>r[TREADMILL_I]==='Y').length;
   const crankyD=tw.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
   const crankyY=crankyD.filter(v=>v==='Y').length;
   const opts={month:'short',day:'numeric'};
@@ -318,12 +324,16 @@ function updateThisWeekCard(valid){
       <div class="sc"><div class="sv">${equi}x</div><div class="sl">Equibands</div></div>
       <div class="sc"><div class="sv">${poles}x</div><div class="sl">Poles</div></div>
       <div class="sc"><div class="sv">${bw}x</div><div class="sl">Bodywork</div></div>
+      <div class="sc ${straddle>=2?'g':straddle>=1?'w':'b'}"><div class="sv">${straddle}x</div><div class="sl">Straddle Poles</div></div>
+      <div class="sc"><div class="sv">${treadmill}x</div><div class="sl">Treadmill</div></div>
     </div>
     <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
       <span>${pt>=3?'🟢':'🔴'} PT ${pt}x ${pt>=3?'(target met)':'(below 3x target)'}</span>
+      <span>${straddle>=2?'🟢':'🔴'} Straddle poles ${straddle}x ${straddle>=2?'(target met)':'(below 2x target)'}</span>
       ${crankyD.length?`<span>🟡 Cranky: ${crankyY}/${crankyD.length} days</span>`:''}
       ${sw?`<span>⚡ Shockwave this week</span>`:''}
       ${laser?`<span>🔦 Laser: ${laser} session${laser>1?'s':''}</span>`:''}
+      ${treadmill?`<span>🏃 Treadmill: ${treadmill}x</span>`:''}
     </div>`;
 }
 
@@ -370,9 +380,9 @@ function buildStats(data){
   if(!data.length){document.getElementById('sg').innerHTML='';return;}
   const vw=data.filter(d=>d.will!==null);
   const aw=vw.length?(vw.reduce((s,d)=>s+d.will,0)/vw.length).toFixed(1):'—';
-  const tw=data.reduce((s,d)=>s+d.walk,0);
-  const tt=data.reduce((s,d)=>s+d.trot,0);
-  const tc=data.reduce((s,d)=>s+d.canter,0);
+  const tw=data.reduce((s,d)=>s+(+d.walk||0),0);
+  const tt=data.reduce((s,d)=>s+(+d.trot||0),0);
+  const tc=data.reduce((s,d)=>s+(+d.canter||0),0);
   const pm=data.filter(d=>d.pt>=3).length;
   const pt=data.filter(d=>d.pt>0).length;
   const si=data.filter(d=>d.si>0).length;
@@ -380,9 +390,9 @@ function buildStats(data){
   const items=[
     {l:'Avg willingness',v:aw,c:parseFloat(aw)>=4?'g':parseFloat(aw)>=3?'w':'b'},
     {l:'Total rides',v:totalRides,c:''},
-    {l:'Walk (min)',v:tw,c:''},
-    {l:'Trot (min)',v:tt,c:''},
-    {l:'Canter (min)',v:tc,c:''},
+    {l:'Total walk (min)',v:tw,c:''},
+    {l:'Total trot (min)',v:tt,c:''},
+    {l:'Total canter (min)',v:tc,c:''},
     {l:'PT target met',v:pt?pm+'/'+pt+(view==='weekly'?' wks':' mo'):'—',c:pm/Math.max(pt,1)>=0.7?'g':'w'},
     {l:'SI reactive',v:si+(view==='weekly'?' wks':' mo'),c:si===0?'g':si<=2?'w':'b'},
   ];
@@ -452,9 +462,11 @@ function buildFreq(data,labels){
   CH.fr=new Chart(document.getElementById('cFreq'),{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Poles',    data:data.map(d=>d.poles),   backgroundColor:'rgba(59,109,17,0.6)', borderRadius:2},
-      {label:'Equibands',data:data.map(d=>d.equi),    backgroundColor:'rgba(186,117,23,0.6)',borderRadius:2},
-      {label:'Bodywork', data:data.map(d=>d.bodywork),backgroundColor:'rgba(24,95,165,0.6)', borderRadius:2},
+      {label:'Poles',         data:data.map(d=>d.poles||0),        backgroundColor:'rgba(59,109,17,0.6)',  borderRadius:2},
+      {label:'Straddle Poles',data:data.map(d=>d.straddlepoles||0), backgroundColor:'rgba(59,109,17,0.3)',  borderRadius:2},
+      {label:'Treadmill',     data:data.map(d=>d.treadmill||0),     backgroundColor:'rgba(83,74,183,0.6)',  borderRadius:2},
+      {label:'Equibands',     data:data.map(d=>d.equi||0),          backgroundColor:'rgba(186,117,23,0.6)', borderRadius:2},
+      {label:'Bodywork',      data:data.map(d=>d.bodywork||0),      backgroundColor:'rgba(24,95,165,0.6)',  borderRadius:2},
     ]},options:o
   });
 }
