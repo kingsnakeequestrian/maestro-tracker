@@ -495,13 +495,17 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="field">
       <label>Other modalities used today</label>
       <div class="chip-group">
-        <button class="chip" data-f="pt"        onclick="multiChip(this,'mod')">PT exercises</button>
-        <button class="chip" data-f="poles"     onclick="multiChip(this,'mod')">Poles</button>
-        <button class="chip" data-f="bemer"     onclick="multiChip(this,'mod')">Bemer</button>
-        <button class="chip" data-f="laser"     onclick="multiChip(this,'mod')">Laser (C4)</button>
-        <button class="chip" data-f="shockwave" onclick="multiChip(this,'mod')">Shockwave</button>
-        <button class="chip" data-f="exgas"     onclick="multiChip(this,'mod')">ExGas</button>
-        <button class="chip" data-f="farrier"   onclick="multiChip(this,'mod')">Farrier</button>
+        <button class="chip" data-f="pt"            onclick="multiChip(this,'mod')">PT exercises</button>
+        <button class="chip" data-f="poles"         onclick="multiChip(this,'mod')">Poles</button>
+        <button class="chip" data-f="straddlepoles" onclick="multiChip(this,'mod')">Straddle Poles</button>
+        <button class="chip" data-f="treadmill"     onclick="multiChip(this,'mod')">Treadmill</button>
+        <button class="chip" data-f="theraplate"    onclick="multiChip(this,'mod')">Theraplate</button>
+        <button class="chip" data-f="balancepad"    onclick="multiChip(this,'mod')">Balance Pad</button>
+        <button class="chip" data-f="bemer"         onclick="multiChip(this,'mod')">Bemer</button>
+        <button class="chip" data-f="laser"         onclick="multiChip(this,'mod')">Laser (C4)</button>
+        <button class="chip" data-f="shockwave"     onclick="multiChip(this,'mod')">Shockwave</button>
+        <button class="chip" data-f="exgas"         onclick="multiChip(this,'mod')">ExGas</button>
+        <button class="chip" data-f="farrier"       onclick="multiChip(this,'mod')">Farrier</button>
       </div>
     </div>
   </div>
@@ -1124,7 +1128,14 @@ async function pushToSheets(entry) {
     entry.modalities?.includes('farrier') ? 'Y' : '',
     entry.modalities?.includes('exgas') ? 'Y' : '',
     entry.behaviorNotes || '',
-    (entry.ptNotes || '') + (driveLinks ? '\nMedia: ' + driveLinks : '')
+    [
+      entry.ptNotes || '',
+      entry.modalities?.includes('straddlepoles') ? 'Straddle poles' : '',
+      entry.modalities?.includes('treadmill')     ? 'Treadmill' : '',
+      entry.modalities?.includes('theraplate')    ? 'Theraplate' : '',
+      entry.modalities?.includes('balancepad')    ? 'Balance pad' : '',
+      driveLinks ? 'Media: ' + driveLinks : ''
+    ].filter(Boolean).join(' | ')
   ];
   try {
     const params = new URLSearchParams();
