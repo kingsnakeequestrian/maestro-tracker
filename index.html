@@ -1130,12 +1130,12 @@ async function pushToSheets(entry) {
     entry.behaviorNotes || '',
     [
       entry.ptNotes || '',
-      entry.modalities?.includes('straddlepoles') ? 'Straddle poles' : '',
-      entry.modalities?.includes('treadmill')     ? 'Treadmill' : '',
-      entry.modalities?.includes('theraplate')    ? 'Theraplate' : '',
-      entry.modalities?.includes('balancepad')    ? 'Balance pad' : '',
+      entry.modalities?.includes('theraplate') ? 'Theraplate' : '',
+      entry.modalities?.includes('balancepad') ? 'Balance pad' : '',
       driveLinks ? 'Media: ' + driveLinks : ''
-    ].filter(Boolean).join(' | ')
+    ].filter(Boolean).join(' | '),
+    entry.modalities?.includes('straddlepoles') ? 'Y' : '',
+    entry.modalities?.includes('treadmill')     ? 'Y' : ''
   ];
   try {
     const params = new URLSearchParams();
