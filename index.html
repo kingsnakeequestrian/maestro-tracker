@@ -615,11 +615,12 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="field">
       <label>Visit type</label>
       <div class="chip-group">
-        <button class="chip" onclick="selectVetVisitType(this)">Lameness eval</button>
-        <button class="chip" onclick="selectVetVisitType(this)">Rehab check-in</button>
-        <button class="chip" onclick="selectVetVisitType(this)">Routine / wellness</button>
-        <button class="chip" onclick="selectVetVisitType(this)">Emergency</button>
-        <button class="chip" onclick="selectVetVisitType(this)">Other</button>
+        <button class="chip" onclick="togVetVisitType(this)">Lameness eval</button>
+        <button class="chip" onclick="togVetVisitType(this)">Rehab check-in</button>
+        <button class="chip" onclick="togVetVisitType(this)">Injection / treatment</button>
+        <button class="chip" onclick="togVetVisitType(this)">Routine / wellness</button>
+        <button class="chip" onclick="togVetVisitType(this)">Emergency</button>
+        <button class="chip" onclick="togVetVisitType(this)">Other</button>
       </div>
     </div>
   </div>
@@ -636,6 +637,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <div class="proc-item" onclick="togProc(this,'vaccination')"><div class="proc-check"></div><div class="proc-label">Vaccination</div></div>
         <div class="proc-item" onclick="togProc(this,'dental')"><div class="proc-check"></div><div class="proc-label">Dental</div></div>
         <div class="proc-item" onclick="togProc(this,'nerve_block')"><div class="proc-check"></div><div class="proc-label">Nerve block</div></div>
+        <div class="proc-item" onclick="togProc(this,'flexion')"><div class="proc-check"></div><div class="proc-label">Flexion tests</div></div>
       </div>
     </div>
   </div>
@@ -643,25 +645,42 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <div class="card" id="vetLamenessCard" style="display:none">
     <div class="card-title">Lameness</div>
     <div class="field">
-      <label>Lameness grade (AAEP 0–5)</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="0" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">0</button>
-        <button class="score-btn" data-v="1" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">1</button>
-        <button class="score-btn" data-v="2" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">2</button>
-        <button class="score-btn" data-v="3" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">3</button>
-        <button class="score-btn" data-v="4" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">4</button>
-        <button class="score-btn" data-v="5" onclick="setScore(this,'vetLameGrade','lameHint',LAME)">5</button>
+      <div class="score-hint" style="margin-bottom:8px">AAEP scale: 0 = sound · 1 = barely perceptible · 2 = mild · 3 = consistently lame · 4 = marked · 5 = non-weight bearing</div>
+      <label>RF grade</label>
+      <div class="score-group" style="margin-bottom:8px">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RF')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RF')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RF')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RF')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RF')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RF')">5</button>
       </div>
-      <div class="score-hint" id="lameHint">0 = sound · 1 = barely perceptible · 3 = consistently lame · 5 = non-weight bearing</div>
-    </div>
-    <div class="field">
-      <label>Affected limb (exam)</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">RF</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">LF</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">RH</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">LH</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameLimb')">Multiple</button>
+      <label>LF grade</label>
+      <div class="score-group" style="margin-bottom:8px">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LF')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LF')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LF')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LF')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LF')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LF')">5</button>
+      </div>
+      <label>RH grade</label>
+      <div class="score-group" style="margin-bottom:8px">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RH')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RH')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RH')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RH')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RH')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RH')">5</button>
+      </div>
+      <label>LH grade</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LH')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LH')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LH')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LH')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LH')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LH')">5</button>
       </div>
     </div>
     <div class="field">
@@ -1275,8 +1294,8 @@ function toast(msg, isErr) {
 const LAME = ['Sound — no lameness perceptible','Barely perceptible, not consistently observable','Perceptible at trot in-hand, consistent','Consistently lame, obvious at trot','Obvious at walk, unable to canter','Non-weight bearing'];
 
 let VET = {
-  date:'', provider:'', clinic:'', visitType:'', procedures:[],
-  lameGrade:'', lameLimb:[], lameRegion:[], lameRegionOther:'', nerveBlock:'',
+  date:'', provider:'', clinic:'', visitType:[], procedures:[],
+  lameGrade:'', lameGrades:{RF:'',LF:'',RH:'',LH:''}, lameLimb:[], lameRegion:[], lameRegionOther:'', nerveBlock:'',
   injSite:'', injProduct:[], injProductOther:'', injProtocol:'',
   imagingType:[], imagingRegion:'', imagingLink:'',
   history:'', findings:'', meds:'', recs:'', plan:'',
@@ -1313,12 +1332,22 @@ function togProc(el, key) {
 }
 
 // ── VET VISIT TYPE SELECTOR ─────────────────────────────────────────
-function selectVetVisitType(btn) {
-  btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+function setLimbGrade(btn, limb) {
+  // Deselect siblings in same limb group
+  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
-  VET.visitType = btn.textContent.trim();
-  // Show lameness card for relevant visit types
-  const showLame = ['Lameness eval','Rehab check-in'].includes(VET.visitType);
+  VET.lameGrades[limb] = btn.dataset.v;
+  // Also update combined lameGrade summary and lameLimb
+  const grades = VET.lameGrades;
+  const active = Object.entries(grades).filter(([l,g]) => g && g !== '0').map(([l,g]) => l+'='+g);
+  VET.lameGrade = active.join(', ');
+  VET.lameLimb = Object.entries(grades).filter(([l,g]) => g && g !== '0').map(([l]) => l);
+}
+
+function togVetVisitType(btn) {
+  btn.classList.toggle('sel');
+  VET.visitType = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
+  const showLame = VET.visitType.some(t => ['Lameness eval','Rehab check-in'].includes(t));
   document.getElementById('vetLamenessCard').style.display = showLame ? 'block' : 'none';
 }
 
@@ -1415,7 +1444,7 @@ async function pushVetToSheets(v) {
   if (!CFG.scriptUrl) return false;
   const arr = (x) => Array.isArray(x) ? x : [];
   const row = [
-    v.date || '', v.provider || '', v.clinic || '', v.visitType || '', arr(v.procedures).join(', '),
+    v.date || '', v.provider || '', v.clinic || '', arr(v.visitType).join(', '), arr(v.procedures).join(', '),
     v.lameGrade || '', arr(v.lameLimb).join(', '), [...arr(v.lameRegion), v.lameRegionOther || ''].filter(Boolean).join(', '), v.nerveBlock || '',
     arr(v.procedures).includes('Scope') ? 'Y' : '', arr(v.procedures).includes('Bloodwork') ? 'Y' : '', '', '', '',
     v.injSite || '', [...arr(v.injProduct), v.injProductOther || ''].filter(Boolean).join(', '), v.injProtocol || '',
