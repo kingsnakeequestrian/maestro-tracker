@@ -642,7 +642,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     </div>
   </div>
 
-  <div class="card" id="vetLamenessCard" style="display:none">
+  <div class="card" id="vetLamenessCard">
     <div class="card-title">Lameness</div>
     <div class="field">
       <div class="score-hint" style="margin-bottom:8px">AAEP scale: 0 = sound · 1 = barely perceptible · 2 = mild · 3 = consistently lame · 4 = marked · 5 = non-weight bearing</div>
@@ -1326,7 +1326,7 @@ function togProc(el, key) {
   const selected = [...document.querySelectorAll('.proc-item.sel')].map(e=>e.querySelector('.proc-label').textContent.trim());
   VET.procedures = selected;
   // Show/hide conditional cards
-  document.getElementById('vetLamenessCard').style.display = (selected.includes('Nerve block') || ['Lameness eval','Rehab check-in'].includes(VET.visitType)) ? 'block' : 'none';
+  document.getElementById('vetLamenessCard').style.display = (selected.includes('Nerve block') || (Array.isArray(VET.visitType) ? VET.visitType.some(t => ['Lameness eval','Rehab check-in'].includes(t)) : ['Lameness eval','Rehab check-in'].includes(VET.visitType))) ? 'block' : 'none';
   document.getElementById('vetInjectionCard').style.display = selected.includes('Injection') ? 'block' : 'none';
   document.getElementById('vetImagingCard').style.display = selected.includes('Imaging') ? 'block' : 'none';
 }
@@ -1347,8 +1347,6 @@ function setLimbGrade(btn, limb) {
 function togVetVisitType(btn) {
   btn.classList.toggle('sel');
   VET.visitType = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
-  const showLame = VET.visitType.some(t => ['Lameness eval','Rehab check-in'].includes(t));
-  document.getElementById('vetLamenessCard').style.display = showLame ? 'block' : 'none';
 }
 
 // ── COLLECT VET TEXT FIELDS ──────────────────────────────────────────
