@@ -36,6 +36,24 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .pf{height:100%;border-radius:4px}
 .pc{font-size:11px;color:var(--muted);width:32px;text-align:right;font-family:'DM Mono',monospace}
 .ph{font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.cmp-now{color:var(--text)}
+.cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.cmp-now{color:var(--text);font-weight:500}
+.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
+.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.cmp-now{color:var(--text)}
+.cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.cmp-now{color:var(--text);font-weight:500}
+.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
+.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
 </style>
 
 <style id="maestro-nav-style">
@@ -76,26 +94,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 <p class="sub">Post-rehab tracking · Nov 20, 2025 – Mar 28, 2026 · 129 days</p>
 
 
-<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11">
-  <div class="card-title">This week — Mar 22–28</div>
-  <div class="card-sub">Current week at a glance (7 days logged)</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px">
-    <div class="sc g"><div class="sv">5.0</div><div class="sl">Avg willingness</div></div>
-    <div class="sc"><div class="sv">3</div><div class="sl">Rides</div></div>
-    <div class="sc"><div class="sv">160</div><div class="sl">Walk (min)</div></div>
-    <div class="sc"><div class="sv">20</div><div class="sl">Trot (min)</div></div>
-    <div class="sc"><div class="sv">0</div><div class="sl">Canter (min)</div></div>
-    <div class="sc"><div class="sv">5x</div><div class="sl">PT exercises</div></div>
-    <div class="sc"><div class="sv">4x</div><div class="sl">Equibands</div></div>
-    <div class="sc"><div class="sv">3x</div><div class="sl">Poles</div></div>
-    <div class="sc"><div class="sv">1x</div><div class="sl">Bodywork</div></div>
-  </div>
-  <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
-    <span>🟢 PT target met (5/3–5 target)</span>
-    <span>🟡 Cranky tack-up: 1 day logged</span>
-    <span>⬜ Shockwave: 1 session (Mar 22 week)</span>
-  </div>
-</div>
+<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11"></div>
 
 <div class="toggle-row" style="justify-content:space-between;align-items:center">
   <div style="display:flex;gap:8px">
@@ -284,56 +283,98 @@ function processRawRows(headers, rows){
 function updateThisWeekCard(valid){
   const today=new Date();
   const sun=new Date(today); sun.setDate(today.getDate()-today.getDay()); sun.setHours(0,0,0,0);
-  const sat=new Date(sun); sat.setDate(sun.getDate()+6);
-  const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
-  const CRANKY_I=13,EQUI_I=21,PT_I=22,POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
-  const STRADDLE_I=32,TREADMILL_I=33;
-  function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
-  const tw=valid.filter(({d})=>d>=sun&&d<=sat);
-  if(!tw.length) return;
-  const rides=tw.filter(({r})=>r[RODE_I]==='Y').length;
-  const walk=tw.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0);
-  const trot=tw.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0);
-  const cant=tw.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0);
-  const willV=tw.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
-  const aw=willV.length?(willV.reduce((s,v)=>s+v,0)/willV.length).toFixed(1):'—';
-  const pt=tw.filter(({r})=>r[PT_I]==='Y').length;
-  const equi=tw.filter(({r})=>r[EQUI_I]==='Y').length;
-  const poles=tw.filter(({r})=>r[POLES_I]==='Y').length;
-  const bw=tw.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!=='').length;
-  const sw=tw.filter(({r})=>r[SW_I]==='Y').length;
-  const laser=tw.filter(({r})=>r[LASER_I]==='Y').length;
-  const straddle=tw.filter(({r})=>r[STRADDLE_I]==='Y').length;
-  const treadmill=tw.filter(({r})=>r[TREADMILL_I]==='Y').length;
-  const crankyD=tw.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
-  const crankyY=crankyD.filter(v=>v==='Y').length;
-  const opts={month:'short',day:'numeric'};
-  const lbl=sun.toLocaleDateString('en-US',opts)+' – '+sat.toLocaleDateString('en-US',opts);
+
+  function getWeekData(weekOffset){
+    const ws=new Date(sun); ws.setDate(sun.getDate()+weekOffset*7);
+    const we=new Date(ws); we.setDate(ws.getDate()+6);
+    const items=valid.filter(({d})=>d>=ws&&d<=we);
+    if(!items.length) return null;
+    const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
+    const CRANKY_I=13,EQUI_I=21,PT_I=22,POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
+    const STRADDLE_I=32,TREADMILL_I=33;
+    function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+    const willV=items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
+    const crankyD=items.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
+    return {
+      label: ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+we.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+      days: items.length,
+      will: willV.length?(willV.reduce((s,v)=>s+v,0)/willV.length).toFixed(1):null,
+      rides: items.filter(({r})=>r[RODE_I]==='Y').length,
+      walk: items.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0),
+      trot: items.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0),
+      cant: items.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0),
+      pt: items.filter(({r})=>r[PT_I]==='Y').length,
+      equi: items.filter(({r})=>r[EQUI_I]==='Y').length,
+      poles: items.filter(({r})=>r[POLES_I]==='Y').length,
+      straddle: items.filter(({r})=>r[STRADDLE_I]==='Y').length,
+      treadmill: items.filter(({r})=>r[TREADMILL_I]==='Y').length,
+      bw: items.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!=='').length,
+      sw: items.filter(({r})=>r[SW_I]==='Y').length,
+      laser: items.filter(({r})=>r[LASER_I]==='Y').length,
+      cranky: crankyD.length?Math.round(crankyD.filter(v=>v==='Y').length/crankyD.length*100):null,
+    };
+  }
+
+  const w0=getWeekData(0), w1=getWeekData(-1), w2=getWeekData(-2);
+  if(!w0) return;
+
+  function delta(now, prev){
+    if(prev===null||now===null) return '';
+    const d=parseFloat(now)-parseFloat(prev);
+    if(d===0) return '';
+    return d>0?`<span class="cmp-up">▲${Math.abs(d)%1===0?Math.abs(d):Math.abs(d).toFixed(1)}</span>`:`<span class="cmp-dn">▼${Math.abs(d)%1===0?Math.abs(d):Math.abs(d).toFixed(1)}</span>`;
+  }
+
+  function cell(now, prev, suffix=''){
+    const val = now!==null ? now+suffix : '—';
+    return `<td class="cmp-now">${val}${prev!==null?delta(now,prev):''}</td>`;
+  }
+
+  function row(label, key, suffix=''){
+    const n=w0[key], p1=w1?w1[key]:null, p2=w2?w2[key]:null;
+    return `<tr>
+      <td>${label}</td>
+      <td>${p2!==null?p2+suffix:'—'}</td>
+      <td>${p1!==null?p1+suffix:'—'}</td>
+      ${cell(n,p1,suffix)}
+    </tr>`;
+  }
+
   const el=document.getElementById('thisWeekCard');
   if(!el) return;
+
+  const ptOk=w0.pt>=3, straddleOk=w0.straddle>=2;
+
   el.innerHTML=`
-    <div class="card-title">This week — ${lbl}</div>
-    <div class="card-sub">${tw.length} days logged</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px">
-      <div class="sc ${parseFloat(aw)>=4?'g':parseFloat(aw)>=3?'w':'b'}"><div class="sv">${aw}</div><div class="sl">Avg willingness</div></div>
-      <div class="sc"><div class="sv">${rides}</div><div class="sl">Rides</div></div>
-      <div class="sc"><div class="sv">${walk}</div><div class="sl">Walk (min)</div></div>
-      <div class="sc"><div class="sv">${trot}</div><div class="sl">Trot (min)</div></div>
-      <div class="sc"><div class="sv">${cant}</div><div class="sl">Canter (min)</div></div>
-      <div class="sc"><div class="sv">${pt}x</div><div class="sl">PT exercises</div></div>
-      <div class="sc"><div class="sv">${equi}x</div><div class="sl">Equibands</div></div>
-      <div class="sc"><div class="sv">${poles}x</div><div class="sl">Poles</div></div>
-      <div class="sc"><div class="sv">${bw}x</div><div class="sl">Bodywork</div></div>
-      <div class="sc ${straddle>=2?'g':straddle>=1?'w':'b'}"><div class="sv">${straddle}x</div><div class="sl">Straddle Poles</div></div>
-      <div class="sc"><div class="sv">${treadmill}x</div><div class="sl">Treadmill</div></div>
-    </div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)">
-      <span>${pt>=3?'🟢':'🔴'} PT ${pt}x ${pt>=3?'(target met)':'(below 3x target)'}</span>
-      <span>${straddle>=2?'🟢':'🔴'} Straddle poles ${straddle}x ${straddle>=2?'(target met)':'(below 2x target)'}</span>
-      ${crankyD.length?`<span>🟡 Cranky: ${crankyY}/${crankyD.length} days</span>`:''}
-      ${sw?`<span>⚡ Shockwave this week</span>`:''}
-      ${laser?`<span>🔦 Laser: ${laser} session${laser>1?'s':''}</span>`:''}
-      ${treadmill?`<span>🏃 Treadmill: ${treadmill}x</span>`:''}
+    <div class="card-title">This week — ${w0.label}</div>
+    <div class="card-sub">${w0.days} days logged${w0.sw?' · ⚡ Shockwave this week':''}${w0.laser?' · 🔦 Laser this week':''}</div>
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>${w2?w2.label:'2 wks ago'}</th>
+          <th>${w1?w1.label:'Last week'}</th>
+          <th class="cmp-now">This week</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${row('Avg willingness','will')}
+        ${row('Rides','rides')}
+        ${row('Walk (min)','walk')}
+        ${row('Trot (min)','trot')}
+        ${row('Canter (min)','cant')}
+        ${row('PT exercises','pt','x')}
+        ${row('Straddle poles','straddle','x')}
+        ${row('Equibands','equi','x')}
+        ${row('Poles','poles','x')}
+        ${row('Treadmill','treadmill','x')}
+        ${row('Bodywork','bw','x')}
+      </tbody>
+    </table>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px">
+      <span>${ptOk?'🟢':'🔴'} PT ${w0.pt}x ${ptOk?'(target met)':'(below 3x)'}</span>
+      <span>${straddleOk?'🟢':'🔴'} Straddle poles ${w0.straddle}x ${straddleOk?'(target met)':'(below 2x)'}</span>
+      ${w0.cranky!==null?`<span>🟡 Cranky ${w0.cranky}% of tack-up days</span>`:''}
     </div>`;
 }
 
