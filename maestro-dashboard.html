@@ -334,9 +334,9 @@ function updateThisWeekCard(valid){
     const n=w0[key], p1=w1?w1[key]:null, p2=w2?w2[key]:null;
     return `<tr>
       <td>${label}</td>
-      <td>${p2!==null?p2+suffix:'—'}</td>
-      <td>${p1!==null?p1+suffix:'—'}</td>
       ${cell(n,p1,suffix)}
+      <td>${p1!==null?p1+suffix:'—'}</td>
+      <td>${p2!==null?p2+suffix:'—'}</td>
     </tr>`;
   }
 
@@ -348,13 +348,24 @@ function updateThisWeekCard(valid){
   el.innerHTML=`
     <div class="card-title">This week — ${w0.label}</div>
     <div class="card-sub">${w0.days} days logged${w0.sw?' · ⚡ Shockwave this week':''}${w0.laser?' · 🔦 Laser this week':''}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:16px">
+      <div class="sc ${parseFloat(w0.will)>=4?'g':parseFloat(w0.will)>=3?'w':'b'}"><div class="sv">${w0.will||'—'}</div><div class="sl">Avg willingness</div></div>
+      <div class="sc"><div class="sv">${w0.rides}</div><div class="sl">Rides</div></div>
+      <div class="sc"><div class="sv">${w0.walk}</div><div class="sl">Walk (min)</div></div>
+      <div class="sc"><div class="sv">${w0.trot}</div><div class="sl">Trot (min)</div></div>
+      <div class="sc"><div class="sv">${w0.cant}</div><div class="sl">Canter (min)</div></div>
+      <div class="sc"><div class="sv">${w0.pt}x</div><div class="sl">PT exercises</div></div>
+      <div class="sc"><div class="sv">${w0.equi}x</div><div class="sl">Equibands</div></div>
+      <div class="sc"><div class="sv">${w0.poles}x</div><div class="sl">Poles</div></div>
+      <div class="sc"><div class="sv">${w0.bw}x</div><div class="sl">Bodywork</div></div>
+    </div>
     <table class="cmp-table">
       <thead>
         <tr>
           <th></th>
-          <th>${w2?w2.label:'2 wks ago'}</th>
-          <th>${w1?w1.label:'Last week'}</th>
           <th class="cmp-now">This week</th>
+          <th>${w1?w1.label:'Last week'}</th>
+          <th>${w2?w2.label:'2 wks ago'}</th>
         </tr>
       </thead>
       <tbody>
