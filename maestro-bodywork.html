@@ -27,6 +27,15 @@
   .region-row { display:flex; align-items:center; gap:10px; padding:5px 6px; border-radius:7px; cursor:default; transition:background 0.15s; margin-bottom:5px; }
   .region-row:hover { background:#F0EDE6; }
   .region-dot { width:12px; height:12px; border-radius:2px; flex-shrink:0; }
+  .side-bar { display:flex; height:7px; border-radius:3px; overflow:hidden; gap:1px; margin-top:4px; }
+  .side-seg-r { background:#D85A30; }
+  .side-seg-b { background:#B4B2A9; }
+  .side-seg-l { background:#185FA5; }
+  .side-counts { font-size:10px; display:flex; gap:6px; margin-top:2px; }
+  .sc-r { color:#993C1D; }
+  .sc-b { color:#5F5E5A; }
+  .sc-l { color:#185FA5; }
+  .bar-wrap { flex:1; }
   .region-name { font-size:12px; flex:1; color:var(--text); }
   .bar-wrap { width:78px; }
   .bar-track { height:5px; background:#EDE9E0; border-radius:3px; margin-bottom:2px; overflow:hidden; }
@@ -168,7 +177,12 @@
 
       </svg>
     </div>
-    <div class="region-list" id="regionList"></div>
+    <div style="margin-bottom:8px;display:flex;gap:10px;font-size:11px;color:#5F5E5A">
+  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#185FA5;margin-right:3px;vertical-align:middle"></span>Left</span>
+  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#B4B2A9;margin-right:3px;vertical-align:middle"></span>Bilateral</span>
+  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#D85A30;margin-right:3px;vertical-align:middle"></span>Right</span>
+</div>
+<div class="region-list" id="regionList"></div>
   </div>
 
   <div class="heat-legend">
@@ -183,32 +197,32 @@
 
 <script>
 const S=[
-  {d:'8/28/24',o:'mixed',p:0,a:['neck','shoulder','forearms','glutes']},
-  {d:'12/16/24',o:'mixed',p:1.5,a:['thoracic','neck','lowback','glutes','forearms','hind_right']},
-  {d:'1/26/25',o:'concern',p:2.5,a:['neck','shoulder','thoracic','glutes','lowback','si']},
-  {d:'2/21/25',o:'concern',p:1.5,a:['glutes','shoulder','neck']},
-  {d:'3/28/25',o:'mixed',p:2.0,a:['lowback','glutes','si']},
-  {d:'6/27/25',o:'good',p:1.0,a:['lowback','glutes','forearms']},
-  {d:'7/22/25',o:'good',p:1.5,a:['lowback','si']},
+  {d:'8/28/24',o:'mixed',p:0,a:['neck','shoulder','forearms','glutes'],s:{'neck': 'L', 'shoulder': 'L', 'forearms': 'L', 'glutes': 'L'}},
+  {d:'12/16/24',o:'mixed',p:1.5,a:['thoracic','neck','lowback','glutes','forearms','hind_right'],s:{'thoracic': 'B', 'neck': 'L', 'lowback': 'L', 'glutes': 'L', 'forearms': 'L', 'hind_right': 'R'}},
+  {d:'1/26/25',o:'concern',p:2.5,a:['neck','shoulder','thoracic','glutes','lowback','si'],s:{'neck': 'B', 'shoulder': 'L', 'thoracic': 'B', 'glutes': 'B', 'lowback': 'L', 'si': 'B'}},
+  {d:'2/21/25',o:'concern',p:1.5,a:['glutes','shoulder','neck'],s:{'glutes': 'B', 'shoulder': 'L', 'neck': 'L'}},
+  {d:'3/28/25',o:'mixed',p:2.0,a:['lowback','glutes','si'],s:{'lowback': 'B', 'glutes': 'B', 'si': 'B'}},
+  {d:'6/27/25',o:'good',p:1.0,a:['lowback','glutes','forearms'],s:{'lowback': 'B', 'glutes': 'B', 'forearms': 'B'}},
+  {d:'7/22/25',o:'good',p:1.5,a:['lowback','si'],s:{'lowback': 'B', 'si': 'B'}},
   {d:'7/31/25',o:'good',p:1.0,a:[]},
-  {d:'11/22/25',o:'concern',p:2.5,a:['midback']},
-  {d:'11/28/25',o:'concern',p:1.0,a:['lowback','glutes']},
+  {d:'11/22/25',o:'concern',p:2.5,a:['midback'],s:{'midback': 'B'}},
+  {d:'11/28/25',o:'concern',p:1.0,a:['lowback','glutes'],s:{'lowback': 'B', 'glutes': 'B'}},
   {d:'12/5/25',o:'mixed',p:2.0,a:[]},
-  {d:'12/13/25',o:'concern',p:2.5,a:['withers']},
-  {d:'12/18/25',o:'mixed',p:1.5,a:['lowback','glutes']},
-  {d:'12/31/25',o:'concern',p:0,a:['glutes','neck','forearms','hind_right']},
-  {d:'1/9/26',o:'mixed',p:1.5,a:['shoulder','lowback']},
-  {d:'1/14/26',o:'mixed',p:1.5,a:['glutes','lowback']},
-  {d:'1/21/26',o:'mixed',p:2.0,a:['lowback']},
-  {d:'1/26/26',o:'mixed',p:2.0,a:['neck','lowback','glutes','poll']},
-  {d:'2/12/26',o:'mixed',p:2.0,a:['neck','thoracic','si']},
-  {d:'2/25/26',o:'mixed',p:2.0,a:['glutes']},
-  {d:'3/4/26',o:'good',p:1.5,a:['glutes']},
-  {d:'3/11/26',o:'good',p:1.0,a:['lowback']},
-  {d:'3/16/26',o:'mixed',p:1.5,a:['lowback','si']},
-  {d:'3/25/26',o:'mixed',p:1.5,a:['lowback','glutes','si']},
-  {d:'4/2/26',o:'mixed',p:2.0,a:['lowback','glutes','si','neck','thoracic']},
-  {d:'4/7/26',o:'mixed',p:1.5,a:['si','glutes','neck','shoulder']},
+  {d:'12/13/25',o:'concern',p:2.5,a:['withers'],s:{'withers': 'R'}},
+  {d:'12/18/25',o:'mixed',p:1.5,a:['lowback','glutes'],s:{'lowback': 'B', 'glutes': 'B'}},
+  {d:'12/31/25',o:'concern',p:0,a:['glutes','neck','forearms','hind_right'],s:{'glutes': 'B', 'neck': 'B', 'forearms': 'B', 'hind_right': 'R'}},
+  {d:'1/9/26',o:'mixed',p:1.5,a:['shoulder','lowback'],s:{'shoulder': 'L', 'lowback': 'L'}},
+  {d:'1/14/26',o:'mixed',p:1.5,a:['glutes','lowback'],s:{'glutes': 'R', 'lowback': 'L'}},
+  {d:'1/21/26',o:'mixed',p:2.0,a:['lowback'],s:{'lowback': 'B'}},
+  {d:'1/26/26',o:'mixed',p:2.0,a:['neck','lowback','glutes','poll'],s:{'neck': 'B', 'lowback': 'B', 'glutes': 'B', 'poll': 'B'}},
+  {d:'2/12/26',o:'mixed',p:2.0,a:['neck','thoracic','si'],s:{'neck': 'B', 'thoracic': 'R', 'si': 'B'}},
+  {d:'2/25/26',o:'mixed',p:2.0,a:['glutes'],s:{'glutes': 'B'}},
+  {d:'3/4/26',o:'good',p:1.5,a:['glutes'],s:{'glutes': 'B'}},
+  {d:'3/11/26',o:'good',p:1.0,a:['lowback'],s:{'lowback': 'B'}},
+  {d:'3/16/26',o:'mixed',p:1.5,a:['lowback','si'],s:{'lowback': 'B', 'si': 'B'}},
+  {d:'3/25/26',o:'mixed',p:1.5,a:['lowback','glutes','si'],s:{'lowback': 'B', 'glutes': 'B', 'si': 'B'}},
+  {d:'4/2/26',o:'mixed',p:2.0,a:['lowback','glutes','si','neck','thoracic'],s:{'lowback': 'B', 'glutes': 'B', 'si': 'B', 'neck': 'B', 'thoracic': 'B'}},
+  {d:'4/7/26',o:'mixed',p:1.5,a:['si','glutes','neck','shoulder'],s:{'si': 'B', 'glutes': 'B', 'neck': 'B', 'shoulder': 'L'}},
 ];
 const RD=[
   {id:'glutes',label:'Glutes'},
@@ -224,8 +238,18 @@ const RD=[
   {id:'hind_right',label:'Hind right'},
 ];
 const C={};
-RD.forEach(r=>C[r.id]=0);
-S.forEach(s=>s.a.forEach(a=>{if(C[a]!==undefined)C[a]++;}));
+const CS={};
+RD.forEach(r=>{C[r.id]=0;CS[r.id]={R:0,B:0,L:0};});
+S.forEach(s=>{
+  s.a.forEach(a=>{
+    if(C[a]!==undefined){
+      C[a]++;
+      const side=(s.s&&s.s[a])||'B';
+      if(CS[a][side]!==undefined) CS[a][side]++;
+      else CS[a]['B']++;
+    }
+  });
+});
 const MX=Math.max(...Object.values(C));
 const N=S.length;
 function hf(n){if(!n)return'#F0EDE6';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D85A30';}
@@ -269,13 +293,26 @@ function buildKey(){
     const n=C[r.id];const pct=Math.round(n/N*100);
     const w=MX>0?Math.round(n/MX*100):0;
     const f=hf(n);const s_=hs(n);const b=bclr(n);
+    const sd=CS[r.id];
+    const total_s=sd.R+sd.B+sd.L||1;
+    const sideBar=n>0?`<div class="side-bar">
+      ${sd.L?`<div class="side-seg-l" style="flex:${sd.L}"></div>`:''}
+      ${sd.B?`<div class="side-seg-b" style="flex:${sd.B}"></div>`:''}
+      ${sd.R?`<div class="side-seg-r" style="flex:${sd.R}"></div>`:''}
+    </div>
+    <div class="side-counts">
+      ${sd.L?`<span class="sc-l">${sd.L}L</span>`:''}
+      ${sd.B?`<span class="sc-b">${sd.B}B</span>`:''}
+      ${sd.R?`<span class="sc-r">${sd.R}R</span>`:''}
+    </div>`:'';
     return`<div class="region-row" id="row-${r.id}"
       onmouseenter="hlFromRow('${r.id}')" onmouseleave="resetFromRow('${r.id}')">
       <span class="region-dot" style="background:${f};border:1.5px solid ${s_};"></span>
-      <span class="region-name">${r.label}</span>
       <div class="bar-wrap">
+        <span class="region-name">${r.label}</span>
         <div class="bar-track"><div class="bar-fill" style="width:${w||3}%;background:${b};"></div></div>
         <div class="bar-label">${n} sessions (${pct}%)</div>
+        ${sideBar}
       </div>
     </div>`;
   }).join('');
