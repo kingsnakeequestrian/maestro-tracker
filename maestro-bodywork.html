@@ -115,64 +115,68 @@
         <!-- Heat overlay ellipses positioned on correct anatomy -->
 
         <ellipse id="region-poll" class="heat-region"
-                 cx="120" cy="76" rx="40" ry="36"
+                 cx="128" cy="88" rx="24" ry="20"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('poll',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-neck" class="heat-region"
-                 cx="287" cy="150" rx="80" ry="84"
+                 cx="230" cy="130" rx="55" ry="55"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('neck',this)" onmouseleave="resetRegion(this)"/>
-        <ellipse id="region-withers" class="heat-region"
-                 cx="377" cy="106" rx="56" ry="40"
+                <ellipse id="region-withers" class="heat-region"
+                 cx="360" cy="108" rx="48" ry="34"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('withers',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-midback" class="heat-region"
-                 cx="440" cy="120" rx="56" ry="40"
+                 cx="425" cy="115" rx="50" ry="36"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('midback',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-lowback" class="heat-region"
-                 cx="502" cy="114" rx="52" ry="40"
+                 cx="478" cy="122" rx="46" ry="38"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('lowback',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-si" class="heat-region"
-                 cx="562" cy="120" rx="48" ry="40"
+                 cx="533" cy="132" rx="42" ry="42"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('si',this)" onmouseleave="resetRegion(this)"/>
-        <ellipse id="region-glutes" class="heat-region"
-                 cx="627" cy="170" rx="64" ry="80"
+        <ellipse id="region-glutes_med" class="heat-region"
+                 cx="563" cy="158" rx="50" ry="46"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
-                 onmouseenter="hlRegion('glutes',this)" onmouseleave="resetRegion(this)"/>
+                 onmouseenter="hlRegion('glutes_med',this)" onmouseleave="resetRegion(this)"/>
+        <ellipse id="region-glutes_sup" class="heat-region"
+                 cx="561" cy="207" rx="42" ry="38"
+                 fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
+                 onmouseenter="hlRegion('glutes_sup',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-shoulder" class="heat-region"
-                 cx="330" cy="231" rx="68" ry="64"
+                 cx="320" cy="160" rx="42" ry="44"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('shoulder',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-thoracic" class="heat-region"
-                 cx="420" cy="237" rx="72" ry="60"
+                 cx="420" cy="192" rx="58" ry="32"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('thoracic',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-forearms" class="heat-region"
-                 cx="335" cy="357" rx="44" ry="68"
+                 cx="270" cy="250" rx="28" ry="36"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('forearms',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-hind_right" class="heat-region"
-                 cx="522" cy="357" rx="44" ry="68"
+                 cx="552" cy="275" rx="32" ry="44"
                  fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82"
                  onmouseenter="hlRegion('hind_right',this)" onmouseleave="resetRegion(this)"/>
 
         <!-- Labels -->
         <g font-family="DM Sans, sans-serif" font-size="9" fill="#1C1A16" pointer-events="none" text-anchor="middle" font-weight="500">
-
-          <text x="120" y="80">poll</text>
-          <text x="287" y="154">neck/shoulder</text>
-          <text x="377" y="110">withers</text>
-          <text x="440" y="124">mid back</text>
-          <text x="502" y="118">low back</text>
-          <text x="562" y="124">SI</text>
-          <text x="627" y="174">glutes</text>
-          <text x="330" y="235">shoulder</text>
-          <text x="420" y="241">thoracic</text>
-          <text x="335" y="361">forearms</text>
-          <text x="522" y="361">hind R</text>
+          <text x="128" y="92">poll</text>
+          <text x="230" y="134">neck</text>
+          <text x="360" y="112">withers</text>
+          <text x="455" y="119">mid back</text>
+          <text x="508" y="126">low back</text>
+          <text x="568" y="156">SI</text>
+          <text x="563" y="162">glutes med</text>
+          <text x="561" y="211">glutes sup</text>
+          <text x="320" y="164">shoulder</text>
+          <text x="420" y="196">thoracic</text>
+          <text x="270" y="254">forearms</text>
+          <text x="552" y="279">hind R</text>
         </g>
 
       </svg>
@@ -197,36 +201,37 @@
 
 <script>
 const S=[
-  {d:'8/28/24',o:'mixed',p:0,a:['neck','shoulder','forearms','glutes'],s:{'neck': 'L', 'shoulder': 'L', 'forearms': 'L', 'glutes': 'L'}},
-  {d:'12/16/24',o:'mixed',p:1.5,a:['thoracic','neck','lowback','glutes','forearms','hind_right'],s:{'thoracic': 'B', 'neck': 'L', 'lowback': 'L', 'glutes': 'L', 'forearms': 'L', 'hind_right': 'R'}},
-  {d:'1/26/25',o:'concern',p:2.5,a:['neck','shoulder','thoracic','glutes','lowback','si'],s:{'neck': 'B', 'shoulder': 'L', 'thoracic': 'B', 'glutes': 'B', 'lowback': 'L', 'si': 'B'}},
-  {d:'2/21/25',o:'concern',p:1.5,a:['glutes','shoulder','neck'],s:{'glutes': 'B', 'shoulder': 'L', 'neck': 'L'}},
-  {d:'3/28/25',o:'mixed',p:2.0,a:['lowback','glutes','si'],s:{'lowback': 'B', 'glutes': 'B', 'si': 'B'}},
-  {d:'6/27/25',o:'good',p:1.0,a:['lowback','glutes','forearms'],s:{'lowback': 'B', 'glutes': 'B', 'forearms': 'B'}},
+  {d:'8/28/24',o:'mixed',p:0,a:['neck','shoulder','forearms','glutes_med','glutes_sup'],s:{'neck': 'L', 'shoulder': 'L', 'forearms': 'L', 'glutes_med': 'L', 'glutes_sup': 'L'}},
+  {d:'12/16/24',o:'mixed',p:1.5,a:['thoracic','neck','lowback','glutes_med','glutes_sup','forearms','hind_right'],s:{'thoracic': 'B', 'neck': 'L', 'lowback': 'L', 'glutes_med': 'L', 'glutes_sup': 'L', 'forearms': 'L', 'hind_right': 'R'}},
+  {d:'1/26/25',o:'concern',p:2.5,a:['neck','shoulder','thoracic','glutes_med','glutes_sup','lowback','si'],s:{'neck': 'B', 'shoulder': 'L', 'thoracic': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'lowback': 'L', 'si': 'B'}},
+  {d:'2/21/25',o:'concern',p:1.5,a:['glutes_med','glutes_sup','shoulder','neck'],s:{'glutes_med': 'B', 'glutes_sup': 'B', 'shoulder': 'L', 'neck': 'L'}},
+  {d:'3/28/25',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','si'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'si': 'B'}},
+  {d:'6/27/25',o:'good',p:1.0,a:['lowback','glutes_med','glutes_sup','forearms'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'forearms': 'B'}},
   {d:'7/22/25',o:'good',p:1.5,a:['lowback','si'],s:{'lowback': 'B', 'si': 'B'}},
   {d:'7/31/25',o:'good',p:1.0,a:[]},
   {d:'11/22/25',o:'concern',p:2.5,a:['midback'],s:{'midback': 'B'}},
-  {d:'11/28/25',o:'concern',p:1.0,a:['lowback','glutes'],s:{'lowback': 'B', 'glutes': 'B'}},
+  {d:'11/28/25',o:'concern',p:1.0,a:['lowback','glutes_med','glutes_sup'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B'}},
   {d:'12/5/25',o:'mixed',p:2.0,a:[]},
   {d:'12/13/25',o:'concern',p:2.5,a:['withers'],s:{'withers': 'R'}},
-  {d:'12/18/25',o:'mixed',p:1.5,a:['lowback','glutes'],s:{'lowback': 'B', 'glutes': 'B'}},
-  {d:'12/31/25',o:'concern',p:0,a:['glutes','neck','forearms','hind_right'],s:{'glutes': 'B', 'neck': 'B', 'forearms': 'B', 'hind_right': 'R'}},
+  {d:'12/18/25',o:'mixed',p:1.5,a:['lowback','glutes_med','glutes_sup'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B'}},
+  {d:'12/31/25',o:'concern',p:0,a:['glutes_med','glutes_sup','neck','forearms','hind_right'],s:{'glutes_med': 'B', 'glutes_sup': 'B', 'neck': 'B', 'forearms': 'B', 'hind_right': 'R'}},
   {d:'1/9/26',o:'mixed',p:1.5,a:['shoulder','lowback'],s:{'shoulder': 'L', 'lowback': 'L'}},
-  {d:'1/14/26',o:'mixed',p:1.5,a:['glutes','lowback'],s:{'glutes': 'R', 'lowback': 'L'}},
+  {d:'1/14/26',o:'mixed',p:1.5,a:['glutes_med','glutes_sup','lowback'],s:{'glutes_med': 'R', 'glutes_sup': 'R', 'lowback': 'L'}},
   {d:'1/21/26',o:'mixed',p:2.0,a:['lowback'],s:{'lowback': 'B'}},
-  {d:'1/26/26',o:'mixed',p:2.0,a:['neck','lowback','glutes','poll'],s:{'neck': 'B', 'lowback': 'B', 'glutes': 'B', 'poll': 'B'}},
+  {d:'1/26/26',o:'mixed',p:2.0,a:['neck','lowback','glutes_med','glutes_sup','poll'],s:{'neck': 'B', 'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'poll': 'B'}},
   {d:'2/12/26',o:'mixed',p:2.0,a:['neck','thoracic','si'],s:{'neck': 'B', 'thoracic': 'R', 'si': 'B'}},
-  {d:'2/25/26',o:'mixed',p:2.0,a:['glutes'],s:{'glutes': 'B'}},
-  {d:'3/4/26',o:'good',p:1.5,a:['glutes'],s:{'glutes': 'B'}},
+  {d:'2/25/26',o:'mixed',p:2.0,a:['glutes_med','glutes_sup'],s:{'glutes_med': 'B', 'glutes_sup': 'B'}},
+  {d:'3/4/26',o:'good',p:1.5,a:['glutes_med','glutes_sup'],s:{'glutes_med': 'B', 'glutes_sup': 'B'}},
   {d:'3/11/26',o:'good',p:1.0,a:['lowback'],s:{'lowback': 'B'}},
   {d:'3/16/26',o:'mixed',p:1.5,a:['lowback','si'],s:{'lowback': 'B', 'si': 'B'}},
-  {d:'3/25/26',o:'mixed',p:1.5,a:['lowback','glutes','si'],s:{'lowback': 'B', 'glutes': 'B', 'si': 'B'}},
-  {d:'4/2/26',o:'mixed',p:2.0,a:['lowback','glutes','si','neck','thoracic'],s:{'lowback': 'B', 'glutes': 'B', 'si': 'B', 'neck': 'B', 'thoracic': 'B'}},
-  {d:'4/7/26',o:'mixed',p:1.5,a:['si','glutes','neck','shoulder'],s:{'si': 'B', 'glutes': 'B', 'neck': 'B', 'shoulder': 'L'}},
-  {d:'4/15/26',o:'mixed',p:2.0,a:['lowback','glutes','neck','thoracic'],s:{'lowback':'R','glutes':'R','neck':'B','thoracic':'R'}},
+  {d:'3/25/26',o:'mixed',p:1.5,a:['lowback','glutes_med','glutes_sup','si'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'si': 'B'}},
+  {d:'4/2/26',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','si','neck','thoracic'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'si': 'B', 'neck': 'B', 'thoracic': 'B'}},
+  {d:'4/7/26',o:'mixed',p:1.5,a:['si','glutes_med','glutes_sup','neck','shoulder'],s:{'si': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'neck': 'B', 'shoulder': 'L'}},
+  {d:'4/15/26',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','neck','thoracic'],s:{'lowback':'R','glutes_med': 'R', 'glutes_sup': 'R','neck':'B','thoracic':'R'}},
 ];
 const RD=[
-  {id:'glutes',label:'Glutes'},
+  {id:'glutes_med',label:'Glutes — medial (med. gluteal)'},
+  {id:'glutes_sup',label:'Glutes — superficial (sup. gluteal)'},
   {id:'lowback',label:'Low back / lumbar'},
   {id:'si',label:'SI / lumbosacral'},
   {id:'neck',label:'Neck / shoulder jct.'},
