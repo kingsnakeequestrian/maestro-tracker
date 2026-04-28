@@ -234,7 +234,7 @@ function processRawRows(headers, rows){
 
   function agg(groups){
     return Object.entries(groups).map(([period,items])=>{
-      const hasData=items.some(({r})=>r[PT_I]==='Y'||r[POLES_I]==='Y'||r[EQUI_I]==='Y'||r[RODE_I]==='Y'||r[BW_I]!=null);
+      const hasData=items.some(({r})=>r[PT_I]==='Y'||r[POLES_I]==='Y'||r[EQUI_I]==='Y'||r[RODE_I]==='Y'||r[BW_I]!=null||(toF(r[WALK_I])||0)>0||(toF(r[TROT_I])||0)>0||(toF(r[CANT_I])||0)>0||r[SW_I]==='Y'||r[LASER_I]==='Y');
       if(!hasData) return null;
       const willV=items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
       const stopsV=items.map(({r})=>stopsN(r[STOPS_I])).filter(v=>v!==null);
