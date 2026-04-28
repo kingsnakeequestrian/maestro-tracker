@@ -286,7 +286,7 @@ function updateThisWeekCard(valid){
 
   function getWeekData(weekOffset){
     const ws=new Date(sun); ws.setDate(sun.getDate()+weekOffset*7);
-    const we=new Date(ws); we.setDate(ws.getDate()+6);
+    const we=new Date(ws); we.setDate(ws.getDate()+6); we.setHours(23,59,59,999);
     const items=valid.filter(({d})=>d>=ws&&d<=we);
     if(!items.length) return null;
     const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
