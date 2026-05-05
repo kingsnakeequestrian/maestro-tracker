@@ -629,6 +629,12 @@ function buildGap(){
 
 // ── BUILD ALL ─────────────────────────────────────────────────────────
 function buildWillDist(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cWillDist')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
   const willCounts={1:0,2:0,3:0,4:0,5:0};
   valid.forEach(({r})=>{
     const w=parseFloat(r[11]);
@@ -652,6 +658,12 @@ function buildWillDist(valid){
 }
 
 function buildStopsDist(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cStopsDist')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
   const DATE_I=2,STOPS_I=15;
   const counts={None:0,Few:0,Many:0};
   valid.forEach(({r})=>{
@@ -678,6 +690,12 @@ function buildStopsDist(valid){
 }
 
 function buildWillMonth(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cWillMonth')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
   const months={};
   valid.forEach(({d,r})=>{
     const w=parseFloat(r[11]);
@@ -711,6 +729,12 @@ function buildWillMonth(valid){
 }
 
 function buildStopsMonth(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cStopsMonth')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
   const DATE_I=2,STOPS_I=15;
   const months={};
   valid.forEach(({d,r})=>{
