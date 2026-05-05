@@ -155,6 +155,30 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="note" id="gapNote"></div>
 </div>
 
+<div class="card">
+  <div class="card-title">Willingness distribution — all rides</div>
+  <div class="card-sub">Percentage of rides at each willingness level (1–5)</div>
+  <div class="cw h240"><canvas id="cWillDist"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Stops distribution — all rides</div>
+  <div class="card-sub">Percentage of rides by stop frequency (None / Few / Many)</div>
+  <div class="cw h240"><canvas id="cStopsDist"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Willingness by month</div>
+  <div class="card-sub">Percentage of rides at each willingness level per month</div>
+  <div class="cw" style="height:350px"><canvas id="cWillMonth"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Stops by month</div>
+  <div class="card-sub">Percentage of rides by stop frequency per month</div>
+  <div class="cw" style="height:350px"><canvas id="cStopsMonth"></canvas></div>
+</div>
+
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const LASER_START='2026-03-15';
@@ -277,6 +301,7 @@ function processRawRows(headers, rows){
   });
 
   updateThisWeekCard(valid);
+  D.valid=valid;
 }
 
 // ── THIS WEEK CARD ────────────────────────────────────────────────────
@@ -391,6 +416,7 @@ function updateThisWeekCard(valid){
 
 // ── HELPERS ───────────────────────────────────────────────────────────
 function D(){ return view==='weekly'?W:M; }
+D.valid=[];
 function L(d){
   const dt=new Date(d.period+'T12:00:00');
   return view==='weekly'?(dt.getMonth()+1)+'/'+dt.getDate():dt.toLocaleDateString('en-US',{month:'short',year:'2-digit'});
@@ -602,6 +628,124 @@ function buildGap(){
 }
 
 // ── BUILD ALL ─────────────────────────────────────────────────────────
+function buildWillDist(valid){
+  const willCounts={1:0,2:0,3:0,4:0,5:0};
+  valid.forEach(({r})=>{
+    const w=parseFloat(r[11]);
+    if(!isNaN(w)&&w>=1&&w<=5) willCounts[Math.round(w)]++;
+  });
+  const total=Object.values(willCounts).reduce((s,v)=>s+v,0);
+  if(!total) return;
+  const labels=['1 — Very unwilling','2 — Reluctant','3 — Neutral','4 — Willing','5 — Eager'];
+  const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
+  const colors=['#A32D2D','#D85A30','#B4A04A','#6B8F3A','#3B6D11'];
+  if(CH.willDist) CH.willDist.destroy();
+  CH.willDist=new Chart(document.getElementById('cWillDist'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+willCounts[ctx.dataIndex+1]+' rides)'}}
+      }
+    }
+  });
+}
+
+function buildStopsDist(valid){
+  const DATE_I=2,STOPS_I=15;
+  const counts={None:0,Few:0,Many:0};
+  valid.forEach(({r})=>{
+    const v=String(r[STOPS_I]||'').trim();
+    if(v.includes('None')) counts.None++;
+    else if(v.includes('Few')) counts.Few++;
+    else if(v.includes('Many')) counts.Many++;
+  });
+  const total=counts.None+counts.Few+counts.Many;
+  if(!total) return;
+  const labels=['None','Few','Many'];
+  const pcts=[Math.round(counts.None/total*100),Math.round(counts.Few/total*100),Math.round(counts.Many/total*100)];
+  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  if(CH.stopsDist) CH.stopsDist.destroy();
+  CH.stopsDist=new Chart(document.getElementById('cStopsDist'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+[counts.None,counts.Few,counts.Many][ctx.dataIndex]+' rides)'}}
+      }
+    }
+  });
+}
+
+function buildWillMonth(valid){
+  const months={};
+  valid.forEach(({d,r})=>{
+    const w=parseFloat(r[11]);
+    if(isNaN(w)||w<1||w>5) return;
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={1:0,2:0,3:0,4:0,5:0,total:0};
+    months[key][Math.round(w)]++;
+    months[key].total++;
+  });
+  const keys=Object.keys(months).sort();
+  const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+  const colors=['#A32D2D','#D85A30','#B4A04A','#6B8F3A','#3B6D11'];
+  const datasets=[1,2,3,4,5].map((lvl,i)=>({
+    label:'Will '+lvl,
+    data:keys.map(k=>Math.round(months[k][lvl]/months[k].total*100)),
+    backgroundColor:colors[i],
+    borderRadius:2,
+  }));
+  if(CH.willMonth) CH.willMonth.destroy();
+  CH.willMonth=new Chart(document.getElementById('cWillMonth'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+      },
+      scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+    }
+  });
+}
+
+function buildStopsMonth(valid){
+  const DATE_I=2,STOPS_I=15;
+  const months={};
+  valid.forEach(({d,r})=>{
+    const v=String(r[STOPS_I]||'').trim();
+    if(!v) return;
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={None:0,Few:0,Many:0,total:0};
+    if(v.includes('None')) months[key].None++;
+    else if(v.includes('Few')) months[key].Few++;
+    else if(v.includes('Many')) months[key].Many++;
+    months[key].total++;
+  });
+  const keys=Object.keys(months).sort();
+  const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  const datasets=['None','Few','Many'].map((cat,i)=>({
+    label:cat,
+    data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
+    backgroundColor:colors[i],
+    borderRadius:2,
+  }));
+  if(CH.stopsMonth) CH.stopsMonth.destroy();
+  CH.stopsMonth=new Chart(document.getElementById('cStopsMonth'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+      },
+      scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+    }
+  });
+}
+
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
@@ -614,6 +758,10 @@ function buildAll(){
   }
   buildTrend();
   buildGap();
+  buildWillDist(D.valid||[]);
+  buildStopsDist(D.valid||[]);
+  buildWillMonth(D.valid||[]);
+  buildStopsMonth(D.valid||[]);
 }
 
 function setView(v,btn){
