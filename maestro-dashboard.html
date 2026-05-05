@@ -644,7 +644,7 @@ function buildWillDist(valid){
   if(!total) return;
   const labels=['1 — Spontaneous halts, very reluctant','2 — Very reluctant, needs crop throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
   const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
-  const colors=['#A32D2D','#D85A30','#B4A04A','#6B8F3A','#3B6D11'];
+  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
   if(CH.willDist) CH.willDist.destroy();
   CH.willDist=new Chart(document.getElementById('cWillDist'),{
     type:'doughnut',
@@ -707,7 +707,7 @@ function buildWillMonth(valid){
   });
   const keys=Object.keys(months).sort();
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#A32D2D','#D85A30','#B4A04A','#6B8F3A','#3B6D11'];
+  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
   const datasets=[1,2,3,4,5].map((lvl,i)=>({
     label:'Will '+lvl,
     data:keys.map(k=>Math.round(months[k][lvl]/months[k].total*100)),
