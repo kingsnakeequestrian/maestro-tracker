@@ -724,7 +724,23 @@ function buildWillMonth(valid){
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
               y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
-    }
+    },
+    plugins:[{
+      id:'willTotals',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        const totals=keys.map(k=>months[k].total);
+        ctx.save();
+        ctx.font='500 10px DM Sans';
+        ctx.fillStyle='#6B6760';
+        ctx.textAlign='center';
+        totals.forEach((t,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText('n='+t,xPos,y.top-6);
+        });
+        ctx.restore();
+      }
+    }]
   });
 }
 
@@ -766,7 +782,23 @@ function buildStopsMonth(valid){
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
               y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
-    }
+    },
+    plugins:[{
+      id:'stopsTotals',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        const totals=keys.map(k=>months[k].total);
+        ctx.save();
+        ctx.font='500 10px DM Sans';
+        ctx.fillStyle='#6B6760';
+        ctx.textAlign='center';
+        totals.forEach((t,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText('n='+t,xPos,y.top-6);
+        });
+        ctx.restore();
+      }
+    }]
   });
 }
 
