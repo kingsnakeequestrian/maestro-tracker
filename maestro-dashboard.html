@@ -642,7 +642,7 @@ function buildWillDist(valid){
   });
   const total=Object.values(willCounts).reduce((s,v)=>s+v,0);
   if(!total) return;
-  const labels=['1 — Very unwilling','2 — Reluctant','3 — Neutral','4 — Willing','5 — Eager'];
+  const labels=['1 — Spontaneous halts, very reluctant','2 — Very reluctant, needs crop throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
   const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
   const colors=['#A32D2D','#D85A30','#B4A04A','#6B8F3A','#3B6D11'];
   if(CH.willDist) CH.willDist.destroy();
