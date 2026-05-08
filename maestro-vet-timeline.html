@@ -156,37 +156,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);pad
   <span class="leg"><span class="leg-dot" style="background:var(--vet)"></span>Lameness Eval</span>
 </div>
 
-<!-- UPCOMING ALERTS -->
-<div class="alerts">
-  <div class="alert-card">
-    <div class="alert-title">Next shockwave</div>
-    <div class="alert-main">~Apr 26, 2026</div>
-    <div class="alert-sub">30 days from Mar 26 · monthly cadence</div>
-    <span class="badge soon">Due in ~4 weeks</span>
+<!-- UPCOMING ALERTS - DYNAMIC -->
+<div class="alerts" id="dynamicAlerts">
+  <div style="font-size:13px;color:var(--muted)">Loading alerts...</div>
+</div>
+
+<!-- UPCOMING APPOINTMENTS -->
+<div style="margin-bottom:24px">
+  <div class="section-title" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span class="section-dot" style="background:var(--vet)"></span>
+    Upcoming appointments
   </div>
-  <div class="alert-card laser">
-    <div class="alert-title">Laser — this week</div>
-    <div class="alert-main">Session due</div>
-    <div class="alert-sub">Weekly Class C · last session Mar 20</div>
-    <span class="badge due">Schedule now</span>
+  <div id="upcomingAppts" style="display:grid;gap:8px">
+    <div style="font-size:13px;color:var(--muted)">No upcoming appointments scheduled. Add them in the field below.</div>
   </div>
-  <div class="alert-card inj">
-    <div class="alert-title">PRP re-eval window</div>
-    <div class="alert-main">May 6, 2026</div>
-    <div class="alert-sub">2 months from Mar 6 · decide on repeat</div>
-    <span class="badge soon">~5 weeks away</span>
-  </div>
-  <div class="alert-card inj" style="border-left-color:#5B8DB8">
-    <div class="alert-title">6-month injection review</div>
-    <div class="alert-main">Sep 6, 2026</div>
-    <div class="alert-sub">Right SI · stifle · QF — consider repeat</div>
-    <span class="badge on-track">Mark calendar now</span>
-  </div>
-  <div class="alert-card" style="border-left-color:#2E7D52">
-    <div class="alert-title">Next farrier</div>
-    <div class="alert-main">~Apr 28, 2026</div>
-    <div class="alert-sub">6 weeks from Mar 17 · schedule now</div>
-    <span class="badge soon">Due in ~4 weeks</span>
+  <div style="display:flex;gap:8px;margin-top:10px">
+    <input type="date" id="apptDate" style="font-family:'DM Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;font-family:'DM Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <button onclick="addAppt()" style="font-family:'DM Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
   </div>
 </div>
 
@@ -424,6 +411,7 @@ async function loadVetHistory(){
     console.log('[VetTimeline] Total rows:', rows.length, 'Dates:', rows.map(r=>r[0]));
     timeline.innerHTML = sorted.map(r => buildVisitCard(r)).join('');
     status.textContent = `${sorted.length} visits · Updated ${new Date().toLocaleTimeString()}`;
+    buildDynamicAlerts(rows);
   }catch(err){
     status.textContent = 'Failed to load: ' + err.message;
     timeline.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0">Could not reach Apps Script endpoint.</div>';
@@ -432,7 +420,149 @@ async function loadVetHistory(){
   }
 }
 
-window.addEventListener('load', ()=>{ loadVetHistory(); });
+function buildDynamicAlerts(rows){
+  const today=new Date();
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const daysUntil=d=>Math.round((d-today)/(86400000));
+
+  // Find last occurrence of each type
+  let lastSW=null, lastFarrier=null, lastLaser=null, lastPRP=null, lastInj=null;
+
+  rows.forEach(r=>{
+    const d=new Date(r[0]);
+    if(isNaN(d)) return;
+    const procs=String(r[4]||'').toLowerCase();
+    const vtype=String(r[3]||'').toLowerCase();
+    const injSite=String(r[14]||'').toLowerCase();
+
+    if(procs.includes('shockwave') && (!lastSW || d>lastSW)) lastSW=d;
+    if(procs.includes('laser') && (!lastLaser || d>lastLaser)) lastLaser=d;
+    if(vtype.includes('farrier') || procs.includes('farrier')){if(!lastFarrier || d>lastFarrier) lastFarrier=d;}
+    if(procs.includes('prp') || injSite.includes('prp')){if(!lastPRP || d>lastPRP) lastPRP=d;}
+    if(procs.includes('injection')){if(!lastInj || d>lastInj) lastInj=d;}
+  });
+
+  // Also check daily sheet for farrier/shockwave/laser
+  // We'll fetch daily sheet too
+  const url=getScriptUrl();
+  if(url){
+    fetch(url+'?action=read&sheet=daily').then(r=>r.json()).then(json=>{
+      if(!json.success) return;
+      json.data.rows.forEach(r=>{
+        const d=new Date(r[2]); // date column in daily
+        if(isNaN(d)) return;
+        if(r[27]==='Y' && (!lastSW || d>lastSW)) lastSW=d;  // shockwave col
+        if(r[26]==='Y' && (!lastLaser || d>lastLaser)) lastLaser=d; // laser col
+        if(r[28]==='Y' && (!lastFarrier || d>lastFarrier)) lastFarrier=d; // farrier col
+      });
+      renderAlerts();
+    }).catch(()=>renderAlerts());
+  } else {
+    renderAlerts();
+  }
+
+  function badgeFor(days){
+    if(days<0) return '<span class="badge due">Overdue by '+Math.abs(days)+' days</span>';
+    if(days<=7) return '<span class="badge due">Due this week</span>';
+    if(days<=21) return '<span class="badge soon">Due in ~'+Math.round(days/7)+' weeks</span>';
+    return '<span class="badge on-track">'+Math.round(days/7)+' weeks away</span>';
+  }
+
+  function renderAlerts(){
+    const cards=[];
+
+    // Shockwave — monthly cadence
+    if(lastSW){
+      const next=new Date(lastSW); next.setDate(next.getDate()+30);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card"><div class="alert-title">Next shockwave</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">30 days from '+fmt(lastSW)+' · monthly cadence</div>'+badgeFor(days)+'</div>');
+    }
+
+    // Laser — weekly cadence
+    if(lastLaser){
+      const next=new Date(lastLaser); next.setDate(next.getDate()+7);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card laser"><div class="alert-title">Laser — weekly</div><div class="alert-main">Next due ~'+fmt(next)+'</div><div class="alert-sub">Weekly Class C · last '+fmt(lastLaser)+'</div>'+badgeFor(days)+'</div>');
+    }
+
+    // Farrier — 6 week cadence
+    if(lastFarrier){
+      const next=new Date(lastFarrier); next.setDate(next.getDate()+42);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card" style="border-left-color:#2E7D52"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">6 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
+    }
+
+    // PRP re-eval — 2 months from last PRP
+    if(lastPRP){
+      const next=new Date(lastPRP); next.setMonth(next.getMonth()+2);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card inj"><div class="alert-title">PRP re-eval window</div><div class="alert-main">'+fmt(next)+'</div><div class="alert-sub">2 months from '+fmt(lastPRP)+'</div>'+badgeFor(days)+'</div>');
+    }
+
+    // 6-month injection review — from last injection
+    if(lastInj){
+      const next=new Date(lastInj); next.setMonth(next.getMonth()+6);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card inj" style="border-left-color:#5B8DB8"><div class="alert-title">6-month injection review</div><div class="alert-main">'+fmt(next)+'</div><div class="alert-sub">6 months from last injection '+fmt(lastInj)+'</div>'+badgeFor(days)+'</div>');
+    }
+
+    const el=document.getElementById('dynamicAlerts');
+    if(el) el.innerHTML=cards.length?cards.join(''):'<div style="font-size:13px;color:var(--muted)">No alerts — no vet data found.</div>';
+  }
+}
+
+// ── UPCOMING APPOINTMENTS (localStorage) ─────────────────────────────
+function getAppts(){
+  try{return JSON.parse(localStorage.getItem('m_appts')||'[]');}catch{return [];}
+}
+function saveAppts(list){localStorage.setItem('m_appts',JSON.stringify(list));}
+
+function addAppt(){
+  const dateEl=document.getElementById('apptDate');
+  const descEl=document.getElementById('apptDesc');
+  if(!dateEl.value||!descEl.value) return;
+  const list=getAppts();
+  list.push({date:dateEl.value,desc:descEl.value});
+  list.sort((a,b)=>a.date.localeCompare(b.date));
+  saveAppts(list);
+  dateEl.value='';
+  descEl.value='';
+  renderAppts();
+}
+
+function removeAppt(i){
+  const list=getAppts();
+  list.splice(i,1);
+  saveAppts(list);
+  renderAppts();
+}
+
+function renderAppts(){
+  const list=getAppts();
+  const el=document.getElementById('upcomingAppts');
+  if(!el) return;
+  if(!list.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--muted)">No upcoming appointments scheduled.</div>';
+    return;
+  }
+  const today=new Date();
+  el.innerHTML=list.map((a,i)=>{
+    const d=new Date(a.date+'T12:00:00');
+    const days=Math.round((d-today)/86400000);
+    const past=days<0;
+    const fmt=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center'+(past?';opacity:0.5':'')+'">'
+      +'<div><div style="font-size:13px;font-weight:500">'+a.desc+'</div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+fmt+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
+      +'<button onclick="removeAppt('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
+window.addEventListener('load', ()=>{
+  loadVetHistory();
+  renderAppts();
+});
 </script>
 </body>
 </html>
