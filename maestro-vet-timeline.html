@@ -282,7 +282,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);pad
     <div class="future-item">
       <div class="future-item-type" style="color:var(--bw)">Farrier</div>
       <div class="future-item-date">~Apr 28</div>
-      <div class="future-item-sub">6 weeks from Mar 17</div>
+      <div class="future-item-sub">5 weeks from Mar 17</div>
     </div>
     <div class="future-item">
       <div class="future-item-type" style="color:var(--vet)">Left trochanter</div>
@@ -426,7 +426,7 @@ function buildDynamicAlerts(rows){
   const daysUntil=d=>Math.round((d-today)/(86400000));
 
   // Find last occurrence of each type
-  let lastSW=null, lastFarrier=null, lastLaser=null, lastPRP=null, lastInj=null;
+  let lastSW=null, lastFarrier=null, lastLaser=null, lastInj=null;
 
   rows.forEach(r=>{
     const d=new Date(r[0]);
@@ -438,7 +438,6 @@ function buildDynamicAlerts(rows){
     if(procs.includes('shockwave') && (!lastSW || d>lastSW)) lastSW=d;
     if(procs.includes('laser') && (!lastLaser || d>lastLaser)) lastLaser=d;
     if(vtype.includes('farrier') || procs.includes('farrier')){if(!lastFarrier || d>lastFarrier) lastFarrier=d;}
-    if(procs.includes('prp') || injSite.includes('prp')){if(!lastPRP || d>lastPRP) lastPRP=d;}
     if(procs.includes('injection')){if(!lastInj || d>lastInj) lastInj=d;}
   });
 
@@ -487,17 +486,12 @@ function buildDynamicAlerts(rows){
 
     // Farrier — 6 week cadence
     if(lastFarrier){
-      const next=new Date(lastFarrier); next.setDate(next.getDate()+42);
+      const next=new Date(lastFarrier); next.setDate(next.getDate()+35);
       const days=daysUntil(next);
-      cards.push('<div class="alert-card" style="border-left-color:#2E7D52"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">6 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
+      cards.push('<div class="alert-card" style="border-left-color:#2E7D52"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">5 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
     }
 
-    // PRP re-eval — 2 months from last PRP
-    if(lastPRP){
-      const next=new Date(lastPRP); next.setMonth(next.getMonth()+2);
-      const days=daysUntil(next);
-      cards.push('<div class="alert-card inj"><div class="alert-title">PRP re-eval window</div><div class="alert-main">'+fmt(next)+'</div><div class="alert-sub">2 months from '+fmt(lastPRP)+'</div>'+badgeFor(days)+'</div>');
-    }
+
 
     // 6-month injection review — from last injection
     if(lastInj){
