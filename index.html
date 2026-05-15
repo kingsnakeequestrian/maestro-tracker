@@ -1580,23 +1580,34 @@ function checkReminders() {
   const in7 = new Date(today); in7.setDate(in7.getDate()+7);
   const items = [];
 
-  getVetEntries().forEach(e => {
+  getVetEntries().forEach((e, idx) => {
     if (!e.followupDate) return;
     const d = new Date(e.followupDate + 'T12:00:00');
     if (d <= in7) {
       const overdue = d < today;
       const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      items.push({ text: label + ' — ' + (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : ''), overdue });
+      items.push({ text: label + ' — ' + (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : ''), overdue, entryIdx: idx, followupDate: e.followupDate });
     }
   });
 
   const banner = document.getElementById('reminderBanner');
   const list   = document.getElementById('reminderList');
   if (items.length) {
-    list.innerHTML = items.map(i => `<div class="reminder-item${i.overdue?' reminder-overdue':''}">${i.overdue?'⚠ OVERDUE: ':''}${i.text}</div>`).join('');
+    list.innerHTML = items.map((i,idx) => `<div class="reminder-item${i.overdue?' reminder-overdue':''}" style="display:flex;justify-content:space-between;align-items:center">${i.overdue?'⚠ OVERDUE: ':''}${i.text}<button onclick="dismissReminder('${i.entryIdx}','${i.followupDate}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:8px" title="Dismiss">✕</button></div>`).join('');
     banner.classList.add('show');
   } else {
     banner.classList.remove('show');
+  }
+}
+
+function dismissReminder(entryIdx, followupDate) {
+  const entries = getVetEntries();
+  const i = parseInt(entryIdx);
+  if (entries[i] && entries[i].followupDate === followupDate) {
+    entries[i].followupDate = '';
+    entries[i].followupNotes = '';
+    localStorage.setItem('m_vet', JSON.stringify(entries));
+    checkReminders();
   }
 }
 
