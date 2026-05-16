@@ -91,7 +91,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link active">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork Dashboard</a></div>
 </nav>
 <h1>Maestro — Progress Dashboard</h1>
-<p class="sub">Post-rehab tracking · Nov 20, 2025 – Mar 28, 2026 · 129 days</p>
+<p class="sub" id="trackingRange">Post-rehab tracking · loading...</p>
 
 
 <div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11"></div>
@@ -302,6 +302,14 @@ function processRawRows(headers, rows){
 
   updateThisWeekCard(valid);
   D.valid=valid;
+  // Update header date range
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const days=Math.round((dates[dates.length-1]-dates[0])/86400000);
+    const el=document.getElementById('trackingRange');
+    if(el) el.textContent='Post-rehab tracking · '+fmt(dates[0])+' – '+fmt(dates[dates.length-1])+' · '+days+' days';
+  }
 }
 
 // ── THIS WEEK CARD ────────────────────────────────────────────────────
