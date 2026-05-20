@@ -179,6 +179,12 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="cw" style="height:350px"><canvas id="cStopsMonth"></canvas></div>
 </div>
 
+<div class="card">
+  <div class="card-title">Gait level by month</div>
+  <div class="card-sub">Percentage of rides at each gait level per month</div>
+  <div class="cw" style="height:350px"><canvas id="cGaitMonth"></canvas></div>
+</div>
+
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const LASER_START='2026-03-15';
@@ -810,6 +816,69 @@ function buildStopsMonth(valid){
   });
 }
 
+function buildGaitMonth(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cGaitMonth')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
+  const RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9;
+  function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+  const months={};
+  valid.forEach(({d,r})=>{
+    if(r[RODE_I]!=='Y') return;
+    const w=(toF(r[WALK_I])||0)>0;
+    const t=(toF(r[TROT_I])||0)>0;
+    const c=(toF(r[CANT_I])||0)>0;
+    let level='Walk only';
+    if(c) level='W/T/C';
+    else if(t) level='W/T';
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={'Walk only':0,'W/T':0,'W/T/C':0,total:0};
+    months[key][level]++;
+    months[key].total++;
+  });
+  const keys=Object.keys(months).sort();
+  if(!keys.length) return;
+  const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+  const colors=['#6B8F3A','#185FA5','#534AB7'];
+  const datasets=['Walk only','W/T','W/T/C'].map((cat,i)=>({
+    label:cat,
+    data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
+    backgroundColor:colors[i],
+    borderRadius:2,
+  }));
+  if(CH.gaitMonth) CH.gaitMonth.destroy();
+  CH.gaitMonth=new Chart(document.getElementById('cGaitMonth'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+      },
+      scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+    },
+    plugins:[{
+      id:'gaitTotals',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        const totals=keys.map(k=>months[k].total);
+        ctx.save();
+        ctx.font='500 10px DM Sans';
+        ctx.fillStyle='#6B6760';
+        ctx.textAlign='center';
+        totals.forEach((t,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText('n='+t,xPos,y.top-6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
@@ -826,6 +895,7 @@ function buildAll(){
   buildStopsDist(D.valid||[]);
   buildWillMonth(D.valid||[]);
   buildStopsMonth(D.valid||[]);
+  buildGaitMonth(D.valid||[]);
 }
 
 function setView(v,btn){
