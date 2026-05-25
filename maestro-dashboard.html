@@ -96,6 +96,11 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 
 <div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11"></div>
 
+<div class="card" id="rehabGoals" style="margin-bottom:24px;border-left:3px solid #534AB7">
+  <div class="card-title">Rehab milestones</div>
+  <div id="rehabGoalsContent" style="font-size:13px;color:var(--muted)">Loading...</div>
+</div>
+
 <div class="toggle-row" style="justify-content:space-between;align-items:center">
   <div style="display:flex;gap:8px">
     <button class="tbtn on" onclick="setView('weekly',this)">Weekly</button>
@@ -879,6 +884,61 @@ function buildGaitMonth(valid){
   });
 }
 
+function buildRehabGoals(valid){
+  const el=document.getElementById('rehabGoalsContent');
+  if(!el||!valid.length) return;
+
+  const WILL_I=11, RODE_I=5;
+  const today=new Date();
+  const thirtyAgo=new Date(today); thirtyAgo.setDate(today.getDate()-30);
+
+  // Sort by date
+  const sorted=[...valid].sort((a,b)=>a.d-b.d);
+
+  // Find last spontaneous halt (willingness = 1)
+  const halts=sorted.filter(({r})=>parseFloat(r[WILL_I])===1);
+  const lastHalt=halts.length?halts[halts.length-1]:null;
+  const daysSinceHalt=lastHalt?Math.round((today-lastHalt.d)/86400000):null;
+
+  // Last 30 days rides
+  const last30=sorted.filter(({d,r})=>d>=thirtyAgo&&r[RODE_I]==='Y');
+  const last30Will=last30.map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+  const fives=last30Will.filter(v=>v===5).length;
+  const fours=last30Will.filter(v=>v===4).length;
+  const pct5=last30Will.length?Math.round(fives/last30Will.length*100):0;
+  const pct45=last30Will.length?Math.round((fives+fours)/last30Will.length*100):0;
+
+  // Goal 1: 30 days no spontaneous halts
+  const haltGoalMet=daysSinceHalt!==null&&daysSinceHalt>=30;
+  const haltProgress=daysSinceHalt!==null?Math.min(daysSinceHalt/30*100,100):100;
+
+  // Goal 2: 90%+ rides at 5/5 in last 30 days
+  const willGoalMet=pct5>=90;
+  const willProgress=Math.min(pct5/90*100,100);
+
+  function progressBar(pct,met){
+    return `<div style="height:8px;background:var(--border);border-radius:4px;margin:6px 0 4px;overflow:hidden">
+      <div style="height:100%;width:${Math.round(pct)}%;background:${met?'#3B6D11':'#534AB7'};border-radius:4px;transition:width 0.3s"></div>
+    </div>`;
+  }
+
+  el.innerHTML=`
+    <div style="display:grid;gap:16px;grid-template-columns:1fr 1fr">
+      <div>
+        <div style="font-weight:500;color:var(--text);margin-bottom:4px">${haltGoalMet?'✓':'○'} Days since last spontaneous halt</div>
+        <div style="font-size:28px;font-weight:500;color:${haltGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${daysSinceHalt!==null?daysSinceHalt:'—'}</div>
+        ${progressBar(haltProgress,haltGoalMet)}
+        <div style="font-size:11px;color:var(--muted)">Goal: 30 days${haltGoalMet?' — achieved':''}${lastHalt?' · Last halt: '+lastHalt.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):' · No halts recorded'}</div>
+      </div>
+      <div>
+        <div style="font-weight:500;color:var(--text);margin-bottom:4px">${willGoalMet?'✓':'○'} Rides at 5/5 (last 30 days)</div>
+        <div style="font-size:28px;font-weight:500;color:${willGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${pct5}%</div>
+        ${progressBar(willProgress,willGoalMet)}
+        <div style="font-size:11px;color:var(--muted)">Goal: 90%+ · ${fives}/${last30Will.length} rides at 5/5 · ${pct45}% at 4+ · Last 30 days</div>
+      </div>
+    </div>`;
+}
+
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
@@ -891,6 +951,7 @@ function buildAll(){
   }
   buildTrend();
   buildGap();
+  buildRehabGoals(D.valid||[]);
   buildWillDist(D.valid||[]);
   buildStopsDist(D.valid||[]);
   buildWillMonth(D.valid||[]);
