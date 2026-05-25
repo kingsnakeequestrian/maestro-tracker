@@ -395,6 +395,13 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <button class="chip" onclick="oneChip(this,'stops')">Many (4+)</button>
       </div>
     </div>
+    <div class="field">
+      <label>Specific behaviors</label>
+      <div class="chip-group">
+        <button class="chip" data-f="spontaneousHalt" onclick="togChip(this)">Spontaneous halt</button>
+        <button class="chip" data-f="stickyResistant" onclick="togChip(this)">Sticky / resistant</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -921,7 +928,7 @@ let S = {
   rode:'', saddleType:'', walkMin:'', trotMin:'', canterMin:'',
   gait:'', will:'', crop:'',
   cranky:'', trigger:[],
-  stops:'',
+  stops:'', spontaneousHalt:'', stickyResistant:'',
   cL:'', cR:'', equibands:'', lungeBeforeRide:'',
   siReactive:'', siSide:'', siSeverity:'',
   bodywork:'', modalities:[],
@@ -1023,6 +1030,12 @@ function setScore(btn, key, hintId, hints) {
   btn.classList.add('sel');
   S[key] = v;
   document.getElementById(hintId).textContent = hints[parseInt(v)] || '';
+}
+
+function togChip(btn) {
+  btn.classList.toggle('sel');
+  const f = btn.dataset.f;
+  if(f) S[f] = btn.classList.contains('sel') ? 'Y' : '';
 }
 
 function oneChip(btn, key) {
@@ -1154,7 +1167,9 @@ async function pushToSheets(entry) {
       driveLinks ? 'Media: ' + driveLinks : ''
     ].filter(Boolean).join(' | '),
     entry.modalities?.includes('straddlepoles') ? 'Y' : '',
-    entry.modalities?.includes('treadmill')     ? 'Y' : ''
+    entry.modalities?.includes('treadmill')     ? 'Y' : '',
+    entry.spontaneousHalt || '',
+    entry.stickyResistant || ''
   ];
   try {
     const params = new URLSearchParams();
