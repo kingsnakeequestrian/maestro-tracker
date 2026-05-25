@@ -909,6 +909,15 @@ function buildRehabGoals(valid){
   const pct5=last30Will.length?Math.round(fives/last30Will.length*100):0;
   const pct45=last30Will.length?Math.round((fives+fours)/last30Will.length*100):0;
 
+  // Sticky/resistant tracking (column AJ = index 35)
+  const STICKY_I=35;
+  const last30Rides=last30.length;
+  const stickyRides=last30.filter(({r})=>r[STICKY_I]==='Y');
+  const stickyCount=stickyRides.length;
+  const stickyPct=last30Rides?Math.round(stickyCount/last30Rides*100):0;
+  const allSticky=sorted.filter(({r})=>r[STICKY_I]==='Y');
+  const lastSticky=allSticky.length?allSticky[allSticky.length-1]:null;
+
   // Goal 1: 30 days no spontaneous halts
   const haltGoalMet=daysSinceHalt!==null&&daysSinceHalt>=30;
   const haltProgress=daysSinceHalt!==null?Math.min(daysSinceHalt/30*100,100):100;
@@ -937,6 +946,15 @@ function buildRehabGoals(valid){
         ${progressBar(willProgress,willGoalMet)}
         <div style="font-size:11px;color:var(--muted)">Goal: 90%+ · ${fives}/${last30Will.length} rides at 5/5 · ${pct45}% at 4+ · Last 30 days</div>
       </div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} Rides without reluctance (last 30 days)</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
+        <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had sticky/resistant behavior</span>
+      </div>
+      ${progressBar(100-stickyPct,stickyPct===0)}
+      <div style="font-size:11px;color:var(--muted)">${lastSticky?'Last sticky ride: '+lastSticky.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No sticky rides recorded'} · Last 30 days</div>
     </div>`;
 }
 
