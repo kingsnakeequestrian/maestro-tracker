@@ -32,6 +32,18 @@
   .side-seg-b { background:#B4B2A9; }
   .side-seg-l { background:#185FA5; }
   .side-counts { font-size:10px; display:flex; gap:6px; margin-top:2px; }
+  .notes-section { margin-top:32px; }
+  .notes-title { font-family:'Libre Baskerville',serif; font-size:17px; margin-bottom:14px; color:#1C1A16; }
+  .note-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; }
+  .note-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .note-date { font-family:'DM Mono',monospace; font-size:12px; color:#6B6760; }
+  .note-tone { font-size:11px; font-weight:500; padding:2px 8px; border-radius:12px; }
+  .note-tone.good { background:#EAF3DE; color:#2A5020; }
+  .note-tone.mixed { background:#FDF3E3; color:#5C3308; }
+  .note-tone.concern { background:#FEF0EC; color:#6B1A08; }
+  .note-obs { font-size:13px; color:#5A4A3A; line-height:1.5; margin-bottom:8px; font-style:italic; }
+  .note-edit { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:#1C1A16; resize:vertical; min-height:60px; line-height:1.5; }
+  .note-edit:focus { outline:none; border-color:#3B5E35; }
   .sc-r { color:#993C1D; }
   .sc-b { color:#5F5E5A; }
   .sc-l { color:#185FA5; }
@@ -204,6 +216,12 @@
   </div>
   <div class="note">Right-side dominance noted in 13 of 32 sessions. Low back / glutes present in 21 of 32 sessions and has never fully cleared. Aug 2024 showed significant left-side restriction (neck, shoulder, triceps, glutes) consistent with compensation pattern pre-diagnosis.</div>
 </div>
+<div class="notes-section">
+  <div class="notes-title">Recent session notes</div>
+  <div id="sessionNotes"></div>
+</div>
+
+
 
 <script>
 const S=[
@@ -360,6 +378,38 @@ new Chart(document.getElementById('tlChart'),{
 });
 applyHeat();
 buildKey();
+
+// ── SESSION NOTES ────────────────────────────────────────────────────
+function getSessionNotes(){
+  try{return JSON.parse(localStorage.getItem('m_bw_notes')||'{}');}catch{return {};}
+}
+function saveSessionNote(date,text){
+  const notes=getSessionNotes();
+  notes[date]=text;
+  localStorage.setItem('m_bw_notes',JSON.stringify(notes));
+}
+function renderSessionNotes(){
+  const el=document.getElementById('sessionNotes');
+  if(!el) return;
+  const notes=getSessionNotes();
+  const recent=S.slice(-6).reverse();
+  el.innerHTML=recent.map(s=>{
+    const toneClass=s.o==='good'?'good':s.o==='mixed'?'mixed':'concern';
+    const toneLabel=s.o==='good'?'Positive':s.o==='mixed'?'Mixed':'Concern';
+    const areas=s.a.map(a=>a.replace('glutes_med','glutes med').replace('glutes_sup','glutes sup')).join(', ');
+    const saved=notes[s.d]||'';
+    return '<div class="note-card">'
+      +'<div class="note-header">'
+      +'<span class="note-date">'+s.d+' · PEMF '+s.p+'</span>'
+      +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span>'
+      +'</div>'
+      +'<div class="note-obs">Areas: '+areas+'</div>'
+      +'<textarea class="note-edit" placeholder="Add your notes from this session..." onchange="saveSessionNote(\''+s.d+'\',this.value)">'+saved+'</textarea>'
+      +'</div>';
+  }).join('');
+}
+renderSessionNotes();
+
 </script>
 </body>
 </html>
