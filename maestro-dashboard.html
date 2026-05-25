@@ -895,8 +895,9 @@ function buildRehabGoals(valid){
   // Sort by date
   const sorted=[...valid].sort((a,b)=>a.d-b.d);
 
-  // Find last spontaneous halt (willingness = 1)
-  const halts=sorted.filter(({r})=>parseFloat(r[WILL_I])===1);
+  // Find last spontaneous halt (column AI = index 34)
+  const HALT_I=34;
+  const halts=sorted.filter(({r})=>r[HALT_I]==='Y');
   const lastHalt=halts.length?halts[halts.length-1]:null;
   const daysSinceHalt=lastHalt?Math.round((today-lastHalt.d)/86400000):null;
 
