@@ -909,6 +909,24 @@ function buildRehabGoals(valid){
   const pct5=last30Will.length?Math.round(fives/last30Will.length*100):0;
   const pct45=last30Will.length?Math.round((fives+fours)/last30Will.length*100):0;
 
+  // Gait level breakdown (last 30 days)
+  const WALK_I=7, TROT_I=8, CANT_I_G=9;
+  function toFG(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+  const last30Ridden=last30.filter(({r})=>r[RODE_I]==='Y');
+  let gaitWOn=0, gaitWTn=0, gaitWTCn=0;
+  last30Ridden.forEach(({r})=>{
+    const w=(toFG(r[WALK_I])||0)>0;
+    const t=(toFG(r[TROT_I])||0)>0;
+    const c=(toFG(r[CANT_I_G])||0)>0;
+    if(c) gaitWTCn++;
+    else if(t) gaitWTn++;
+    else gaitWOn++;
+  });
+  const gaitTotal=last30Ridden.length||1;
+  const gaitWO=Math.round(gaitWOn/gaitTotal*100);
+  const gaitWT=Math.round(gaitWTn/gaitTotal*100);
+  const gaitWTC=Math.round(gaitWTCn/gaitTotal*100);
+
   // Sticky/resistant tracking (column AJ = index 35)
   const STICKY_I=35;
   const last30Rides=last30.length;
@@ -955,6 +973,19 @@ function buildRehabGoals(valid){
       </div>
       ${progressBar(100-stickyPct,stickyPct===0)}
       <div style="font-size:11px;color:var(--muted)">${lastSticky?'Last sticky ride: '+lastSticky.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No sticky rides recorded'} · Last 30 days</div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-weight:500;color:var(--text);margin-bottom:8px">Gait level (last 30 days)</div>
+      <div style="display:flex;height:14px;border-radius:6px;overflow:hidden;gap:1px;margin-bottom:6px">
+        ${gaitWO?'<div style="flex:'+gaitWO+';background:#6B8F3A" title="Walk only: '+gaitWO+'%"></div>':''}
+        ${gaitWT?'<div style="flex:'+gaitWT+';background:#185FA5" title="W/T: '+gaitWT+'%"></div>':''}
+        ${gaitWTC?'<div style="flex:'+gaitWTC+';background:#534AB7" title="W/T/C: '+gaitWTC+'%"></div>':''}
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--muted)">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6B8F3A;margin-right:4px;vertical-align:middle"></span>Walk only ${gaitWO}% (${gaitWOn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#185FA5;margin-right:4px;vertical-align:middle"></span>W/T ${gaitWT}% (${gaitWTn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#534AB7;margin-right:4px;vertical-align:middle"></span>W/T/C ${gaitWTC}% (${gaitWTCn})</span>
+      </div>
     </div>`;
 }
 
