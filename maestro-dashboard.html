@@ -265,7 +265,7 @@ function processRawRows(headers, rows){
 
   const START=new Date('2025-11-20');
   const valid=rows.map(r=>({d:parseDate(r[DATE_I]),r}))
-    .filter(({d})=>d&&d>=START)
+    .filter(({d,r})=>d&&d>=START&&r.slice(3).some(v=>v!==null&&v!==undefined&&String(v).trim()!==''))
     .sort((a,b)=>a.d-b.d);
 
   const wMap={},mMap={};
@@ -929,14 +929,15 @@ function buildRehabGoals(valid){
   const gaitWT=Math.round(gaitWTn/gaitTotal*100);
   const gaitWTC=Math.round(gaitWTCn/gaitTotal*100);
 
-  // Sticky/resistant tracking (column AJ = index 35)
-  const STICKY_I=35;
-  const last30Rides=last30.length;
-  const stickyRides=last30.filter(({r})=>r[STICKY_I]==='Y');
-  const stickyCount=stickyRides.length;
+  // Clean rides tracking — no spontaneous halt (34), no sticky/resistant (35), stops = None (15)
+  const HALT_COL=34, STICKY_I=35, STOPS_COL=15;
+  const last30Rodes=last30.filter(({r})=>r[RODE_I]==='Y');
+  const last30Rides=last30Rodes.length;
+  const reluctantRides=last30Rodes.filter(({r})=>r[HALT_COL]==='Y'||r[STICKY_I]==='Y'||!(String(r[STOPS_COL]||'').includes('None')));
+  const stickyCount=reluctantRides.length;
   const stickyPct=last30Rides?Math.round(stickyCount/last30Rides*100):0;
-  const allSticky=sorted.filter(({r})=>r[STICKY_I]==='Y');
-  const lastSticky=allSticky.length?allSticky[allSticky.length-1]:null;
+  const allReluctant=sorted.filter(({r})=>r[RODE_I]==='Y'&&(r[HALT_COL]==='Y'||r[STICKY_I]==='Y'||!(String(r[STOPS_COL]||'').includes('None'))));
+  const lastSticky=allReluctant.length?allReluctant[allReluctant.length-1]:null;
 
   // Goal 1: 30 days no spontaneous halts
   const haltGoalMet=daysSinceHalt!==null&&daysSinceHalt>=30;
@@ -968,13 +969,13 @@ function buildRehabGoals(valid){
       </div>
     </div>
     <div style="margin-top:16px">
-      <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} Rides without reluctance (last 30 days)</div>
+      <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} Clean rides — no halts, no stickiness, no stops (last 30 days)</div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
-        <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had sticky/resistant behavior</span>
+        <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had reluctance (halt, sticky, or stops)</span>
       </div>
       ${progressBar(100-stickyPct,stickyPct===0)}
-      <div style="font-size:11px;color:var(--muted)">${lastSticky?'Last sticky ride: '+lastSticky.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No sticky rides recorded'} · Last 30 days</div>
+      <div style="font-size:11px;color:var(--muted)">${lastSticky?'Last reluctant ride: '+lastSticky.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No reluctant rides recorded'} · Last 30 days</div>
     </div>
     <div style="margin-top:16px">
       <div style="font-weight:500;color:var(--text);margin-bottom:8px">Gait level (last 30 days)</div>
@@ -1064,17 +1065,17 @@ function buildInterventionAnalysis(valid){
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Shockwave sessions</div>
-        <div style="font-size:24px;font-weight:500">\${swDates.length}</div>
+        <div style="font-size:24px;font-weight:500">${swDates.length}</div>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Avg willingness change</div>
-        <div style="font-size:24px;font-weight:500">\${willDelta!==null?arrow(willDelta):'—'}</div>
-        <div style="font-size:11px;color:var(--muted)">\${avgPreWill||'—'} before → \${avgPostWill||'—'} after</div>
+        <div style="font-size:24px;font-weight:500">${willDelta!==null?arrow(willDelta):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${avgPreWill||'—'} before → ${avgPostWill||'—'} after</div>
       </div>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Rides w/ no stops change</div>
-        <div style="font-size:24px;font-weight:500">\${preStopsAvg!==null&&postStopsAvg!==null?arrow(postStopsAvg-preStopsAvg)+'%':'—'}</div>
-        <div style="font-size:11px;color:var(--muted)">\${preStopsAvg!==null?preStopsAvg+'%':'—'} before → \${postStopsAvg!==null?postStopsAvg+'%':'—'} after</div>
+        <div style="font-size:24px;font-weight:500">${preStopsAvg!==null&&postStopsAvg!==null?arrow(postStopsAvg-preStopsAvg)+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${preStopsAvg!==null?preStopsAvg+'%':'—'} before → ${postStopsAvg!==null?postStopsAvg+'%':'—'} after</div>
       </div>
     </div>`;
 
@@ -1116,7 +1117,7 @@ function buildInterventionAnalysis(valid){
         </tr>
       </thead>
       <tbody>
-        \${windows.map(w=>{
+        ${windows.map(w=>{
           const d=w.postWill!==null&&w.preWill!==null?(w.postWill-w.preWill).toFixed(1):null;
           return '<tr style="border-top:1px solid var(--border)">'
             +'<td style="padding:4px 8px;font-weight:500">'+w.label+'</td>'
