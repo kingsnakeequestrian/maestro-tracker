@@ -969,7 +969,7 @@ function buildRehabGoals(valid){
       </div>
     </div>
     <div style="margin-top:16px">
-      <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} Clean rides — no halts, no stickiness, no stops (last 30 days)</div>
+      <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} No reluctance or stops (last 30 days)</div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
         <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had reluctance (halt, sticky, or stops)</span>
@@ -1130,6 +1130,33 @@ function buildInterventionAnalysis(valid){
         }).join('')}
       </tbody>
     </table>`;
+
+  // Clinical significance note
+  const sig=document.createElement('div');
+  sig.style.cssText='font-size:12px;line-height:1.7;color:#5A4A3A;margin-top:16px;padding:12px 16px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30';
+  const validWindows=windows.filter(w=>w.preWill!==null&&w.postWill!==null);
+  const improved=validWindows.filter(w=>w.postWill>w.preWill).length;
+  const declined=validWindows.filter(w=>w.postWill<w.preWill).length;
+  const unchanged=validWindows.filter(w=>w.postWill===w.preWill).length;
+  const delta=willDelta?parseFloat(willDelta):0;
+  let interpretation='';
+  if(validWindows.length<3){
+    interpretation='<strong>Insufficient data.</strong> Fewer than 3 shockwave sessions with before/after ride data. More sessions needed to identify a reliable pattern.';
+  } else if(delta>=0.5&&improved>=validWindows.length*0.6){
+    interpretation='<strong>Clinically meaningful positive association.</strong> Willingness improved by an average of '+Math.abs(delta).toFixed(1)+' points post-shockwave, with improvement observed in '+improved+' of '+validWindows.length+' sessions. This suggests shockwave is contributing to measurable ride quality gains. Consider maintaining current cadence.';
+  } else if(delta>0&&delta<0.5){
+    interpretation='<strong>Mild positive trend, not clinically significant.</strong> Average improvement of '+Math.abs(delta).toFixed(1)+' points is within normal day-to-day variation. Shockwave may be contributing but the effect size is small relative to other variables (barn move, warm-up protocol, injections). '+improved+' of '+validWindows.length+' sessions showed improvement.';
+  } else if(delta<=0){
+    interpretation='<strong>No measurable benefit detected.</strong> Average willingness did not improve post-shockwave (delta: '+delta.toFixed(1)+'). This does not mean shockwave is ineffective — the benefit may be in pain management rather than behavioral willingness, or other variables may be masking the effect. '+declined+' of '+validWindows.length+' sessions showed decline post-shockwave.';
+  }
+  if(preStopsAvg!==null&&postStopsAvg!==null){
+    const stopsDelta=postStopsAvg-preStopsAvg;
+    if(stopsDelta>10) interpretation+=' Rides with no stops increased by '+stopsDelta+'% post-shockwave, which supports a positive pain management effect.';
+    else if(stopsDelta<-10) interpretation+=' However, rides with no stops decreased by '+Math.abs(stopsDelta)+'% post-shockwave, suggesting other factors may be contributing to stops.';
+  }
+  interpretation+='<br><span style="color:#888;font-size:11px">Note: This analysis uses a 14-day before/after window. Shockwave effects typically build over 1–2 weeks. Confounding variables (injections, farrier, barn changes, weather) are not controlled for. Correlation is not causation.</span>';
+  sig.innerHTML=interpretation;
+  detail.parentElement.appendChild(sig);
 }
 
 function buildAll(){
