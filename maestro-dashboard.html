@@ -190,6 +190,14 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="cw" style="height:350px"><canvas id="cGaitMonth"></canvas></div>
 </div>
 
+<div class="card" id="interventionCard">
+  <div class="card-title">Intervention analysis — shockwave</div>
+  <div class="card-sub" id="interventionSub">Comparing ride quality 14 days before vs 14 days after each shockwave session</div>
+  <div id="interventionSummary" style="margin-bottom:16px"></div>
+  <div class="cw" style="height:300px"><canvas id="cIntervention"></canvas></div>
+  <div id="interventionDetail" style="margin-top:12px"></div>
+</div>
+
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const LASER_START='2026-03-15';
@@ -983,6 +991,146 @@ function buildRehabGoals(valid){
     </div>`;
 }
 
+function buildInterventionAnalysis(valid){
+  const el=document.getElementById('interventionSummary');
+  const detail=document.getElementById('interventionDetail');
+  if(!el||!valid.length) return;
+
+  const WILL_I=11, STOPS_I=15, SW_I=27, RODE_I=5;
+  const DAY=86400000;
+
+  // Find all shockwave dates
+  const swDates=[];
+  valid.forEach(({d,r})=>{
+    if(r[SW_I]==='Y') swDates.push(d);
+  });
+
+  if(!swDates.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--muted)">No shockwave sessions logged.</div>';
+    return;
+  }
+
+  // For each shockwave, compute before/after metrics
+  const windows=swDates.map(swDate=>{
+    const before14=new Date(swDate.getTime()-14*DAY);
+    const after14=new Date(swDate.getTime()+14*DAY);
+
+    const pre=valid.filter(({d,r})=>d>=before14&&d<swDate&&r[RODE_I]==='Y');
+    const post=valid.filter(({d,r})=>d>swDate&&d<=after14&&r[RODE_I]==='Y');
+
+    function avg(arr,idx){
+      const vals=arr.map(({r})=>parseFloat(r[idx])).filter(v=>!isNaN(v));
+      return vals.length?Math.round(vals.reduce((s,v)=>s+v,0)/vals.length*100)/100:null;
+    }
+    function stopsPct(arr,val){
+      const stops=arr.map(({r})=>String(r[STOPS_I]||'').trim()).filter(v=>v);
+      if(!stops.length) return null;
+      return Math.round(stops.filter(s=>s.includes(val)).length/stops.length*100);
+    }
+
+    return {
+      date: swDate,
+      label: swDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}),
+      preRides: pre.length,
+      postRides: post.length,
+      preWill: avg(pre, WILL_I),
+      postWill: avg(post, WILL_I),
+      preStopsNone: stopsPct(pre,'None'),
+      postStopsNone: stopsPct(post,'None'),
+    };
+  });
+
+  // Overall before/after averages
+  const allPre=windows.filter(w=>w.preWill!==null);
+  const allPost=windows.filter(w=>w.postWill!==null);
+  const avgPreWill=allPre.length?(allPre.reduce((s,w)=>s+w.preWill,0)/allPre.length).toFixed(1):null;
+  const avgPostWill=allPost.length?(allPost.reduce((s,w)=>s+w.postWill,0)/allPost.length).toFixed(1):null;
+  const willDelta=avgPreWill&&avgPostWill?(avgPostWill-avgPreWill).toFixed(1):null;
+
+  const avgPreStops=allPre.filter(w=>w.preStopsNone!==null);
+  const avgPostStops=allPost.filter(w=>w.postStopsNone!==null);
+  const preStopsAvg=avgPreStops.length?Math.round(avgPreStops.reduce((s,w)=>s+w.preStopsNone,0)/avgPreStops.length):null;
+  const postStopsAvg=avgPostStops.length?Math.round(avgPostStops.reduce((s,w)=>s+w.postStopsNone,0)/avgPostStops.length):null;
+
+  function arrow(d){
+    if(d===null) return '';
+    const n=parseFloat(d);
+    if(n>0) return '<span style="color:#3B6D11">▲ +'+Math.abs(n)+'</span>';
+    if(n<0) return '<span style="color:#A32D2D">▼ '+Math.abs(n)+'</span>';
+    return '<span style="color:var(--muted)">—</span>';
+  }
+
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Shockwave sessions</div>
+        <div style="font-size:24px;font-weight:500">\${swDates.length}</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Avg willingness change</div>
+        <div style="font-size:24px;font-weight:500">\${willDelta!==null?arrow(willDelta):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">\${avgPreWill||'—'} before → \${avgPostWill||'—'} after</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Rides w/ no stops change</div>
+        <div style="font-size:24px;font-weight:500">\${preStopsAvg!==null&&postStopsAvg!==null?arrow(postStopsAvg-preStopsAvg)+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">\${preStopsAvg!==null?preStopsAvg+'%':'—'} before → \${postStopsAvg!==null?postStopsAvg+'%':'—'} after</div>
+      </div>
+    </div>`;
+
+  // Chart: willingness before/after each shockwave
+  const labels=windows.map(w=>w.label);
+  if(CH.intervention) CH.intervention.destroy();
+  CH.intervention=new Chart(document.getElementById('cIntervention'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Avg willingness — 14 days before',data:windows.map(w=>w.preWill),backgroundColor:'rgba(160,112,15,0.6)',borderRadius:2},
+        {label:'Avg willingness — 14 days after',data:windows.map(w=>w.postWill),backgroundColor:'rgba(59,109,17,0.6)',borderRadius:2},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y}}
+      },
+      scales:{
+        x:{ticks:{font:{family:'DM Mono',size:9}}},
+        y:{min:0,max:5,ticks:{font:{family:'DM Sans',size:9}}}
+      }
+    }
+  });
+
+  // Detail table
+  detail.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Date</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Rides before</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Will before</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Rides after</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Will after</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        \${windows.map(w=>{
+          const d=w.postWill!==null&&w.preWill!==null?(w.postWill-w.preWill).toFixed(1):null;
+          return '<tr style="border-top:1px solid var(--border)">'
+            +'<td style="padding:4px 8px;font-weight:500">'+w.label+'</td>'
+            +'<td style="padding:4px 8px;text-align:right;color:var(--muted)">'+w.preRides+'</td>'
+            +'<td style="padding:4px 8px;text-align:right">'+(w.preWill!==null?w.preWill:'—')+'</td>'
+            +'<td style="padding:4px 8px;text-align:right;color:var(--muted)">'+w.postRides+'</td>'
+            +'<td style="padding:4px 8px;text-align:right">'+(w.postWill!==null?w.postWill:'—')+'</td>'
+            +'<td style="padding:4px 8px;text-align:right">'+arrow(d)+'</td>'
+            +'</tr>';
+        }).join('')}
+      </tbody>
+    </table>`;
+}
+
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
@@ -1001,6 +1149,7 @@ function buildAll(){
   buildWillMonth(D.valid||[]);
   buildStopsMonth(D.valid||[]);
   buildGaitMonth(D.valid||[]);
+  buildInterventionAnalysis(D.valid||[]);
 }
 
 function setView(v,btn){
