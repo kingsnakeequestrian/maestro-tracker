@@ -515,6 +515,22 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <button class="chip" data-f="farrier"       onclick="multiChip(this,'mod')">Farrier</button>
       </div>
     </div>
+    <div class="field" id="swAreaField" style="display:none">
+      <label>Shockwave — area(s) treated</label>
+      <div class="chip-group" id="swAreaChips">
+        <button class="chip" data-swa="R Quad/Hip"      onclick="multiChip(this,'swa')">R Quad/Hip</button>
+        <button class="chip" data-swa="L Quad/Hip"      onclick="multiChip(this,'swa')">L Quad/Hip</button>
+        <button class="chip" data-swa="SI (bilateral)"  onclick="multiChip(this,'swa')">SI (bilateral)</button>
+        <button class="chip" data-swa="Neck (bilateral)" onclick="multiChip(this,'swa')">Neck (bilateral)</button>
+        <button class="chip" data-swa="Hock L"          onclick="multiChip(this,'swa')">Hock L</button>
+        <button class="chip" data-swa="Hock R"          onclick="multiChip(this,'swa')">Hock R</button>
+        <button class="chip" data-swa="Hock (both)"     onclick="multiChip(this,'swa')">Hock (both)</button>
+        <button class="chip" data-swa="Stifle L"        onclick="multiChip(this,'swa')">Stifle L</button>
+        <button class="chip" data-swa="Stifle R"        onclick="multiChip(this,'swa')">Stifle R</button>
+        <button class="chip" data-swa="Stifle (both)"   onclick="multiChip(this,'swa')">Stifle (both)</button>
+        <button class="chip" data-swa="Other"           onclick="multiChip(this,'swa')">Other</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -931,7 +947,7 @@ let S = {
   stops:'', spontaneousHalt:'', stickyResistant:'',
   cL:'', cR:'', equibands:'', lungeBeforeRide:'',
   siReactive:'', siSide:'', siSeverity:'',
-  bodywork:'', modalities:[],
+  bodywork:'', modalities:[], swAreas:[],
   behaviorNotes:'', ptNotes:'',
   mediaCaption:'', mediaFiles:[]
 };
@@ -1050,6 +1066,15 @@ function multiChip(btn, group) {
     S.trigger = [...document.querySelectorAll('#triggerChips .chip.sel')].map(c => c.textContent.trim());
   } else if (group === 'mod') {
     S.modalities = [...document.querySelectorAll('[data-f].chip.sel')].map(c => c.dataset.f);
+    const swOn = S.modalities.includes('shockwave');
+    const swField = document.getElementById('swAreaField');
+    if (swField) swField.style.display = swOn ? 'block' : 'none';
+    if (!swOn) {
+      document.querySelectorAll('#swAreaChips .chip.sel').forEach(c => c.classList.remove('sel'));
+      S.swAreas = [];
+    }
+  } else if (group === 'swa') {
+    S.swAreas = [...document.querySelectorAll('#swAreaChips .chip.sel')].map(c => c.dataset.swa);
   }
 }
 
@@ -1169,7 +1194,8 @@ async function pushToSheets(entry) {
     entry.modalities?.includes('straddlepoles') ? 'Y' : '',
     entry.modalities?.includes('treadmill')     ? 'Y' : '',
     entry.spontaneousHalt || '',
-    entry.stickyResistant || ''
+    entry.stickyResistant || '',
+    (entry.modalities?.includes('shockwave') && entry.swAreas?.length) ? entry.swAreas.join(', ') : ''
   ];
   try {
     const params = new URLSearchParams();
