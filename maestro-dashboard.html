@@ -2,218 +2,58 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Maestro Tracker</title>
-
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maestro — Progress Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
-  --bg: #F5F2ED;
-  --surface: #FFFFFF;
-  --surface2: #F0ECE4;
-  --border: #DDD8CE;
-  --border-light: #EAE6DE;
-  --text: #1C1A16;
-  --text-mid: #5C5850;
-  --text-muted: #9C9488;
-  --green-bg: #EAF3DE; --green: #3B6D11; --green-border: #97C459;
-  --amber-bg: #FAEEDA; --amber: #854F0B; --amber-border: #EF9F27;
-  --red-bg: #FCEBEB; --red: #A32D2D; --red-border: #E24B4A;
-  --blue-bg: #E6F1FB; --blue: #185FA5; --blue-border: #85B7EB;
-  --accent: #3B6D11; --accent-light: #EAF3DE;
-  --radius: 12px; --radius-sm: 8px;
-  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: Georgia, 'Times New Roman', serif;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
-
-/* HEADER */
-.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px 10px; position: sticky; top: 0; z-index: 100; }
-.app-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.app-title { font-family: var(--font-display); font-size: 21px; color: var(--text); letter-spacing: -0.3px; }
-.app-title span { font-style: italic; color: var(--accent); }
-.header-right { display: flex; align-items: center; gap: 8px; }
-.day-badge { background: var(--accent-light); color: var(--accent); font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
-.sync-status { font-size: 11px; padding: 4px 9px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
-.sync-status.connected { background: var(--green-bg); color: var(--green); }
-.sync-status.disconnected { background: var(--surface2); color: var(--text-muted); cursor: pointer; border: 1px solid var(--border); }
-.sync-status.syncing { background: var(--blue-bg); color: var(--blue); }
-.date-row { display: flex; align-items: center; gap: 8px; }
-.date-row input[type="date"] { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; flex: 1; outline: none; -webkit-appearance: none; }
-.date-row input[type="date"]:focus { border-color: var(--accent); }
-
-/* NAV */
-.nav-tabs { display: flex; overflow-x: auto; scrollbar-width: none; gap: 2px; padding: 10px 18px 0; border-bottom: 1px solid var(--border-light); background: var(--surface); }
-.nav-tabs::-webkit-scrollbar { display: none; }
-.nav-tab { flex-shrink: 0; font-family: var(--font); font-size: 13px; font-weight: 400; color: var(--text-muted); background: none; border: none; padding: 6px 11px 10px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color 0.15s; }
-.nav-tab.active { color: var(--accent); font-weight: 500; border-bottom-color: var(--accent); }
-.nav-tab.has-data::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--accent); border-radius: 50%; margin-left: 5px; vertical-align: middle; margin-top: -2px; }
-
-/* CONTENT */
-.content { padding: 14px 14px 110px; }
-.section { display: none; }
-.section.active { display: block; }
-
-/* CARDS */
-.card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
-.card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 13px; }
-
-/* FIELDS */
-.field { margin-bottom: 13px; }
-.field:last-child { margin-bottom: 0; }
-label { display: block; font-size: 13px; color: var(--text-mid); margin-bottom: 5px; }
-input[type="text"], input[type="number"], textarea, select {
-  width: 100%; font-family: var(--font); font-size: 15px; color: var(--text);
-  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 9px 11px; outline: none; -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
-}
-input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: var(--accent); background: var(--surface); }
-textarea { resize: none; min-height: 76px; line-height: 1.5; }
-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239C9488' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
-
-/* TOGGLES */
-.toggle-group { display: flex; gap: 7px; }
-.toggle-btn { flex: 1; font-family: var(--font); font-size: 14px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
-.toggle-btn.sel-yes { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
-.toggle-btn.sel-no { background: var(--surface2); color: var(--text-mid); border-color: var(--border); }
-
-/* SCORES */
-.score-group { display: flex; gap: 5px; }
-.score-btn { flex: 1; font-family: var(--font); font-size: 15px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 4px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
-.score-btn[data-v="1"].sel { background: var(--red-bg); color: var(--red); border-color: var(--red-border); font-weight: 500; }
-.score-btn[data-v="2"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
-.score-btn[data-v="3"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
-.score-btn[data-v="4"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
-.score-btn[data-v="5"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
-.score-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; min-height: 15px; }
-
-/* CHIPS */
-.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-family: var(--font); font-size: 13px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; -webkit-appearance: none; white-space: nowrap; }
-.chip.sel { background: var(--accent-light); color: var(--accent); border-color: var(--green-border); font-weight: 500; }
-
-/* DURATION ROW */
-.dur-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.dur-row label { font-size: 12px; }
-.dur-row input { text-align: center; }
-
-/* CONDITIONAL */
-.cond { display: none; }
-.cond.show { display: block; }
-
-/* SEVERITY */
-.sev-group { display: flex; flex-direction: column; gap: 7px; }
-.sev-opt { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
-.sev-opt.sel { background: var(--amber-bg); border-color: var(--amber-border); }
-.sev-opt.sel.severe { background: var(--red-bg); border-color: var(--red-border); }
-.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid var(--border); transition: all 0.15s; }
-.sev-opt.sel .sev-dot { background: #EF9F27; border-color: #EF9F27; }
-.sev-opt.sel.severe .sev-dot { background: #E24B4A; border-color: #E24B4A; }
-.sev-label { font-size: 14px; color: var(--text-mid); }
-.sev-hint { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.sev-opt.sel .sev-label { color: var(--amber); font-weight: 500; }
-.sev-opt.sel.severe .sev-label { color: var(--red); }
-
-/* DAY RATING */
-.rating-row { display: flex; gap: 8px; }
-.rating-btn { flex: 1; font-family: var(--font); font-size: 13px; border-radius: var(--radius-sm); padding: 11px 6px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; border: 1.5px solid transparent; }
-.rating-btn.good { background: var(--green-bg); color: var(--green); border-color: var(--border-light); }
-.rating-btn.ok   { background: var(--amber-bg); color: var(--amber); border-color: var(--border-light); }
-.rating-btn.bad  { background: var(--red-bg);   color: var(--red);   border-color: var(--border-light); }
-.rating-btn.sel.good { border-color: var(--green-border); font-weight: 600; }
-.rating-btn.sel.ok   { border-color: var(--amber-border); font-weight: 600; }
-.rating-btn.sel.bad  { border-color: var(--red-border);   font-weight: 600; }
-
-/* MEDIA */
-.upload-area { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 22px 14px; text-align: center; cursor: pointer; background: var(--surface2); transition: border-color 0.15s; position: relative; overflow: hidden; }
-.upload-area:hover { border-color: var(--accent); }
-.upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-.upload-icon { font-size: 26px; margin-bottom: 6px; filter: grayscale(1) opacity(0.5); }
-.upload-label { font-size: 14px; color: var(--text-mid); }
-.upload-hint { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-.media-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 11px; }
-.m-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface2); border: 1px solid var(--border-light); }
-.m-thumb img, .m-thumb video { width: 100%; height: 100%; object-fit: cover; }
-.m-remove { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; background: rgba(0,0,0,0.55); border: none; border-radius: 50%; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
-.m-badge { position: absolute; bottom: 3px; left: 3px; background: rgba(0,0,0,0.58); color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
-.m-status { position: absolute; bottom: 3px; right: 3px; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
-.m-status.uploading { background: var(--blue-bg); color: var(--blue); }
-.m-status.done { background: var(--green-bg); color: var(--green); }
-.m-status.error { background: var(--red-bg); color: var(--red); }
-
-/* SETUP CARD */
-.setup-card { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
-.setup-card h3 { font-size: 13px; font-weight: 500; color: var(--blue); margin-bottom: 8px; }
-.setup-card p { font-size: 13px; color: #185FA5; line-height: 1.55; margin-bottom: 8px; }
-.setup-card p:last-child { margin-bottom: 0; }
-.setup-input { margin-top: 10px; }
-.setup-input label { color: var(--blue); font-size: 12px; margin-bottom: 4px; }
-.setup-input input { font-size: 13px; padding: 8px 10px; }
-.setup-btn { width: 100%; font-family: var(--font); font-size: 14px; font-weight: 500; color: white; background: var(--blue); border: none; border-radius: var(--radius-sm); padding: 11px; cursor: pointer; margin-top: 10px; transition: opacity 0.15s; }
-.setup-btn:active { opacity: 0.85; }
-
-/* SAVE BAR */
-.save-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--border-light); z-index: 200; }
-.save-btn { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: white; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; cursor: pointer; transition: opacity 0.15s; }
-.save-btn:active { opacity: 0.85; }
-.save-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
-
-/* HISTORY */
-.hist-entry { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 9px; cursor: pointer; }
-.hist-entry:hover { border-color: var(--border); }
-.hist-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
-.hist-date { font-size: 14px; font-weight: 500; }
-.hist-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
-.dot-good { background: var(--green); }
-.dot-ok { background: #EF9F27; }
-.dot-bad { background: #E24B4A; }
-.dot-none { background: var(--border); }
-.hist-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
-.hist-notes { font-size: 13px; color: var(--text-mid); margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border-light); padding-top: 8px; display: none; }
-.hist-entry.open .hist-notes { display: block; }
-.hist-media { display: flex; gap: 5px; margin-top: 7px; overflow-x: auto; scrollbar-width: none; }
-.hist-media::-webkit-scrollbar { display: none; }
-.hist-media img, .hist-media video { flex-shrink: 0; width: 54px; height: 54px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-light); }
-.empty-hist { text-align: center; padding: 44px 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
-
-/* DIVIDER */
-.div { height: 1px; background: var(--border-light); margin: 12px 0; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* TOAST */
-.toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--text); color: white; font-size: 13px; padding: 9px 18px; border-radius: 20px; opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 300; white-space: nowrap; max-width: 90vw; text-align: center; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.err { background: var(--red); }
-
-/* REMINDER BANNER */
-.reminder-banner { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: var(--radius-sm); padding: 10px 14px; margin: 10px 14px 0; display: none; }
-.reminder-banner.show { display: block; }
-.reminder-banner-title { font-size: 12px; font-weight: 500; color: var(--amber); margin-bottom: 4px; }
-.reminder-item { font-size: 13px; color: var(--amber); line-height: 1.5; padding: 3px 0; border-bottom: 1px solid var(--amber-border); }
-.reminder-item:last-child { border-bottom: none; }
-.reminder-overdue { color: var(--red); }
-
-/* VET / BODYWORK SPECIFIC */
-.procedures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.proc-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s; }
-.proc-item.sel { background: var(--accent-light); border-color: var(--green-border); }
-.proc-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.15s; }
-.proc-item.sel .proc-check { background: var(--accent); border-color: var(--accent); color: white; }
-.proc-label { font-size: 13px; color: var(--text-mid); }
-.proc-item.sel .proc-label { color: var(--accent); font-weight: 500; }
-
-/* MODALITY CHIPS for bodywork */
-.mod-chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
-
-/* VET save btn secondary */
-.save-btn-secondary { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 13px; cursor: pointer; margin-bottom: 8px; transition: opacity 0.15s; }
-.save-btn-secondary:active { opacity: 0.8; }
-
-/* INFO NOTE */
-.info-note { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; color: var(--blue); line-height: 1.55; }
-.info-note strong { font-weight: 500; display: block; margin-bottom: 3px; }
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F7F5F0;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
+h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:32px 0 12px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:22px 22px 18px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.cw{position:relative;width:100%}
+.h240{height:240px}.h200{height:200px}.h280{height:280px}.h260{height:260px}
+.toggle-row{display:flex;gap:8px;margin-bottom:18px}
+.tbtn{font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
+.tbtn.on{background:var(--text);color:white;border-color:var(--text)}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+.sc{background:var(--bg);border-radius:10px;padding:12px 14px}
+.sv{font-size:22px;font-weight:500;letter-spacing:-.3px}
+.sl{font-size:11px;color:var(--muted);margin-top:2px}
+.sc.g .sv{color:#3B6D11}.sc.w .sv{color:#854F0B}.sc.b .sv{color:#A32D2D}
+.ann{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.ai{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ad{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+.note{font-size:12px;color:#5A4A3A;font-style:italic;margin-top:12px;padding:10px 14px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30;line-height:1.6}
+.pb{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pl{font-size:12px;color:var(--muted);width:64px;flex-shrink:0;font-family:'DM Mono',monospace}
+.pt{flex:1;height:8px;background:#EDE9E0;border-radius:4px;overflow:hidden;position:relative}
+.pf{height:100%;border-radius:4px}
+.pc{font-size:11px;color:var(--muted);width:32px;text-align:right;font-family:'DM Mono',monospace}
+.ph{font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.cmp-now{color:var(--text)}
+.cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.cmp-now{color:var(--text);font-weight:500}
+.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
+.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.cmp-now{color:var(--text)}
+.cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.cmp-now{color:var(--text);font-weight:500}
+.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
+.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
 </style>
 
 <style id="maestro-nav-style">
@@ -248,1432 +88,1196 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <body>
 <nav class="mnav">
   <span class="mnav-brand">Maestro <span>Djinto</span></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link active">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork Dashboard</a></div>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link active">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork Dashboard</a></div>
 </nav>
+<h1>Maestro — Progress Dashboard</h1>
+<p class="sub" id="trackingRange">Post-rehab tracking · loading...</p>
 
-<div class="app-header">
-  <div class="app-header-top">
-    <div class="app-title"><span>Maestro</span> Daily Log</div>
-    <div class="header-right">
-      <div class="day-badge" id="dayBadge">TX —</div>
-      <div class="sync-status disconnected" id="syncStatus" onclick="showSection('settings')">Not connected</div>
-    </div>
+
+<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11"></div>
+
+<div class="card" id="rehabGoals" style="margin-bottom:24px;border-left:3px solid #534AB7">
+  <div class="card-title">Rehab milestones</div>
+  <div id="rehabGoalsContent" style="font-size:13px;color:var(--muted)">Loading...</div>
+</div>
+
+<div class="toggle-row" style="justify-content:space-between;align-items:center">
+  <div style="display:flex;gap:8px">
+    <button class="tbtn on" onclick="setView('weekly',this)">Weekly</button>
+    <button class="tbtn" onclick="setView('monthly',this)">Monthly</button>
   </div>
-  <div class="date-row">
-    <input type="date" id="entryDate" onchange="onDateChange(this.value)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="refreshStatus" style="font-size:11px;color:var(--muted)"></span>
+    <button id="refreshBtn" onclick="refreshData()" class="tbtn" style="background:#1A1814;color:white;border-color:#1A1814">Refresh data</button>
   </div>
 </div>
 
-<div class="nav-tabs" id="navTabs">
-  <button class="nav-tab active" data-s="ridden" onclick="showSection('ridden',this)">Ridden</button>
-  <button class="nav-tab" data-s="behavioral" onclick="showSection('behavioral',this)">Behavior</button>
-  <button class="nav-tab" data-s="lunge" onclick="showSection('lunge',this)">Lunge</button>
-  <button class="nav-tab" data-s="si" onclick="showSection('si',this)">SI</button>
-  <button class="nav-tab" data-s="modalities" onclick="showSection('modalities',this)">Modalities</button>
-  <button class="nav-tab" data-s="media" onclick="showSection('media',this)">Media</button>
-  <button class="nav-tab" data-s="notes" onclick="showSection('notes',this)">Notes</button>
-  <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
-  <button class="nav-tab" data-s="vet" onclick="showSection('vet',this)">Vet</button>
-  <button class="nav-tab" data-s="bodywork" onclick="showSection('bodywork',this)">Bodywork</button>
-  <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
+<div class="sg" id="sg"></div>
+
+<div class="card">
+  <div class="card-title">Workload — time in each gait (min)</div>
+  <div class="card-sub">Walk / trot / canter per period</div>
+  <div class="cw h240"><canvas id="cWorkload"></canvas></div>
 </div>
 
-<div id="reminderBanner" class="reminder-banner">
-  <div class="reminder-banner-title">Follow-up reminders</div>
-  <div id="reminderList"></div>
-</div>
-<div class="content">
-
-<!-- RIDDEN -->
-<div class="section active" id="s-ridden">
-  <div class="card">
-    <div class="card-title">Day Overview</div>
-    <div class="field">
-      <label>Day rating</label>
-      <div class="rating-row">
-        <button class="rating-btn good" data-r="good" onclick="setRating(this)">Good</button>
-        <button class="rating-btn ok"   data-r="ok"   onclick="setRating(this)">OK</button>
-        <button class="rating-btn bad"  data-r="bad"  onclick="setRating(this)">Bad</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Day type</label>
-      <input type="text" id="dayType" placeholder="e.g. Lunge + ride, Hand walk, Day off…">
-    </div>
-    <div class="field">
-      <label>Total duration (min)</label>
-      <input type="number" id="totalDur" placeholder="45" inputmode="numeric">
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Ridden Work</div>
-    <div class="field">
-      <label>Rode today?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="rode" data-v="Y" onclick="tog(this,()=>show('ridenFields'))">Yes</button>
-        <button class="toggle-btn" data-f="rode" data-v="N" onclick="tog(this,()=>hide('ridenFields'))">No</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Time in each gait (min)</label>
-      <div class="dur-row">
-        <div><label>Walk</label><input type="number" id="walkMin" placeholder="0" inputmode="numeric"></div>
-        <div><label>Trot</label><input type="number" id="trotMin" placeholder="0" inputmode="numeric"></div>
-        <div><label>Canter</label><input type="number" id="canterMin" placeholder="0" inputmode="numeric"></div>
-      </div>
-    </div>
-    <div id="ridenFields" class="cond">
-      <div class="field">
-        <label>Saddle or bareback?</label>
-        <select id="saddleType">
-          <option value="">— select —</option>
-          <option>Saddle</option>
-          <option>Bareback</option>
-          <option>Bareback + pad</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Gait achieved</label>
-        <div class="chip-group" id="gaitChips">
-          <button class="chip" onclick="oneChip(this,'gait')">Walk only</button>
-          <button class="chip" onclick="oneChip(this,'gait')">W / T</button>
-          <button class="chip" onclick="oneChip(this,'gait')">W / T / C</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Willingness <span style="color:var(--text-muted);font-weight:300">1–5</span></label>
-        <div class="score-group" id="willGrp">
-          <button class="score-btn" data-v="1" onclick="setScore(this,'will','willHint',WILL)">1</button>
-          <button class="score-btn" data-v="2" onclick="setScore(this,'will','willHint',WILL)">2</button>
-          <button class="score-btn" data-v="3" onclick="setScore(this,'will','willHint',WILL)">3</button>
-          <button class="score-btn" data-v="4" onclick="setScore(this,'will','willHint',WILL)">4</button>
-          <button class="score-btn" data-v="5" onclick="setScore(this,'will','willHint',WILL)">5</button>
-        </div>
-        <div class="score-hint" id="willHint"></div>
-      </div>
-      <div class="field">
-        <label>Crop used?</label>
-        <div class="toggle-group">
-          <button class="toggle-btn" data-f="crop" data-v="Y" onclick="tog(this)">Yes</button>
-          <button class="toggle-btn" data-f="crop" data-v="N" onclick="tog(this)">No</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="card">
+  <div class="card-title">PT exercise compliance</div>
+  <div class="card-sub">Share of weeks that hit the 3×/week target</div>
+  <div id="ptCompliance"></div>
 </div>
 
-<!-- BEHAVIORAL -->
-<div class="section" id="s-behavioral">
-  <div class="card">
-    <div class="card-title">Tacking Up</div>
-    <div class="field">
-      <label>Cranky during tack up?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="cranky" data-v="Y" onclick="tog(this,()=>show('triggerField'))">Yes</button>
-        <button class="toggle-btn" data-f="cranky" data-v="N" onclick="tog(this,()=>hide('triggerField'))">No</button>
-      </div>
-    </div>
-    <div id="triggerField" class="cond field">
-      <label>Trigger</label>
-      <div class="chip-group" id="triggerChips">
-        <button class="chip" onclick="multiChip(this,'trigger')">Girth</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Back</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Pad / blanket</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Girth + back</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Multiple</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Other</button>
-      </div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Stops / Stalling</div>
-    <div class="field">
-      <label>Stops today</label>
-      <div class="chip-group">
-        <button class="chip" onclick="oneChip(this,'stops')">None</button>
-        <button class="chip" onclick="oneChip(this,'stops')">Few (1–3)</button>
-        <button class="chip" onclick="oneChip(this,'stops')">Many (4+)</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Specific behaviors</label>
-      <div class="chip-group">
-        <button class="chip" data-f="spontaneousHalt" onclick="togChip(this)">Spontaneous halt</button>
-        <button class="chip" data-f="stickyResistant" onclick="togChip(this)">Sticky / resistant</button>
-      </div>
-    </div>
-  </div>
+<p class="section-label">Rest &amp; willingness</p>
+
+<div class="card">
+  <div class="card-title">Time off vs willingness</div>
+  <div class="card-sub">Average willingness by how many days since the previous ride</div>
+  <div class="cw h240"><canvas id="cGap"></canvas></div>
+  <div class="note" id="gapNote"></div>
 </div>
 
-<!-- LUNGE -->
-<div class="section" id="s-lunge">
-  <div class="card">
-    <div class="card-title">Canter Quality — Lunge</div>
-    <div class="field">
-      <label>Canter left score</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="1" onclick="setScore(this,'cL','cLHint',CANT)">1</button>
-        <button class="score-btn" data-v="2" onclick="setScore(this,'cL','cLHint',CANT)">2</button>
-        <button class="score-btn" data-v="3" onclick="setScore(this,'cL','cLHint',CANT)">3</button>
-        <button class="score-btn" data-v="4" onclick="setScore(this,'cL','cLHint',CANT)">4</button>
-        <button class="score-btn" data-v="5" onclick="setScore(this,'cL','cLHint',CANT)">5</button>
-      </div>
-      <div class="score-hint" id="cLHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
-    </div>
-    <div class="div"></div>
-    <div class="field">
-      <label>Canter right score</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="1" onclick="setScore(this,'cR','cRHint',CANT)">1</button>
-        <button class="score-btn" data-v="2" onclick="setScore(this,'cR','cRHint',CANT)">2</button>
-        <button class="score-btn" data-v="3" onclick="setScore(this,'cR','cRHint',CANT)">3</button>
-        <button class="score-btn" data-v="4" onclick="setScore(this,'cR','cRHint',CANT)">4</button>
-        <button class="score-btn" data-v="5" onclick="setScore(this,'cR','cRHint',CANT)">5</button>
-      </div>
-      <div class="score-hint" id="cRHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Lunge Add-ons</div>
-    <div class="field">
-      <label>Equibands?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="equibands" data-v="Y" onclick="tog(this)">Yes</button>
-        <button class="toggle-btn" data-f="equibands" data-v="N" onclick="tog(this)">No</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Lunge before ride?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="Y" onclick="tog(this)">Yes</button>
-        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="N" onclick="tog(this)">No</button>
-      </div>
-    </div>
-  </div>
+<div class="card">
+  <div class="card-title">Willingness distribution — all rides</div>
+  <div class="card-sub">Percentage of rides at each willingness level (1–5)</div>
+  <div class="cw h240"><canvas id="cWillDist"></canvas></div>
 </div>
 
-<!-- SI -->
-<div class="section" id="s-si">
-  <div class="card">
-    <div class="card-title">SI Palpation</div>
-    <div class="field">
-      <label>SI reactive?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="siReactive" data-v="Y" onclick="tog(this,()=>show('siDetail'))">Yes</button>
-        <button class="toggle-btn" data-f="siReactive" data-v="N" onclick="tog(this,()=>hide('siDetail'))">No</button>
-      </div>
-    </div>
-    <div id="siDetail" class="cond">
-      <div class="field">
-        <label>Side</label>
-        <div class="chip-group">
-          <button class="chip" onclick="oneChip(this,'siSide')">Left</button>
-          <button class="chip" onclick="oneChip(this,'siSide')">Right</button>
-          <button class="chip" onclick="oneChip(this,'siSide')">Both</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Severity</label>
-        <div class="sev-group">
-          <div class="sev-opt" onclick="setSev(this,'mild')"><div class="sev-dot"></div><div><div class="sev-label">Mild</div><div class="sev-hint">Mild flinch</div></div></div>
-          <div class="sev-opt" onclick="setSev(this,'moderate')"><div class="sev-dot"></div><div><div class="sev-label">Moderate</div><div class="sev-hint">Clear reaction</div></div></div>
-          <div class="sev-opt severe" onclick="setSev(this,'severe')"><div class="sev-dot"></div><div><div class="sev-label">Severe</div><div class="sev-hint">Jumps away / kicks</div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="card">
+  <div class="card-title">Stops distribution — all rides</div>
+  <div class="card-sub">Percentage of rides by stop frequency (None / Few / Many)</div>
+  <div class="cw h240"><canvas id="cStopsDist"></canvas></div>
 </div>
 
-<!-- MODALITIES -->
-<div class="section" id="s-modalities">
-  <div class="card">
-    <div class="card-title">Modalities</div>
-    <div class="field">
-      <label>Bodywork</label>
-      <div class="chip-group">
-        <button class="chip" onclick="oneChip(this,'bodywork')">None</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">PEMF</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF + Other</button>
-      </div>
-    </div>
-    <div class="div"></div>
-    <div class="field">
-      <label>Other modalities used today</label>
-      <div class="chip-group">
-        <button class="chip" data-f="pt"            onclick="multiChip(this,'mod')">PT exercises</button>
-        <button class="chip" data-f="poles"         onclick="multiChip(this,'mod')">Poles</button>
-        <button class="chip" data-f="straddlepoles" onclick="multiChip(this,'mod')">Straddle Poles</button>
-        <button class="chip" data-f="treadmill"     onclick="multiChip(this,'mod')">Treadmill</button>
-        <button class="chip" data-f="theraplate"    onclick="multiChip(this,'mod')">Theraplate</button>
-        <button class="chip" data-f="balancepad"    onclick="multiChip(this,'mod')">Balance Pad</button>
-        <button class="chip" data-f="bemer"         onclick="multiChip(this,'mod')">Bemer</button>
-        <button class="chip" data-f="laser"         onclick="multiChip(this,'mod')">Laser (C4)</button>
-        <button class="chip" data-f="shockwave"     onclick="multiChip(this,'mod')">Shockwave</button>
-        <button class="chip" data-f="exgas"         onclick="multiChip(this,'mod')">ExGas</button>
-        <button class="chip" data-f="farrier"       onclick="multiChip(this,'mod')">Farrier</button>
-      </div>
-    </div>
-    <div class="field" id="swAreaField" style="display:none">
-      <label>Shockwave — area(s) treated</label>
-      <div class="chip-group" id="swAreaChips">
-        <button class="chip" data-swa="R Quad/Hip"      onclick="multiChip(this,'swa')">R Quad/Hip</button>
-        <button class="chip" data-swa="L Quad/Hip"      onclick="multiChip(this,'swa')">L Quad/Hip</button>
-        <button class="chip" data-swa="SI (bilateral)"  onclick="multiChip(this,'swa')">SI (bilateral)</button>
-        <button class="chip" data-swa="Neck (bilateral)" onclick="multiChip(this,'swa')">Neck (bilateral)</button>
-        <button class="chip" data-swa="Hock L"          onclick="multiChip(this,'swa')">Hock L</button>
-        <button class="chip" data-swa="Hock R"          onclick="multiChip(this,'swa')">Hock R</button>
-        <button class="chip" data-swa="Hock (both)"     onclick="multiChip(this,'swa')">Hock (both)</button>
-        <button class="chip" data-swa="Stifle L"        onclick="multiChip(this,'swa')">Stifle L</button>
-        <button class="chip" data-swa="Stifle R"        onclick="multiChip(this,'swa')">Stifle R</button>
-        <button class="chip" data-swa="Stifle (both)"   onclick="multiChip(this,'swa')">Stifle (both)</button>
-        <button class="chip" data-swa="Other"           onclick="multiChip(this,'swa')">Other</button>
-      </div>
-    </div>
-  </div>
+<div class="card">
+  <div class="card-title">Willingness by month</div>
+  <div class="card-sub">Percentage of rides at each willingness level per month</div>
+  <div class="cw" style="height:350px"><canvas id="cWillMonth"></canvas></div>
 </div>
 
-<!-- MEDIA -->
-<div class="section" id="s-media">
-  <div class="card">
-    <div class="card-title">Photos &amp; Videos</div>
-    <div class="field">
-      <div class="upload-area">
-        <input type="file" id="mediaInput" accept="image/*,video/*" multiple onchange="handleMedia(event)">
-        <div class="upload-icon">📎</div>
-        <div class="upload-label">Tap to add photos or videos</div>
-        <div class="upload-hint">Camera or photo library · any format</div>
-      </div>
-      <div class="media-grid" id="mediaGrid"></div>
-    </div>
-    <div class="field">
-      <label>Caption / context</label>
-      <input type="text" id="mediaCaption" placeholder="e.g. Trot both directions on lunge">
-    </div>
-  </div>
-  <div id="driveNote" class="info-note" style="display:none">
-    <strong>Google Drive upload</strong>
-    Media will be uploaded to your Maestro Videos folder when you save. Files are named with the TX Day automatically.
-  </div>
-  <div id="driveSetupNote" class="info-note">
-    <strong>Connect Google Drive to enable auto-upload</strong>
-    Go to the Settings tab to add your credentials. Until then, media is saved locally only.
-  </div>
+<div class="card">
+  <div class="card-title">Stops by month</div>
+  <div class="card-sub">Percentage of rides by stop frequency per month</div>
+  <div class="cw" style="height:350px"><canvas id="cStopsMonth"></canvas></div>
 </div>
 
-<!-- NOTES -->
-<div class="section" id="s-notes">
-  <div class="card">
-    <div class="card-title">Notes</div>
-    <div class="field">
-      <label>Behavior notes</label>
-      <textarea id="behaviorNotes" placeholder="Attitude, energy, specific behaviors, anything that stood out…" rows="4"></textarea>
-    </div>
-    <div class="field">
-      <label>PT / bodywork notes</label>
-      <textarea id="ptNotes" placeholder="Findings, reactions, practitioner observations…" rows="3"></textarea>
-    </div>
-  </div>
+<div class="card">
+  <div class="card-title">Gait level by month</div>
+  <div class="card-sub">Percentage of rides at each gait level per month</div>
+  <div class="cw" style="height:350px"><canvas id="cGaitMonth"></canvas></div>
 </div>
 
-<!-- HISTORY -->
-<div class="section" id="s-history">
-  <div id="histList"></div>
+<div class="card" id="interventionCard">
+  <div class="card-title">Intervention analysis — shockwave</div>
+  <div class="card-sub" id="interventionSub">Comparing ride quality 14 days before vs 14 days after each shockwave session</div>
+  <div id="interventionSummary" style="margin-bottom:16px"></div>
+  <div class="cw" style="height:300px"><canvas id="cIntervention"></canvas></div>
+  <div id="interventionDetail" style="margin-top:12px"></div>
 </div>
 
-<!-- SETTINGS -->
-<div class="section" id="s-settings">
-  <div class="setup-card">
-    <h3>Google Sheets — Spreadsheet ID</h3>
-    <p>Paste your Google Sheets spreadsheet ID below. You'll find it in the sheet URL:<br>
-    <code style="font-size:11px;word-break:break-all">docs.google.com/spreadsheets/d/<strong>[ID IS HERE]</strong>/edit</code></p>
-    <div class="setup-input">
-      <label>Spreadsheet ID</label>
-      <input type="text" id="sheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
-    </div>
-    <div class="setup-input">
-      <label>Apps Script Web App URL</label>
-      <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
-    </div>
-  </div>
-  <div class="setup-card" style="background:var(--green-bg);border-color:var(--green-border);">
-    <h3 style="color:var(--green)">Google Drive — Folder ID</h3>
-    <p style="color:var(--green)">Paste your Maestro Videos folder ID. Found in the folder URL:<br>
-    <code style="font-size:11px;word-break:break-all">drive.google.com/drive/folders/<strong>[ID IS HERE]</strong></code></p>
-    <div class="setup-input">
-      <label style="color:var(--green)">Drive Folder ID</label>
-      <input type="text" id="driveFolderId" placeholder="1aBcDeFgHiJkLmNoPqRsTuVwXyZ">
-    </div>
-  </div>
-  <button class="save-btn" style="margin-bottom:10px" onclick="saveSettings()">Save Settings</button>
-  <div id="settingsStatus" style="font-size:13px;color:var(--text-muted);text-align:center;padding:4px"></div>
-
-  <div class="card" style="margin-top:14px">
-    <div class="card-title">Export local entries to sheet</div>
-    <p style="font-size:13px;color:var(--text-mid);line-height:1.55;margin-bottom:10px">If you've been logging without a connection, tap below to push all saved local entries to your Google Sheet at once.</p>
-    <button class="save-btn" onclick="exportAllToSheets()">Push all local entries to Sheets</button>
-  </div>
+<div class="card" id="swAreaCard">
+  <div class="card-title">Shockwave response by treated area</div>
+  <div class="card-sub">Willingness change (14 days before → after) grouped by which region was shocked. Tests whether adding a region — the neck especially — moves the needle.</div>
+  <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
 </div>
-
-
-<!-- VET VISIT -->
-<div class="section" id="s-vet">
-  <div class="card">
-    <div class="card-title">Visit Details</div>
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="vetDate">
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Provider</label>
-        <input type="text" id="vetProvider" placeholder="Dr. Smith">
-      </div>
-      <div class="field">
-        <label>Clinic / Practice</label>
-        <input type="text" id="vetClinic" placeholder="EVCT">
-      </div>
-    </div>
-    <div class="field">
-      <label>Visit type</label>
-      <div class="chip-group">
-        <button class="chip" onclick="togVetVisitType(this)">Lameness eval</button>
-        <button class="chip" onclick="togVetVisitType(this)">Rehab check-in</button>
-        <button class="chip" onclick="togVetVisitType(this)">Injection / treatment</button>
-        <button class="chip" onclick="togVetVisitType(this)">Routine / wellness</button>
-        <button class="chip" onclick="togVetVisitType(this)">Emergency</button>
-        <button class="chip" onclick="togVetVisitType(this)">Other</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Procedures Performed</div>
-    <div class="field">
-      <div class="procedures-grid">
-        <div class="proc-item" onclick="togProc(this,'injection')"><div class="proc-check"></div><div class="proc-label">Injection</div></div>
-        <div class="proc-item" onclick="togProc(this,'shockwave')"><div class="proc-check"></div><div class="proc-label">Shockwave</div></div>
-        <div class="proc-item" onclick="togProc(this,'scope')"><div class="proc-check"></div><div class="proc-label">Scope</div></div>
-        <div class="proc-item" onclick="togProc(this,'bloodwork')"><div class="proc-check"></div><div class="proc-label">Bloodwork</div></div>
-        <div class="proc-item" onclick="togProc(this,'imaging')"><div class="proc-check"></div><div class="proc-label">Imaging</div></div>
-        <div class="proc-item" onclick="togProc(this,'vaccination')"><div class="proc-check"></div><div class="proc-label">Vaccination</div></div>
-        <div class="proc-item" onclick="togProc(this,'dental')"><div class="proc-check"></div><div class="proc-label">Dental</div></div>
-        <div class="proc-item" onclick="togProc(this,'nerve_block')"><div class="proc-check"></div><div class="proc-label">Nerve block</div></div>
-        <div class="proc-item" onclick="togProc(this,'flexion')"><div class="proc-check"></div><div class="proc-label">Flexion tests</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" id="vetLamenessCard">
-    <div class="card-title">Lameness</div>
-    <div class="field">
-      <div class="score-hint" style="margin-bottom:8px">AAEP scale: 0 = sound · 1 = barely perceptible · 2 = mild · 3 = consistently lame · 4 = marked · 5 = non-weight bearing</div>
-      <label>RF grade</label>
-      <div class="score-group" style="margin-bottom:8px">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RF')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RF')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RF')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RF')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RF')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RF')">5</button>
-      </div>
-      <label>LF grade</label>
-      <div class="score-group" style="margin-bottom:8px">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LF')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LF')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LF')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LF')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LF')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LF')">5</button>
-      </div>
-      <label>RH grade</label>
-      <div class="score-group" style="margin-bottom:8px">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RH')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RH')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RH')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RH')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RH')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RH')">5</button>
-      </div>
-      <label>LH grade</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LH')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LH')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LH')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LH')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LH')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LH')">5</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Joint / region</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">SI</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pelvis / gluteal</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Stifle</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hock</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Fetlock</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pastern</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hoof / coffin</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Tendon</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Cervical spine</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Back</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Other region (write in)</label>
-      <input type="text" id="vetLameRegionOther" placeholder="e.g. 3rd trochanter, proximal metatarsus…">
-    </div>
-    <div class="field">
-      <label>Response to nerve block</label>
-      <input type="text" id="vetNerveBlock" placeholder="e.g. 70% improvement distal limb block">
-    </div>
-  </div>
-
-  <div class="card" id="vetInjectionCard" style="display:none">
-    <div class="card-title">Injection Details</div>
-    <div class="field">
-      <label>Injection site(s)</label>
-      <input type="text" id="vetInjSite" placeholder="e.g. Right SI, right stifle, right quadratus femoris">
-    </div>
-    <div class="field">
-      <label>Product</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">PRP</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">ProStride</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Triamcinolone</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Methylprednisolone</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Hyaluronic acid</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Other product (write in)</label>
-      <input type="text" id="vetInjProductOther" placeholder="">
-    </div>
-    <div class="field">
-      <label>Post-injection protocol</label>
-      <textarea id="vetInjProtocol" rows="2" placeholder="e.g. Stall rest 3 days, light work day 4, return to work day 5"></textarea>
-    </div>
-  </div>
-
-  <div class="card" id="vetImagingCard" style="display:none">
-    <div class="card-title">Imaging</div>
-    <div class="field">
-      <label>Imaging type</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Radiograph</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Ultrasound</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Nuclear scintigraphy</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">MRI</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">CT</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Region imaged</label>
-      <input type="text" id="vetImagingRegion" placeholder="e.g. Pelvis, cervical spine, RH stifle">
-    </div>
-    <div class="field">
-      <label>Imaging file link (Drive)</label>
-      <input type="text" id="vetImagingLink" placeholder="https://drive.google.com/…">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Clinical Notes</div>
-    <div class="field">
-      <label>History / presentation</label>
-      <textarea id="vetHistory" rows="3" placeholder="Reason for visit, owner observations…"></textarea>
-    </div>
-    <div class="field">
-      <label>Findings</label>
-      <textarea id="vetFindings" rows="3" placeholder="Exam findings, diagnostic results…"></textarea>
-    </div>
-    <div class="field">
-      <label>Medications administered</label>
-      <input type="text" id="vetMeds" placeholder="e.g. Banamine 10mL IV, Gastrogard 1 tube PO">
-    </div>
-    <div class="field">
-      <label>Recommendations</label>
-      <textarea id="vetRecs" rows="2" placeholder=""></textarea>
-    </div>
-    <div class="field">
-      <label>Plan</label>
-      <textarea id="vetPlan" rows="2" placeholder=""></textarea>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Follow-Up</div>
-    <div class="field">
-      <label>Follow-up date</label>
-      <input type="date" id="vetFollowupDate">
-    </div>
-    <div class="field">
-      <label>Follow-up notes</label>
-      <input type="text" id="vetFollowupNotes" placeholder="e.g. Recheck in 4 weeks, schedule scope…">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Files</div>
-    <div class="field">
-      <label>Visit summary PDF (upload to Drive)</label>
-      <div class="upload-area" style="margin-bottom:10px">
-        <input type="file" id="vetPdfInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'pdf')">
-        <div class="upload-icon">📄</div>
-        <div class="upload-label">Tap to upload visit summary</div>
-        <div class="upload-hint">PDF or image</div>
-      </div>
-      <input type="text" id="vetPdfLink" placeholder="Or paste Drive link directly">
-    </div>
-    <div class="field" id="vetVaccCard">
-      <label>Vaccination certificate (upload or link)</label>
-      <div class="upload-area" style="margin-bottom:10px">
-        <input type="file" id="vetVaccInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'vacc')">
-        <div class="upload-icon">💉</div>
-        <div class="upload-label">Tap to upload certificate</div>
-        <div class="upload-hint">PDF or image</div>
-      </div>
-      <input type="text" id="vetVaccLink" placeholder="Or paste Drive link directly">
-    </div>
-  </div>
-
-  <div style="padding: 0 0 12px">
-    <button class="save-btn-secondary" onclick="saveVetEntry()">Save Vet Visit</button>
-  </div>
-</div>
-
-<!-- BODYWORK -->
-<div class="section" id="s-bodywork">
-  <div class="card">
-    <div class="card-title">Session Details</div>
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="bwDate">
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Provider</label>
-        <input type="text" id="bwProvider" placeholder="Aimee M.">
-      </div>
-      <div class="field">
-        <label>Practice</label>
-        <input type="text" id="bwPractice" placeholder="Barrio Performance Therapy">
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Modalities Used</div>
-    <div class="field">
-      <div class="chip-group">
-        <button class="chip" onclick="togBwMod(this)">Massage</button>
-        <button class="chip" onclick="togBwMod(this)">PEMF</button>
-        <button class="chip" onclick="togBwMod(this)">Cold Laser</button>
-        <button class="chip" onclick="togBwMod(this)">KT Tape</button>
-        <button class="chip" onclick="togBwMod(this)">Stretching</button>
-        <button class="chip" onclick="togBwMod(this)">Chiro</button>
-        <button class="chip" onclick="togBwMod(this)">Other</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="ktAreaCard" style="display:none;padding:0 0 4px">
-    <div class="field" style="background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:8px">
-      <label>KT Tape — area(s) applied</label>
-      <input type="text" id="ktAreaInput" placeholder="e.g. Left shoulder, SI right">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Session Notes</div>
-    <div class="field">
-      <label>Areas of concern / symptoms</label>
-      <input type="text" id="bwConcerns" placeholder="e.g. Continuing care, right gluteal reactivity">
-    </div>
-    <div class="field">
-      <label>PEMF reactivity / massage findings</label>
-      <textarea id="bwFindings" rows="3" placeholder="e.g. Right side slightly more fasciculations than left…"></textarea>
-    </div>
-    <div class="field">
-      <label>Observations / assessment / response</label>
-      <textarea id="bwObservations" rows="3" placeholder="How did he respond to the session?"></textarea>
-    </div>
-    <div class="field">
-      <label>Recommendations</label>
-      <input type="text" id="bwRecs" placeholder="e.g. Massage + PEMF every other week">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Session PDF</div>
-    <div class="field">
-      <div class="upload-area" style="margin-bottom:10px">
-        <input type="file" id="bwPdfInput" accept="application/pdf,image/*" onchange="handleBwFile(event)">
-        <div class="upload-icon">📄</div>
-        <div class="upload-label">Tap to upload session notes PDF</div>
-        <div class="upload-hint">Barrio form or similar</div>
-      </div>
-      <input type="text" id="bwPdfLink" placeholder="Or paste Drive link directly">
-    </div>
-    <div id="bwFilePreview" style="font-size:13px;color:var(--green);margin-top:6px;display:none"></div>
-  </div>
-
-  <div style="padding: 0 0 12px">
-    <button class="save-btn-secondary" style="color:var(--green);background:var(--green-bg);border-color:var(--green-border)" onclick="saveBwEntry()">Save Bodywork Session</button>
-  </div>
-</div>
-
-</div><!-- /content -->
-
-<div class="save-bar">
-  <button class="save-btn" id="saveBtn" onclick="saveEntry()">Save Entry</button>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const TX_START = 246;
-const ORIGIN_DATE = new Date('2025-11-20T12:00:00');
-const WILL  = ['','Barely moving','Very reluctant','Reluctant but workable','OK — some encouragement needed','Willing and forward'];
-const CANT  = ['','Refused / very unwilling','Very reluctant — multiple asks','Reluctant but achieved','Willing with minor resistance','Willing / offered freely'];
+// ── CONFIG ────────────────────────────────────────────────────────────
+const LASER_START='2026-03-15';
+let view='weekly', CH={};
+let W=[], M=[], GAPS=[];
 
-let S = {
-  date:'', rating:'', dayType:'', totalDur:'',
-  rode:'', saddleType:'', walkMin:'', trotMin:'', canterMin:'',
-  gait:'', will:'', crop:'',
-  cranky:'', trigger:[],
-  stops:'', spontaneousHalt:'', stickyResistant:'',
-  cL:'', cR:'', equibands:'', lungeBeforeRide:'',
-  siReactive:'', siSide:'', siSeverity:'',
-  bodywork:'', modalities:[], swAreas:[],
-  behaviorNotes:'', ptNotes:'',
-  mediaCaption:'', mediaFiles:[]
-};
-
-let CFG = { sheetId:'', scriptUrl:'', driveFolderId:'' };
-
-function loadCfg() {
-  try { CFG = JSON.parse(localStorage.getItem('m_cfg') || '{}'); } catch {}
-  CFG.sheetId = CFG.sheetId || '';
-  CFG.scriptUrl = CFG.scriptUrl || '';
-  CFG.driveFolderId = CFG.driveFolderId || '';
-  if (CFG.sheetId) { document.getElementById('sheetId').value = CFG.sheetId; }
-  if (CFG.scriptUrl) { document.getElementById('scriptUrl').value = CFG.scriptUrl; }
-  if (CFG.driveFolderId) { document.getElementById('driveFolderId').value = CFG.driveFolderId; }
-  updateSyncBadge();
-  updateDriveNote();
+// ── SCRIPT URL ────────────────────────────────────────────────────────
+function getScriptUrl(){
+  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||''; }catch{ return ''; }
 }
 
-function saveSettings() {
-  CFG.sheetId = document.getElementById('sheetId').value.trim();
-  CFG.scriptUrl = document.getElementById('scriptUrl').value.trim();
-  CFG.driveFolderId = document.getElementById('driveFolderId').value.trim();
-  localStorage.setItem('m_cfg', JSON.stringify(CFG));
-  updateSyncBadge();
-  updateDriveNote();
-  document.getElementById('settingsStatus').textContent = 'Settings saved.';
-  toast('Settings saved');
+// ── STATUS ────────────────────────────────────────────────────────────
+function setStatus(msg, isErr){
+  const el=document.getElementById('refreshStatus');
+  if(!el) return;
+  el.textContent=msg;
+  el.style.color=isErr?'#C0392B':'#706E67';
 }
 
-function updateSyncBadge() {
-  const el = document.getElementById('syncStatus');
-  if (CFG.scriptUrl) {
-    el.className = 'sync-status connected';
-    el.textContent = 'Sheets connected';
-  } else {
-    el.className = 'sync-status disconnected';
-    el.textContent = 'Not connected';
+// ── REFRESH ───────────────────────────────────────────────────────────
+async function refreshData(){
+  const url=getScriptUrl();
+  if(!url){ setStatus('No script URL — check Tracker → Settings',true); return; }
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.disabled=true;btn.textContent='Refreshing…';}
+  setStatus('Fetching…');
+  try{
+    const resp=await fetch(url+'?action=read&sheet=daily');
+    const json=await resp.json();
+    if(!json.success) throw new Error(json.error||'Unknown error');
+    processRawRows(json.data.headers, json.data.rows);
+    setStatus('Updated '+new Date().toLocaleTimeString());
+    buildAll();
+  }catch(err){
+    setStatus('Refresh failed: '+err.message, true);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Refresh data';}
   }
 }
 
-function updateDriveNote() {
-  document.getElementById('driveNote').style.display = CFG.driveFolderId ? 'block' : 'none';
-  document.getElementById('driveSetupNote').style.display = CFG.driveFolderId ? 'none' : 'block';
-}
+// ── PROCESS RAW ROWS ──────────────────────────────────────────────────
+function processRawRows(headers, rows){
+  const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
+  const CRANKY_I=13,STOPS_I=15,SI_I=18,EQUI_I=21,PT_I=22;
+  const POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
+  const STRADDLE_I=32,TREADMILL_I=33;
 
-function txDay(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  return TX_START + Math.round((d - ORIGIN_DATE) / 86400000);
-}
-
-function initDate() {
-  const now = new Date();
-  const s = now.toISOString().slice(0,10);
-  document.getElementById('entryDate').value = s;
-  S.date = s;
-  updateBadge(s);
-}
-
-function onDateChange(v) { S.date = v; updateBadge(v); }
-
-function updateBadge(v) {
-  const tx = txDay(v);
-  const pr = tx - TX_START + 1;
-  document.getElementById('dayBadge').textContent = 'TX ' + tx + ' · D' + pr;
-}
-
-function showSection(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('s-' + id).classList.add('active');
-  if (btn) btn.classList.add('active');
-  else {
-    const t = document.querySelector('[data-s="'+id+'"]');
-    if (t) t.classList.add('active');
+  function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+  function stopsN(v){
+    if(v==null) return null;
+    const s=String(v);
+    if(s.includes('None')) return 0;
+    if(s.includes('Many')) return 2;
+    if(s.includes('Few')) return 1;
+    return null;
   }
-  if (id === 'history') renderHistory();
-  // Hide main Save Entry bar on tabs that have their own save button
-  const hideSaveBar = ['vet','bodywork','history','settings'].includes(id);
-  document.querySelector('.save-bar').style.display = hideSaveBar ? 'none' : 'block';
-}
+  function parseDate(v){
+    if(!v) return null;
+    const d=new Date(String(v).slice(0,10)+'T12:00:00');
+    return isNaN(d)?null:d;
+  }
+  function wkStart(d){const day=d.getDay();return new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);}
+  function moStart(d){return new Date(d.getFullYear(),d.getMonth(),1);}
+  function dFmt(d){return d.toISOString().slice(0,10);}
 
-function show(id) { document.getElementById(id).classList.add('show'); }
-function hide(id) { document.getElementById(id).classList.remove('show'); }
+  const START=new Date('2025-11-20');
+  const valid=rows.map(r=>({d:parseDate(r[DATE_I]),r}))
+    .filter(({d,r})=>d&&d>=START&&r.slice(3).some(v=>v!==null&&v!==undefined&&String(v).trim()!==''))
+    .sort((a,b)=>a.d-b.d);
 
-function tog(btn, cb) {
-  const f = btn.dataset.f, v = btn.dataset.v;
-  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('sel-yes','sel-no'));
-  btn.classList.add(v === 'Y' ? 'sel-yes' : 'sel-no');
-  S[f] = v;
-  if (cb) cb();
-}
+  const wMap={},mMap={};
+  valid.forEach(({d,r})=>{
+    const wk=dFmt(wkStart(d)), mo=dFmt(moStart(d));
+    (wMap[wk]=wMap[wk]||[]).push({d,r});
+    (mMap[mo]=mMap[mo]||[]).push({d,r});
+  });
 
-function setScore(btn, key, hintId, hints) {
-  const v = btn.dataset.v;
-  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  S[key] = v;
-  document.getElementById(hintId).textContent = hints[parseInt(v)] || '';
-}
+  function agg(groups){
+    return Object.entries(groups).map(([period,items])=>{
+      const hasData=items.some(({r})=>r[PT_I]==='Y'||r[POLES_I]==='Y'||r[EQUI_I]==='Y'||r[RODE_I]==='Y'||r[BW_I]!=null||(toF(r[WALK_I])||0)>0||(toF(r[TROT_I])||0)>0||(toF(r[CANT_I])||0)>0||r[SW_I]==='Y'||r[LASER_I]==='Y');
+      if(!hasData) return null;
+      const willV=items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
+      const stopsV=items.map(({r})=>stopsN(r[STOPS_I])).filter(v=>v!==null);
+      const crankyD=items.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
+      return {
+        period,
+        will:willV.length?Math.round(willV.reduce((s,v)=>s+v,0)/willV.length*100)/100:null,
+        walk:items.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0),
+        trot:items.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0),
+        canter:items.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0),
+        rode:items.filter(({r})=>r[RODE_I]==='Y').length,
+        pt:items.filter(({r})=>r[PT_I]==='Y').length,
+        poles:items.filter(({r})=>r[POLES_I]==='Y').length,
+        equi:items.filter(({r})=>r[EQUI_I]==='Y').length,
+        shockwave:items.filter(({r})=>r[SW_I]==='Y').length,
+        bodywork:items.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!=='').length,
+        laser:items.filter(({r})=>r[LASER_I]==='Y').length,
+        cranky_rate:crankyD.length?Math.round(crankyD.filter(v=>v==='Y').length/crankyD.length*100):null,
+        si:items.filter(({r})=>r[SI_I]==='Y').length,
+        stops:stopsV.length?Math.round(stopsV.reduce((s,v)=>s+v,0)/stopsV.length*100)/100:null,
+        straddlepoles:items.filter(({r})=>r[STRADDLE_I]==='Y').length,
+        treadmill:items.filter(({r})=>r[TREADMILL_I]==='Y').length,
+        days:items.length,
+      };
+    }).filter(Boolean).sort((a,b)=>a.period.localeCompare(b.period));
+  }
 
-function togChip(btn) {
-  btn.classList.toggle('sel');
-  const f = btn.dataset.f;
-  if(f) S[f] = btn.classList.contains('sel') ? 'Y' : '';
-}
+  W=agg(wMap);
+  M=agg(mMap);
 
-function oneChip(btn, key) {
-  btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
-  btn.classList.add('sel');
-  S[key] = btn.textContent.trim();
-}
+  // Gaps
+  const rideDates=valid.filter(({r})=>r[RODE_I]==='Y');
+  GAPS=[];
+  rideDates.forEach(({d,r},i)=>{
+    if(!i) return;
+    const will=toF(r[WILL_I]);
+    if(will===null) return;
+    const gap=Math.round((d-rideDates[i-1].d)/(86400000));
+    GAPS.push({gap,will});
+  });
 
-function multiChip(btn, group) {
-  btn.classList.toggle('sel');
-  if (group === 'trigger') {
-    S.trigger = [...document.querySelectorAll('#triggerChips .chip.sel')].map(c => c.textContent.trim());
-  } else if (group === 'mod') {
-    S.modalities = [...document.querySelectorAll('[data-f].chip.sel')].map(c => c.dataset.f);
-    const swOn = S.modalities.includes('shockwave');
-    const swField = document.getElementById('swAreaField');
-    if (swField) swField.style.display = swOn ? 'block' : 'none';
-    if (!swOn) {
-      document.querySelectorAll('#swAreaChips .chip.sel').forEach(c => c.classList.remove('sel'));
-      S.swAreas = [];
-    }
-  } else if (group === 'swa') {
-    S.swAreas = [...document.querySelectorAll('#swAreaChips .chip.sel')].map(c => c.dataset.swa);
+  updateThisWeekCard(valid);
+  D.valid=valid;
+  // Update header date range
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const days=Math.round((dates[dates.length-1]-dates[0])/86400000);
+    const el=document.getElementById('trackingRange');
+    if(el) el.textContent='Post-rehab tracking · '+fmt(dates[0])+' – '+fmt(dates[dates.length-1])+' · '+days+' days';
   }
 }
 
-function setRating(btn) {
-  document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  S.rating = btn.dataset.r;
-}
+// ── THIS WEEK CARD ────────────────────────────────────────────────────
+function updateThisWeekCard(valid){
+  const today=new Date();
+  const sun=new Date(today); sun.setDate(today.getDate()-today.getDay()); sun.setHours(0,0,0,0);
 
-function setSev(el, v) {
-  document.querySelectorAll('.sev-opt').forEach(o => o.classList.remove('sel'));
-  el.classList.add('sel');
-  S.siSeverity = v;
-}
-
-function collectText() {
-  S.dayType       = document.getElementById('dayType').value;
-  S.totalDur      = document.getElementById('totalDur').value;
-  S.saddleType    = document.getElementById('saddleType').value;
-  S.walkMin       = document.getElementById('walkMin').value;
-  S.trotMin       = document.getElementById('trotMin').value;
-  S.canterMin     = document.getElementById('canterMin').value;
-  S.behaviorNotes = document.getElementById('behaviorNotes').value;
-  S.ptNotes       = document.getElementById('ptNotes').value;
-  S.mediaCaption  = document.getElementById('mediaCaption').value;
-}
-
-function handleMedia(e) {
-  Array.from(e.target.files).forEach(f => {
-    const r = new FileReader();
-    r.onload = ev => {
-      S.mediaFiles.push({ name: f.name, type: f.type, data: ev.target.result, driveUrl: '' });
-      renderMediaGrid();
+  function getWeekData(weekOffset){
+    const ws=new Date(sun); ws.setDate(sun.getDate()+weekOffset*7);
+    const we=new Date(ws); we.setDate(ws.getDate()+6); we.setHours(23,59,59,999);
+    const items=valid.filter(({d})=>d>=ws&&d<=we);
+    if(!items.length) return null;
+    const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
+    const CRANKY_I=13,EQUI_I=21,PT_I=22,POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
+    const STRADDLE_I=32,TREADMILL_I=33;
+    function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
+    const willV=items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
+    const crankyD=items.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
+    return {
+      label: ws.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' – '+we.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+      days: items.length,
+      will: willV.length?(willV.reduce((s,v)=>s+v,0)/willV.length).toFixed(1):null,
+      rides: items.filter(({r})=>r[RODE_I]==='Y').length,
+      walk: items.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0),
+      trot: items.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0),
+      cant: items.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0),
+      pt: items.filter(({r})=>r[PT_I]==='Y').length,
+      equi: items.filter(({r})=>r[EQUI_I]==='Y').length,
+      poles: items.filter(({r})=>r[POLES_I]==='Y').length,
+      straddle: items.filter(({r})=>r[STRADDLE_I]==='Y').length,
+      treadmill: items.filter(({r})=>r[TREADMILL_I]==='Y').length,
+      bw: items.filter(({r})=>r[BW_I]!=null&&String(r[BW_I]).trim()!=='').length,
+      sw: items.filter(({r})=>r[SW_I]==='Y').length,
+      laser: items.filter(({r})=>r[LASER_I]==='Y').length,
+      cranky: crankyD.length?Math.round(crankyD.filter(v=>v==='Y').length/crankyD.length*100):null,
     };
-    r.readAsDataURL(f);
+  }
+
+  const w0=getWeekData(0), w1=getWeekData(-1), w2=getWeekData(-2);
+  if(!w0) return;
+
+  function delta(now, prev){
+    if(prev===null||now===null) return '';
+    const d=parseFloat(now)-parseFloat(prev);
+    if(d===0) return '';
+    return d>0?`<span class="cmp-up">▲${Math.abs(d)%1===0?Math.abs(d):Math.abs(d).toFixed(1)}</span>`:`<span class="cmp-dn">▼${Math.abs(d)%1===0?Math.abs(d):Math.abs(d).toFixed(1)}</span>`;
+  }
+
+  function cell(now, prev, suffix=''){
+    const val = now!==null ? now+suffix : '—';
+    return `<td class="cmp-now">${val}${prev!==null?delta(now,prev):''}</td>`;
+  }
+
+  function row(label, key, suffix=''){
+    const n=w0[key], p1=w1?w1[key]:null, p2=w2?w2[key]:null;
+    return `<tr>
+      <td>${label}</td>
+      ${cell(n,p1,suffix)}
+      <td>${p1!==null?p1+suffix:'—'}</td>
+      <td>${p2!==null?p2+suffix:'—'}</td>
+    </tr>`;
+  }
+
+  const el=document.getElementById('thisWeekCard');
+  if(!el) return;
+
+  const ptOk=w0.pt>=3, straddleOk=w0.straddle>=2;
+
+  el.innerHTML=`
+    <div class="card-title">This week — ${w0.label}</div>
+    <div class="card-sub">${w0.days} days logged${w0.sw?' · ⚡ Shockwave this week':''}${w0.laser?' · 🔦 Laser this week':''}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:16px">
+      <div class="sc ${parseFloat(w0.will)>=4?'g':parseFloat(w0.will)>=3?'w':'b'}"><div class="sv">${w0.will||'—'}</div><div class="sl">Avg willingness</div></div>
+      <div class="sc"><div class="sv">${w0.rides}</div><div class="sl">Rides</div></div>
+      <div class="sc"><div class="sv">${w0.walk}</div><div class="sl">Walk (min)</div></div>
+      <div class="sc"><div class="sv">${w0.trot}</div><div class="sl">Trot (min)</div></div>
+      <div class="sc"><div class="sv">${w0.cant}</div><div class="sl">Canter (min)</div></div>
+      <div class="sc"><div class="sv">${w0.pt}x</div><div class="sl">PT exercises</div></div>
+      <div class="sc"><div class="sv">${w0.equi}x</div><div class="sl">Equibands</div></div>
+      <div class="sc"><div class="sv">${w0.poles}x</div><div class="sl">Poles</div></div>
+      <div class="sc"><div class="sv">${w0.bw}x</div><div class="sl">Bodywork</div></div>
+    </div>
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="cmp-now">This week</th>
+          <th>${w1?w1.label:'Last week'}</th>
+          <th>${w2?w2.label:'2 wks ago'}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${row('Avg willingness','will')}
+        ${row('Rides','rides')}
+        ${row('Walk (min)','walk')}
+        ${row('Trot (min)','trot')}
+        ${row('Canter (min)','cant')}
+        ${row('PT exercises','pt','x')}
+        ${row('Straddle poles','straddle','x')}
+        ${row('Equibands','equi','x')}
+        ${row('Poles','poles','x')}
+        ${row('Treadmill','treadmill','x')}
+        ${row('Bodywork','bw','x')}
+      </tbody>
+    </table>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px">
+      <span>${ptOk?'🟢':'🔴'} PT ${w0.pt}x ${ptOk?'(target met)':'(below 3x)'}</span>
+      <span>${straddleOk?'🟢':'🔴'} Straddle poles ${w0.straddle}x ${straddleOk?'(target met)':'(below 2x)'}</span>
+      ${w0.cranky!==null?`<span>🟡 Cranky ${w0.cranky}% of tack-up days</span>`:''}
+    </div>`;
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────
+function D(){ return view==='weekly'?W:M; }
+D.valid=[];
+function L(d){
+  const dt=new Date(d.period+'T12:00:00');
+  return view==='weekly'?(dt.getMonth()+1)+'/'+dt.getDate():dt.toLocaleDateString('en-US',{month:'short',year:'2-digit'});
+}
+function kill(){ Object.values(CH).forEach(c=>c&&c.destroy()); CH={}; }
+
+function bandPlugin(data){
+  return {id:'bands',beforeDraw(chart){
+    const {ctx,chartArea}=chart;
+    if(!chartArea) return;
+    const bw=chartArea.width/data.length;
+    data.forEach((d,i)=>{
+      let col=null;
+      if(d.shockwave>0)               col='rgba(226,75,74,0.10)';
+      else if(d.period==='2026-03-02') col='rgba(24,95,165,0.10)';
+      else if(d.period>=LASER_START)   col='rgba(83,74,183,0.10)';
+      if(d.period==='2026-03-16'&&!col) col='rgba(133,79,11,0.10)';
+      if(!col) return;
+      ctx.save(); ctx.fillStyle=col;
+      ctx.fillRect(chartArea.left+i*bw,chartArea.top,bw,chartArea.height);
+      ctx.restore();
+    });
+  }};
+}
+
+function base(){
+  return {
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},padding:9}},
+    scales:{
+      x:{ticks:{font:{family:'DM Mono',size:9},maxRotation:45,color:'#706E67'},grid:{color:'rgba(0,0,0,0.04)'}},
+      y:{ticks:{font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
+    }
+  };
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────
+function buildStats(data){
+  if(!data.length){document.getElementById('sg').innerHTML='';return;}
+  const vw=data.filter(d=>d.will!==null);
+  const aw=vw.length?(vw.reduce((s,d)=>s+d.will,0)/vw.length).toFixed(1):'—';
+  const tw=data.reduce((s,d)=>s+(+d.walk||0),0);
+  const tt=data.reduce((s,d)=>s+(+d.trot||0),0);
+  const tc=data.reduce((s,d)=>s+(+d.canter||0),0);
+  const pm=data.filter(d=>d.pt>=3).length;
+  const pt=data.filter(d=>d.pt>0).length;
+  const si=data.filter(d=>d.si>0).length;
+  const totalRides=data.reduce((s,d)=>s+d.rode,0);
+  const items=[
+    {l:'Avg willingness',v:aw,c:parseFloat(aw)>=4?'g':parseFloat(aw)>=3?'w':'b'},
+    {l:'Total rides',v:totalRides,c:''},
+    {l:'Total walk (min)',v:tw,c:''},
+    {l:'Total trot (min)',v:tt,c:''},
+    {l:'Total canter (min)',v:tc,c:''},
+    {l:'PT target met',v:pt?pm+'/'+pt+(view==='weekly'?' wks':' mo'):'—',c:pm/Math.max(pt,1)>=0.7?'g':'w'},
+    {l:'SI reactive',v:si+(view==='weekly'?' wks':' mo'),c:si===0?'g':si<=2?'w':'b'},
+  ];
+  document.getElementById('sg').innerHTML=items.map(s=>`<div class="sc ${s.c}"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+}
+
+// ── WORKLOAD ──────────────────────────────────────────────────────────
+function buildWorkload(data,labels){
+  const o=base();
+  o.plugins.legend={display:true,position:'top',labels:{font:{family:'DM Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
+  o.scales.y.stacked=true; o.scales.x.stacked=true;
+  o.scales.y.title={display:true,text:'minutes',font:{family:'DM Sans',size:10},color:'#706E67'};
+  CH.wl=new Chart(document.getElementById('cWorkload'),{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(59,109,17,0.65)', borderColor:'#3B6D11',borderWidth:.5,borderRadius:2},
+      {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(186,117,23,0.65)',borderColor:'#BA7517',borderWidth:.5,borderRadius:2},
+      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(162,45,45,0.65)', borderColor:'#A32D2D',borderWidth:.5,borderRadius:2},
+    ]},options:o
   });
-  e.target.value = '';
 }
 
-function renderMediaGrid() {
-  const g = document.getElementById('mediaGrid');
-  g.innerHTML = S.mediaFiles.map((f,i) => {
-    const isVid = f.type.startsWith('video');
-    const status = f.driveUrl
-      ? '<span class="m-badge">&#10003; Drive</span>'
-      : (f.uploading ? '<span class="m-status uploading">uploading…</span>' : '');
-    return `<div class="m-thumb">
-      ${isVid ? `<video src="${f.data}" muted playsinline></video><span class="m-badge">video</span>` : `<img src="${f.data}" alt="">`}
-      ${status}
-      <button class="m-remove" onclick="removeMedia(${i})">×</button>
+// ── PT COMPLIANCE (single overall %) ──────────────────────────────────
+function buildPTCompliance(data,labels){
+  const el=document.getElementById('ptCompliance');
+  if(!el) return;
+  // Only count periods with enough logged days to fairly assess a weekly target
+  const assessable=data.filter(d=>d.days>=3);
+  const met=assessable.filter(d=>d.pt>=3).length;
+  const total=assessable.length;
+  const pct=total?Math.round(met/total*100):null;
+  const unit=view==='weekly'?'weeks':'months';
+  if(pct===null){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">Not enough logged days to assess.</div>'; return; }
+  const col=pct>=70?'#3B6D11':pct>=40?'#854F0B':'#A32D2D';
+  el.innerHTML=`
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:40px;font-weight:500;letter-spacing:-1px;color:${col}">${pct}%</span>
+      <span style="font-size:13px;color:var(--muted)">of ${unit} hit the 3× target · ${met}/${total}</span>
+    </div>
+    <div style="height:10px;background:#EDE9E0;border-radius:5px;overflow:hidden;margin-top:10px">
+      <div style="height:100%;width:${pct}%;background:${col};border-radius:5px"></div>
     </div>`;
-  }).join('');
 }
 
-function removeMedia(i) { S.mediaFiles.splice(i,1); renderMediaGrid(); }
-
-async function uploadMediaToDrive(mediaFile, txD, dateStr) {
-  if (!CFG.scriptUrl || !CFG.driveFolderId) return null;
-  const ext = mediaFile.name.split('.').pop() || (mediaFile.type.startsWith('video') ? 'mp4' : 'jpg');
-  const fname = `TX${txD}_${dateStr.replace(/-/g,'')}_${mediaFile.name}`;
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({
-      action: 'uploadFile',
-      folderId: CFG.driveFolderId,
-      fileName: fname,
-      mimeType: mediaFile.type,
-      data: mediaFile.data.split(',')[1]
-    }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.url || null;
-  } catch { return null; }
-}
-
-async function pushToSheets(entry) {
-  if (!CFG.scriptUrl) return false;
-  const tx = txDay(entry.date);
-  const pr = tx - TX_START + 1;
-  const driveLinks = entry.mediaFiles.filter(f => f.driveUrl).map(f => f.driveUrl).join(', ');
-  const row = [
-    tx, pr, entry.date,
-    entry.dayType || '',
-    entry.totalDur || '',
-    entry.rode || '',
-    entry.saddleType || '',
-    entry.walkMin || '',
-    entry.trotMin || '',
-    entry.canterMin || '',
-    entry.gait || '',
-    entry.will || '',
-    entry.crop || '',
-    entry.cranky || '',
-    entry.trigger?.join(', ') || '',
-    entry.stops || '',
-    entry.cL || '',
-    entry.cR || '',
-    entry.siReactive || '',
-    entry.siSide || '',
-    entry.siSeverity || '',
-    entry.equibands || '',
-    entry.modalities?.includes('pt') ? 'Y' : '',
-    entry.modalities?.includes('poles') ? 'Y' : '',
-    entry.modalities?.includes('bemer') ? 'Y' : '',
-    entry.bodywork || '',
-    entry.modalities?.includes('laser') ? 'Y' : '',
-    entry.modalities?.includes('shockwave') ? 'Y' : '',
-    entry.modalities?.includes('farrier') ? 'Y' : '',
-    entry.modalities?.includes('exgas') ? 'Y' : '',
-    entry.behaviorNotes || '',
-    [
-      entry.ptNotes || '',
-      entry.modalities?.includes('theraplate') ? 'Theraplate' : '',
-      entry.modalities?.includes('balancepad') ? 'Balance pad' : '',
-      driveLinks ? 'Media: ' + driveLinks : ''
-    ].filter(Boolean).join(' | '),
-    entry.modalities?.includes('straddlepoles') ? 'Y' : '',
-    entry.modalities?.includes('treadmill')     ? 'Y' : '',
-    entry.spontaneousHalt || '',
-    entry.stickyResistant || '',
-    (entry.modalities?.includes('shockwave') && entry.swAreas?.length) ? entry.swAreas.join(', ') : ''
+// ── TIME-OFF vs WILLINGNESS (bucketed bars) ───────────────────────────
+function buildGap(){
+  const el=document.getElementById('gapNote');
+  if(!GAPS.length){ if(el) el.textContent=''; if(CH.gp){CH.gp.destroy();CH.gp=null;} return; }
+  // Bucket rides by rest length before them
+  const buckets=[
+    {key:'0–1 days',  test:g=>g.gap<=1},
+    {key:'2–3 days',  test:g=>g.gap>=2&&g.gap<=3},
+    {key:'4+ days',   test:g=>g.gap>=4},
   ];
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Maestro Post-Rehab Tracking', row, rating: entry.rating || '' }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.success === true;
-  } catch(err) { console.error('Sheets error:', err); return false; }
-}
-
-async function saveEntry() {
-  collectText();
-  if (!S.date) { toast('Please set a date', true); return; }
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-
-  const tx = txDay(S.date);
-  const entry = JSON.parse(JSON.stringify(S));
-  entry.txDay = tx;
-  entry.savedAt = Date.now();
-
-  // Upload media to Drive first
-  if (CFG.scriptUrl && CFG.driveFolderId && S.mediaFiles.length) {
-    setSyncBadgeText('Uploading media…');
-    for (let i = 0; i < S.mediaFiles.length; i++) {
-      if (S.mediaFiles[i].driveUrl) continue;
-      S.mediaFiles[i].uploading = true;
-      renderMediaGrid();
-      const url = await uploadMediaToDrive(S.mediaFiles[i], tx, S.date);
-      S.mediaFiles[i].uploading = false;
-      S.mediaFiles[i].driveUrl = url || '';
-      entry.mediaFiles[i].driveUrl = url || '';
-      renderMediaGrid();
-    }
-  }
-
-  // Save locally
-  const all = getEntries();
-  const idx = all.findIndex(e => e.date === S.date);
-  if (idx >= 0) all[idx] = entry; else all.unshift(entry);
-  localStorage.setItem('m_entries', JSON.stringify(all));
-
-  // Only push to Sheets if meaningful data was entered
-  // (prevent blank saves from overwriting real data for the same date)
-  const hasMeaningfulData = entry.rode || entry.will || entry.stops || entry.dayType ||
-    entry.cranky || entry.siReactive || entry.behaviorNotes || entry.rating ||
-    entry.cL || entry.cR || entry.modalities?.length;
-
-  if (CFG.scriptUrl && hasMeaningfulData) {
-    setSyncBadgeText('Syncing…');
-    const ok = await pushToSheets(entry);
-    if (ok) {
-      setSyncBadgeText('Sheets connected');
-      toast('Saved + synced to Sheets ✓');
-    } else {
-      toast('Saved locally — Sheets sync failed', true);
-    }
-  } else if (!hasMeaningfulData) {
-    toast('Nothing to sync — fill in some fields first');
-    updateSyncBadge();
-  } else {
-    toast('Saved locally (connect Sheets in Settings)');
-  }
-
-  updateSyncBadge();
-  btn.disabled = false;
-  btn.textContent = 'Save Entry';
-}
-
-function setSyncBadgeText(t) {
-  const el = document.getElementById('syncStatus');
-  el.className = 'sync-status syncing';
-  el.textContent = t;
-}
-
-async function exportAllToSheets() {
-  if (!CFG.scriptUrl) { toast('Add your Script URL in Settings first', true); return; }
-  const all = getEntries();
-  if (!all.length) { toast('No local entries found'); return; }
-  let ok = 0;
-  for (const e of all) {
-    const res = await pushToSheets(e);
-    if (res) ok++;
-  }
-  toast(`Pushed ${ok}/${all.length} entries to Sheets`);
-}
-
-function getEntries() {
-  try { return JSON.parse(localStorage.getItem('m_entries') || '[]'); } catch { return []; }
-}
-
-function renderHistory() {
-  const all = getEntries();
-  const el = document.getElementById('histList');
-  if (!all.length) {
-    el.innerHTML = `<div class="empty-hist">🐴<br><br>No entries yet.<br>Save your first log above.</div>`;
-    return;
-  }
-  el.innerHTML = all.map((e,i) => {
-    const dotCls = e.rating==='good'?'dot-good':e.rating==='ok'?'dot-ok':e.rating==='bad'?'dot-bad':'dot-none';
-    const d = new Date(e.date+'T12:00:00');
-    const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    const meta = [
-      e.rode==='Y' ? 'Rode' : null,
-      e.will ? `W: ${e.will}/5` : null,
-      e.stops ? `Stops: ${e.stops}` : null,
-      e.siReactive==='Y' ? 'SI reactive' : null,
-      e.cL||e.cR ? `Canter L${e.cL||'—'}/R${e.cR||'—'}` : null
-    ].filter(Boolean).map(x=>`<span>${x}</span>`).join('');
-    const noteText = [e.dayType, e.behaviorNotes, e.ptNotes].filter(Boolean).join(' · ');
-    const mediaHTML = (e.mediaFiles||[]).length
-      ? `<div class="hist-media">${e.mediaFiles.map(f=>f.type?.startsWith('video')
-          ?`<video class="hist-media" src="${f.data}" muted></video>`
-          :`<img src="${f.data}">`).join('')}</div>` : '';
-    return `<div class="hist-entry" onclick="this.classList.toggle('open')">
-      <div class="hist-header">
-        <div><div class="hist-date">${dateStr}</div><div class="hist-sub">TX ${e.txDay||''}</div></div>
-        <div class="dot ${dotCls}"></div>
-      </div>
-      <div class="hist-meta">${meta}</div>
-      ${noteText||mediaHTML?`<div class="hist-notes">${noteText?`<div>${noteText}</div>`:''}${mediaHTML}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-function toast(msg, isErr) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isErr?' err':'');
-  clearTimeout(t._to);
-  t._to = setTimeout(()=>t.classList.remove('show'), 2600);
-}
-
-
-// ── VET & BODYWORK STATE ─────────────────────────────────────────────
-const LAME = ['Sound — no lameness perceptible','Barely perceptible, not consistently observable','Perceptible at trot in-hand, consistent','Consistently lame, obvious at trot','Obvious at walk, unable to canter','Non-weight bearing'];
-
-let VET = {
-  date:'', provider:'', clinic:'', visitType:[], procedures:[],
-  lameGrade:'', lameGrades:{RF:'',LF:'',RH:'',LH:''}, lameLimb:[], lameRegion:[], lameRegionOther:'', nerveBlock:'',
-  injSite:'', injProduct:[], injProductOther:'', injProtocol:'',
-  imagingType:[], imagingRegion:'', imagingLink:'',
-  history:'', findings:'', meds:'', recs:'', plan:'',
-  followupDate:'', followupNotes:'',
-  pdfFile:null, pdfLink:'', vaccFile:null, vaccLink:''
-};
-
-let BW = {
-  date:'', provider:'', practice:'', modalities:[], ktArea:'',
-  concerns:'', findings:'', observations:'', recs:'',
-  pdfFile:null, pdfLink:''
-};
-
-// ── CHIP HELPERS (multi-select sets) ────────────────────────────────
-function toggleChipSet(btn, stateKey) {
-  btn.classList.toggle('sel');
-  // rebuild array from all .sel chips in same group parent
-  const selected = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());
-  // figure out which state object owns this key
-  if (stateKey in VET) VET[stateKey] = selected;
-  else if (stateKey in BW) BW[stateKey] = selected;
-}
-
-// ── PROC TOGGLE ──────────────────────────────────────────────────────
-function togProc(el, key) {
-  el.classList.toggle('sel');
-  el.querySelector('.proc-check').textContent = el.classList.contains('sel') ? '✓' : '';
-  const selected = [...document.querySelectorAll('.proc-item.sel')].map(e=>e.querySelector('.proc-label').textContent.trim());
-  VET.procedures = selected;
-  // Show/hide conditional cards
-  document.getElementById('vetLamenessCard').style.display = (selected.includes('Nerve block') || (Array.isArray(VET.visitType) ? VET.visitType.some(t => ['Lameness eval','Rehab check-in'].includes(t)) : ['Lameness eval','Rehab check-in'].includes(VET.visitType))) ? 'block' : 'none';
-  document.getElementById('vetInjectionCard').style.display = selected.includes('Injection') ? 'block' : 'none';
-  document.getElementById('vetImagingCard').style.display = selected.includes('Imaging') ? 'block' : 'none';
-}
-
-// ── VET VISIT TYPE SELECTOR ─────────────────────────────────────────
-function setLimbGrade(btn, limb) {
-  // Deselect siblings in same limb group
-  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  VET.lameGrades[limb] = btn.dataset.v;
-  // Also update combined lameGrade summary and lameLimb
-  const grades = VET.lameGrades;
-  const active = Object.entries(grades).filter(([l,g]) => g && g !== '0').map(([l,g]) => l+'='+g);
-  VET.lameGrade = active.join(', ');
-  VET.lameLimb = Object.entries(grades).filter(([l,g]) => g && g !== '0').map(([l]) => l);
-}
-
-function togVetVisitType(btn) {
-  btn.classList.toggle('sel');
-  VET.visitType = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
-}
-
-// ── COLLECT VET TEXT FIELDS ──────────────────────────────────────────
-function collectVet() {
-  VET.date = document.getElementById('vetDate').value;
-  VET.provider = document.getElementById('vetProvider').value;
-  VET.clinic = document.getElementById('vetClinic').value;
-  VET.lameRegionOther = document.getElementById('vetLameRegionOther').value;
-  VET.nerveBlock = document.getElementById('vetNerveBlock').value;
-  VET.injSite = document.getElementById('vetInjSite').value;
-  VET.injProductOther = document.getElementById('vetInjProductOther').value;
-  VET.injProtocol = document.getElementById('vetInjProtocol').value;
-  VET.imagingRegion = document.getElementById('vetImagingRegion').value;
-  VET.imagingLink = document.getElementById('vetImagingLink').value;
-  VET.history = document.getElementById('vetHistory').value;
-  VET.findings = document.getElementById('vetFindings').value;
-  VET.meds = document.getElementById('vetMeds').value;
-  VET.recs = document.getElementById('vetRecs').value;
-  VET.plan = document.getElementById('vetPlan').value;
-  VET.followupDate = document.getElementById('vetFollowupDate').value;
-  VET.followupNotes = document.getElementById('vetFollowupNotes').value;
-  VET.pdfLink = document.getElementById('vetPdfLink').value;
-  VET.vaccLink = document.getElementById('vetVaccLink').value;
-}
-
-function togBwMod(btn) {
-  btn.classList.toggle('sel');
-  BW.modalities = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
-  const ktCard = document.getElementById('ktAreaCard');
-  if(ktCard) ktCard.style.display = BW.modalities.includes('KT Tape') ? 'block' : 'none';
-}
-
-function collectBw() {
-  BW.date = document.getElementById('bwDate').value;
-  BW.provider = document.getElementById('bwProvider').value;
-  BW.practice = document.getElementById('bwPractice').value;
-  BW.ktArea = (document.getElementById('ktAreaInput') || {}).value || '';
-  BW.concerns = document.getElementById('bwConcerns').value;
-  BW.findings = document.getElementById('bwFindings').value;
-  BW.observations = document.getElementById('bwObservations').value;
-  BW.recs = document.getElementById('bwRecs').value;
-  BW.pdfLink = document.getElementById('bwPdfLink').value;
-}
-
-// ── FILE HANDLERS ────────────────────────────────────────────────────
-function handleVetFile(e, type) {
-  const f = e.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    if (type === 'pdf') VET.pdfFile = { name: f.name, type: f.type, data: ev.target.result };
-    else VET.vaccFile = { name: f.name, type: f.type, data: ev.target.result };
-    toast('File ready — will upload to Drive on save');
-  };
-  r.readAsDataURL(f);
-}
-
-function handleBwFile(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    BW.pdfFile = { name: f.name, type: f.type, data: ev.target.result };
-    const prev = document.getElementById('bwFilePreview');
-    prev.style.display = 'block';
-    prev.textContent = '✓ ' + f.name + ' ready to upload';
-    toast('File ready — will upload to Drive on save');
-  };
-  r.readAsDataURL(f);
-}
-
-// ── UPLOAD FILE TO DRIVE ─────────────────────────────────────────────
-async function uploadFileToDrive(fileObj, prefix) {
-  if (!CFG.scriptUrl || !CFG.driveFolderId || !fileObj) return null;
-  const fname = prefix + '_' + fileObj.name;
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({
-      action: 'uploadFile',
-      folderId: CFG.driveFolderId,
-      fileName: fname,
-      mimeType: fileObj.type,
-      data: fileObj.data.split(',')[1]
-    }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.url || null;
-  } catch { return null; }
-}
-
-// ── PUSH VET ROW TO SHEETS ───────────────────────────────────────────
-async function pushVetToSheets(v) {
-  if (!CFG.scriptUrl) return false;
-  const arr = (x) => Array.isArray(x) ? x : [];
-  const row = [
-    v.date || '', v.provider || '', v.clinic || '', arr(v.visitType).join(', '), arr(v.procedures).join(', '),
-    v.lameGrade || '', arr(v.lameLimb).join(', '), [...arr(v.lameRegion), v.lameRegionOther || ''].filter(Boolean).join(', '), v.nerveBlock || '',
-    arr(v.procedures).includes('Scope') ? 'Y' : '', arr(v.procedures).includes('Bloodwork') ? 'Y' : '', '', '', '',
-    v.injSite || '', [...arr(v.injProduct), v.injProductOther || ''].filter(Boolean).join(', '), v.injProtocol || '',
-    arr(v.imagingType).join(', '), v.imagingRegion || '', v.imagingLink || '',
-    v.meds || '', '',
-    v.history || '', v.findings || '', v.recs || '', v.plan || '',
-    v.followupDate || '', v.followupNotes || '',
-    v.pdfLink || '', v.vaccLink || ''
-  ];
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Vet Records', row, dateCol: 0 }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.success === true;
-  } catch { return false; }
-}
-
-// ── PUSH BODYWORK ROW TO SHEETS ──────────────────────────────────────
-async function pushBwToSheets(b) {
-  if (!CFG.scriptUrl) return false;
-  const mods = b.modalities || [];
-  const ktInput = document.getElementById('ktAreaInput');
-  const ktVal = (ktInput && ktInput.value) ? ktInput.value.trim() : (b.ktArea || '');
-  const ktStr = ktVal ? 'KT tape: ' + ktVal : '';
-  const findingsWithKt = [b.findings, ktStr].filter(Boolean).join(' | ');
-  const row = [
-    b.date, b.provider, b.practice,
-    mods.includes('Massage') ? 'Y' : '', mods.includes('PEMF') ? 'Y' : '',
-    mods.includes('Cold Laser') ? 'Y' : '', mods.includes('KT Tape') ? 'Y' : '',
-    mods.includes('Stretching') ? 'Y' : '', mods.filter(m=>!['Massage','PEMF','Cold Laser','KT Tape','Stretching'].includes(m)).join(', '),
-    b.concerns, findingsWithKt, b.observations, b.recs, b.pdfLink
-  ];
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Bodywork Sessions', row, dateCol: 0 }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.success === true;
-  } catch { return false; }
-}
-
-// ── SAVE VET ENTRY ───────────────────────────────────────────────────
-async function saveVetEntry() {
-  collectVet();
-  if (!VET.date) { toast('Please set a visit date', true); return; }
-
-  const btn = document.querySelector('#s-vet .save-btn-secondary');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-
-  // Upload files to Drive
-  try {
-    if (VET.pdfFile && CFG.driveFolderId) {
-      const url = await uploadFileToDrive(VET.pdfFile, 'vet_' + VET.date);
-      if (url) { VET.pdfLink = url; document.getElementById('vetPdfLink').value = url; }
-    }
-    if (VET.vaccFile && CFG.driveFolderId) {
-      const url = await uploadFileToDrive(VET.vaccFile, 'vacc_' + VET.date);
-      if (url) { VET.vaccLink = url; document.getElementById('vetVaccLink').value = url; }
-    }
-  } catch(uploadErr) {
-    console.error('File upload error:', uploadErr);
-  }
-
-  // Save locally — vet entries are separate from daily log, always append
-  try {
-    const all = getVetEntries();
-    all.unshift({ ...VET, savedAt: Date.now() });
-    localStorage.setItem('m_vet', JSON.stringify(all));
-  } catch(localErr) {
-    console.error('Local save error:', localErr);
-    toast('Local save failed: ' + localErr.message, true);
-    if (btn) { btn.disabled = false; btn.textContent = 'Save Vet Visit'; }
-    return;
-  }
-
-  // Push to Sheets
-  if (CFG.scriptUrl) {
-    try {
-      const ok = await pushVetToSheets(VET);
-      if (ok) {
-        toast('Vet visit saved + synced ✓');
-      } else {
-        toast('Saved locally — Sheets sync failed', true);
+  const rows=buckets.map(b=>{
+    const vals=GAPS.filter(b.test).map(g=>g.will);
+    const avg=vals.length?vals.reduce((s,v)=>s+v,0)/vals.length:null;
+    return {label:b.key,avg:avg,n:vals.length};
+  });
+  const colFor=v=>v===null?'#D8D3C8':v>=4?'#3B6D11':v>=3?'#854F0B':'#A32D2D';
+  if(CH.gp) CH.gp.destroy();
+  CH.gp=new Chart(document.getElementById('cGap'),{
+    type:'bar',
+    data:{labels:rows.map(r=>r.label),datasets:[{
+      data:rows.map(r=>r.avg),
+      backgroundColor:rows.map(r=>colFor(r.avg)),
+      borderRadius:3,
+      barPercentage:0.6,
+    }]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1C1A16',bodyFont:{family:'DM Sans',size:11},padding:8,callbacks:{
+          label:ctx=>' Avg willingness: '+(ctx.raw!=null?ctx.raw.toFixed(1):'—')+' (n='+rows[ctx.dataIndex].n+')'
+        }}
+      },
+      scales:{
+        x:{title:{display:true,text:'Days since previous ride',font:{family:'DM Sans',size:10}},ticks:{font:{family:'DM Sans',size:11},color:'#706E67'},grid:{display:false}},
+        y:{title:{display:true,text:'Avg willingness (1–5)',font:{family:'DM Sans',size:10}},min:1,max:5,ticks:{stepSize:1,font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
       }
-    } catch(sheetErr) {
-      console.error('Sheets push error:', sheetErr);
-      toast('Saved locally — Sheets error: ' + sheetErr.message, true);
+    },
+    plugins:[{
+      id:'gapCounts',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        ctx.save();ctx.font='500 11px DM Sans';ctx.fillStyle='#706E67';ctx.textAlign='center';
+        rows.forEach((r,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText(r.avg!=null?r.avg.toFixed(1):'—',xPos,(r.avg!=null?y.getPixelForValue(r.avg):y.bottom)-8);
+          ctx.fillText('n='+r.n,xPos,y.bottom+18);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+  // Correlation readout across all rides
+  const n=GAPS.length,xs=GAPS.map(g=>g.gap),ys=GAPS.map(g=>g.will);
+  const mx=xs.reduce((s,v)=>s+v,0)/n,my=ys.reduce((s,v)=>s+v,0)/n;
+  const denom=Math.sqrt(xs.reduce((s,v)=>s+(v-mx)**2,0)*ys.reduce((s,v)=>s+(v-my)**2,0));
+  const r=denom?(xs.reduce((s,v,i)=>s+(v-mx)*(ys[i]-my),0)/denom):0;
+  const rr=r.toFixed(2);
+  const strength=Math.abs(r)<0.2?'little to no':Math.abs(r)<0.4?'a weak':'a moderate';
+  const dirn=Math.abs(r)<0.2?`Days off alone don't predict willingness — pain level and what's asked appear to matter more.`:`Longer rest gaps tend to ${r>0?'raise':'lower'} willingness.`;
+  if(el) el.textContent=`Pearson r = ${rr} — ${strength} correlation. ${dirn} Based on ${n} ridden sessions.`;
+}
+
+// ── BUILD ALL ─────────────────────────────────────────────────────────
+function buildWillDist(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cWillDist')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
+  const willCounts={1:0,2:0,3:0,4:0,5:0};
+  valid.forEach(({r})=>{
+    const w=parseFloat(r[11]);
+    if(!isNaN(w)&&w>=1&&w<=5) willCounts[Math.round(w)]++;
+  });
+  const total=Object.values(willCounts).reduce((s,v)=>s+v,0);
+  if(!total) return;
+  const labels=['1 — Spontaneous halts, very reluctant','2 — Very reluctant, needs crop throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
+  const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
+  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
+  if(CH.willDist) CH.willDist.destroy();
+  CH.willDist=new Chart(document.getElementById('cWillDist'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+willCounts[ctx.dataIndex+1]+' rides)'}}
+      }
     }
-  } else {
-    toast('Vet visit saved locally (no Sheets connection)');
-  }
-
-  if (btn) { btn.disabled = false; btn.textContent = 'Save Vet Visit'; }
-  checkReminders();
+  });
 }
 
-// ── SAVE BODYWORK ENTRY ──────────────────────────────────────────────
-async function saveBwEntry() {
-  collectBw();
-  if (!BW.date) { toast('Please set a session date', true); return; }
-
-  // Upload PDF to Drive
-  if (BW.pdfFile && CFG.driveFolderId) {
-    const url = await uploadFileToDrive(BW.pdfFile, 'bodywork_' + BW.date);
-    if (url) { BW.pdfLink = url; document.getElementById('bwPdfLink').value = url; }
+function buildStopsDist(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cStopsDist')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
   }
-
-  // Save locally
-  const all = getBwEntries();
-  all.unshift({ ...BW, savedAt: Date.now() });
-  localStorage.setItem('m_bw', JSON.stringify(all));
-
-  if (CFG.scriptUrl) {
-    const ok = await pushBwToSheets(BW);
-    toast(ok ? 'Bodywork session saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
-  } else {
-    toast('Bodywork session saved locally');
-  }
-
-  // Reset KT area after save
-  BW.ktArea = '';
-  const ktInput = document.getElementById('ktAreaInput');
-  if(ktInput) ktInput.value = '';
-  const ktCard = document.getElementById('ktAreaCard');
-  if(ktCard) ktCard.style.display = 'none';
+  const DATE_I=2,STOPS_I=15;
+  const counts={None:0,Few:0,Many:0};
+  valid.forEach(({r})=>{
+    const v=String(r[STOPS_I]||'').trim();
+    if(v.includes('None')) counts.None++;
+    else if(v.includes('Few')) counts.Few++;
+    else if(v.includes('Many')) counts.Many++;
+  });
+  const total=counts.None+counts.Few+counts.Many;
+  if(!total) return;
+  const labels=['None','Few','Many'];
+  const pcts=[Math.round(counts.None/total*100),Math.round(counts.Few/total*100),Math.round(counts.Many/total*100)];
+  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  if(CH.stopsDist) CH.stopsDist.destroy();
+  CH.stopsDist=new Chart(document.getElementById('cStopsDist'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+[counts.None,counts.Few,counts.Many][ctx.dataIndex]+' rides)'}}
+      }
+    }
+  });
 }
 
-function getVetEntries() { try { return JSON.parse(localStorage.getItem('m_vet')||'[]'); } catch { return []; } }
-function getBwEntries()  { try { return JSON.parse(localStorage.getItem('m_bw') ||'[]'); } catch { return []; } }
+function buildWillMonth(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cWillMonth')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
+  const months={};
+  valid.forEach(({d,r})=>{
+    const w=parseFloat(r[11]);
+    if(isNaN(w)||w<1||w>5) return;
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={1:0,2:0,3:0,4:0,5:0,total:0};
+    months[key][Math.round(w)]++;
+    months[key].total++;
+  });
+  const keys=Object.keys(months).sort();
+  const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
+  const datasets=[1,2,3,4,5].map((lvl,i)=>({
+    label:'Will '+lvl,
+    data:keys.map(k=>Math.round(months[k][lvl]/months[k].total*100)),
+    backgroundColor:colors[i],
+    borderRadius:2,
+  }));
+  if(CH.willMonth) CH.willMonth.destroy();
+  CH.willMonth=new Chart(document.getElementById('cWillMonth'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+      },
+      scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+    },
+    plugins:[{
+      id:'willTotals',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        const totals=keys.map(k=>months[k].total);
+        ctx.save();
+        ctx.font='500 10px DM Sans';
+        ctx.fillStyle='#6B6760';
+        ctx.textAlign='center';
+        totals.forEach((t,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText('n='+t,xPos,y.top-6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
 
-// ── FOLLOW-UP REMINDERS ──────────────────────────────────────────────
-function checkReminders() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const in7 = new Date(today); in7.setDate(in7.getDate()+7);
-  const items = [];
+function buildStopsMonth(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cStopsMonth')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
+  const DATE_I=2,STOPS_I=15;
+  const months={};
+  valid.forEach(({d,r})=>{
+    const v=String(r[STOPS_I]||'').trim();
+    if(!v) return;
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={None:0,Few:0,Many:0,total:0};
+    if(v.includes('None')) months[key].None++;
+    else if(v.includes('Few')) months[key].Few++;
+    else if(v.includes('Many')) months[key].Many++;
+    months[key].total++;
+  });
+  const keys=Object.keys(months).sort();
+  const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  const datasets=['None','Few','Many'].map((cat,i)=>({
+    label:cat,
+    data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
+    backgroundColor:colors[i],
+    borderRadius:2,
+  }));
+  if(CH.stopsMonth) CH.stopsMonth.destroy();
+  CH.stopsMonth=new Chart(document.getElementById('cStopsMonth'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+      },
+      scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+    },
+    plugins:[{
+      id:'stopsTotals',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        const totals=keys.map(k=>months[k].total);
+        ctx.save();
+        ctx.font='500 10px DM Sans';
+        ctx.fillStyle='#6B6760';
+        ctx.textAlign='center';
+        totals.forEach((t,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText('n='+t,xPos,y.top-6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
 
-  getVetEntries().forEach((e, idx) => {
-    if (!e.followupDate) return;
-    const d = new Date(e.followupDate + 'T12:00:00');
-    if (d <= in7) {
-      const overdue = d < today;
-      const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      items.push({ text: label + ' — ' + (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : ''), overdue, entryIdx: idx, followupDate: e.followupDate });
+function buildGaitMonth(valid){
+  if(valid.length){
+    const dates=valid.map(v=>v.d).sort((a,b)=>a-b);
+    const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const el=document.getElementById('cGaitMonth')?.closest('.card')?.querySelector('.card-sub');
+    if(el) el.textContent=fmt(dates[0])+' — '+fmt(dates[dates.length-1]);
+  }
+  const RODE_I=5,GAIT_I=10;
+  const months={};
+  valid.forEach(({d,r})=>{
+    const g=String(r[GAIT_I]||'').trim().toLowerCase();
+    if(r[RODE_I]!=='Y'&&!g) return;
+    let level='Walk only';
+    if(g.includes('c')) level='W/T/C';
+    else if(g.includes('t')) level='W/T';
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    if(!months[key]) months[key]={'Walk only':0,'W/T':0,'W/T/C':0,total:0};
+    months[key][level]++;
+    months[key].total++;
+  });
+  const keys=Object.keys(months).sort();
+  if(!keys.length) return;
+  const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
+  const colors=['#6B8F3A','#185FA5','#534AB7'];
+  const datasets=['Walk only','W/T','W/T/C'].map((cat,i)=>({
+    label:cat,
+    data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
+    backgroundColor:colors[i],
+    borderRadius:2,
+  }));
+  if(CH.gaitMonth) CH.gaitMonth.destroy();
+  CH.gaitMonth=new Chart(document.getElementById('cGaitMonth'),{
+    type:'bar',
+    data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
+      },
+      scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+    },
+    plugins:[{
+      id:'gaitTotals',
+      afterDatasetsDraw(chart){
+        const{ctx,scales:{x,y}}=chart;
+        const totals=keys.map(k=>months[k].total);
+        ctx.save();
+        ctx.font='500 10px DM Sans';
+        ctx.fillStyle='#6B6760';
+        ctx.textAlign='center';
+        totals.forEach((t,i)=>{
+          const xPos=x.getPixelForValue(i);
+          ctx.fillText('n='+t,xPos,y.top-6);
+        });
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+function buildRehabGoals(valid){
+  const el=document.getElementById('rehabGoalsContent');
+  if(!el||!valid.length) return;
+
+  const WILL_I=11, RODE_I=5;
+  const today=new Date();
+  const thirtyAgo=new Date(today); thirtyAgo.setDate(today.getDate()-30);
+
+  // Sort by date
+  const sorted=[...valid].sort((a,b)=>a.d-b.d);
+
+  // Find last spontaneous halt (column AI = index 34)
+  const HALT_I=34;
+  const halts=sorted.filter(({r})=>r[HALT_I]==='Y');
+  const lastHalt=halts.length?halts[halts.length-1]:null;
+  const daysSinceHalt=lastHalt?Math.round((today-lastHalt.d)/86400000):null;
+
+  // Last 30 days rides
+  const last30=sorted.filter(({d,r})=>d>=thirtyAgo&&r[RODE_I]==='Y');
+  const last30Will=last30.map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+  const fives=last30Will.filter(v=>v===5).length;
+  const fours=last30Will.filter(v=>v===4).length;
+  const pct5=last30Will.length?Math.round(fives/last30Will.length*100):0;
+  const pct45=last30Will.length?Math.round((fives+fours)/last30Will.length*100):0;
+
+  // Gait level breakdown (last 30 days) — uses Gait Ridden column (index 10)
+  const GAIT_I=10;
+  const last30Ridden=last30.filter(({r})=>r[RODE_I]==='Y'||String(r[GAIT_I]||'').trim()!=='');
+  let gaitWOn=0, gaitWTn=0, gaitWTCn=0;
+  last30Ridden.forEach(({r})=>{
+    const g=String(r[GAIT_I]||'').trim().toLowerCase();
+    if(g.includes('c')) gaitWTCn++;
+    else if(g.includes('t')) gaitWTn++;
+    else gaitWOn++;
+  });
+  const gaitTotal=last30Ridden.length||1;
+  const gaitWO=Math.round(gaitWOn/gaitTotal*100);
+  const gaitWT=Math.round(gaitWTn/gaitTotal*100);
+  const gaitWTC=Math.round(gaitWTCn/gaitTotal*100);
+
+  // Clean rides tracking — no spontaneous halt (34), no sticky/resistant (35), stops = None (15)
+  const HALT_COL=34, STICKY_I=35, STOPS_COL=15;
+  const last30Rodes=last30.filter(({r})=>r[RODE_I]==='Y');
+  const last30Rides=last30Rodes.length;
+  const reluctantRides=last30Rodes.filter(({r})=>r[HALT_COL]==='Y'||r[STICKY_I]==='Y'||!(String(r[STOPS_COL]||'').includes('None')));
+  const stickyCount=reluctantRides.length;
+  const stickyPct=last30Rides?Math.round(stickyCount/last30Rides*100):0;
+  const allReluctant=sorted.filter(({r})=>r[RODE_I]==='Y'&&(r[HALT_COL]==='Y'||r[STICKY_I]==='Y'||!(String(r[STOPS_COL]||'').includes('None'))));
+  const lastSticky=allReluctant.length?allReluctant[allReluctant.length-1]:null;
+
+  // Goal 1: 30 days no spontaneous halts
+  const haltGoalMet=daysSinceHalt!==null&&daysSinceHalt>=30;
+  const haltProgress=daysSinceHalt!==null?Math.min(daysSinceHalt/30*100,100):100;
+
+  // Goal 2: 90%+ rides at 5/5 in last 30 days
+  const willGoalMet=pct5>=90;
+  const willProgress=Math.min(pct5/90*100,100);
+
+  function progressBar(pct,met){
+    return `<div style="height:8px;background:var(--border);border-radius:4px;margin:6px 0 4px;overflow:hidden">
+      <div style="height:100%;width:${Math.round(pct)}%;background:${met?'#3B6D11':'#534AB7'};border-radius:4px;transition:width 0.3s"></div>
+    </div>`;
+  }
+
+  el.innerHTML=`
+    <div style="display:grid;gap:16px;grid-template-columns:1fr 1fr">
+      <div>
+        <div style="font-weight:500;color:var(--text);margin-bottom:4px">${haltGoalMet?'✓':'○'} Days since last spontaneous halt</div>
+        <div style="font-size:28px;font-weight:500;color:${haltGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${daysSinceHalt!==null?daysSinceHalt:'—'}</div>
+        ${progressBar(haltProgress,haltGoalMet)}
+        <div style="font-size:11px;color:var(--muted)">Goal: 30 days${haltGoalMet?' — achieved':''}${lastHalt?' · Last halt: '+lastHalt.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):' · No halts recorded'}</div>
+      </div>
+      <div>
+        <div style="font-weight:500;color:var(--text);margin-bottom:4px">${willGoalMet?'✓':'○'} Rides at 5/5 (last 30 days)</div>
+        <div style="font-size:28px;font-weight:500;color:${willGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${pct5}%</div>
+        ${progressBar(willProgress,willGoalMet)}
+        <div style="font-size:11px;color:var(--muted)">Goal: 90%+ · ${fives}/${last30Will.length} rides at 5/5 · ${pct45}% at 4+ · Last 30 days</div>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} No reluctance or stops (last 30 days)</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
+        <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had reluctance (halt, sticky, or stops)</span>
+      </div>
+      ${progressBar(100-stickyPct,stickyPct===0)}
+      <div style="font-size:11px;color:var(--muted)">${lastSticky?'Last reluctant ride: '+lastSticky.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'No reluctant rides recorded'} · Last 30 days</div>
+    </div>
+    <div style="margin-top:16px">
+      <div style="font-weight:500;color:var(--text);margin-bottom:8px">Gait level (last 30 days)</div>
+      <div style="display:flex;height:14px;border-radius:6px;overflow:hidden;gap:1px;margin-bottom:6px">
+        ${gaitWO?'<div style="flex:'+gaitWO+';background:#6B8F3A" title="Walk only: '+gaitWO+'%"></div>':''}
+        ${gaitWT?'<div style="flex:'+gaitWT+';background:#185FA5" title="W/T: '+gaitWT+'%"></div>':''}
+        ${gaitWTC?'<div style="flex:'+gaitWTC+';background:#534AB7" title="W/T/C: '+gaitWTC+'%"></div>':''}
+      </div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--muted)">
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6B8F3A;margin-right:4px;vertical-align:middle"></span>Walk only ${gaitWO}% (${gaitWOn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#185FA5;margin-right:4px;vertical-align:middle"></span>W/T ${gaitWT}% (${gaitWTn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#534AB7;margin-right:4px;vertical-align:middle"></span>W/T/C ${gaitWTC}% (${gaitWTCn})</span>
+      </div>
+    </div>`;
+}
+
+function buildInterventionAnalysis(valid){
+  const el=document.getElementById('interventionSummary');
+  const detail=document.getElementById('interventionDetail');
+  if(!el||!valid.length) return;
+
+  const WILL_I=11, STOPS_I=15, SW_I=27, RODE_I=5;
+  const DAY=86400000;
+
+  // Find all shockwave dates
+  const swDates=[];
+  valid.forEach(({d,r})=>{
+    if(r[SW_I]==='Y') swDates.push(d);
+  });
+
+  if(!swDates.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--muted)">No shockwave sessions logged.</div>';
+    return;
+  }
+
+  // For each shockwave, compute before/after metrics
+  const windows=swDates.map(swDate=>{
+    const before14=new Date(swDate.getTime()-14*DAY);
+    const after14=new Date(swDate.getTime()+14*DAY);
+
+    const pre=valid.filter(({d,r})=>d>=before14&&d<swDate&&r[RODE_I]==='Y');
+    const post=valid.filter(({d,r})=>d>swDate&&d<=after14&&r[RODE_I]==='Y');
+
+    function avg(arr,idx){
+      const vals=arr.map(({r})=>parseFloat(r[idx])).filter(v=>!isNaN(v));
+      return vals.length?Math.round(vals.reduce((s,v)=>s+v,0)/vals.length*100)/100:null;
+    }
+    function stopsPct(arr,val){
+      const stops=arr.map(({r})=>String(r[STOPS_I]||'').trim()).filter(v=>v);
+      if(!stops.length) return null;
+      return Math.round(stops.filter(s=>s.includes(val)).length/stops.length*100);
+    }
+
+    return {
+      date: swDate,
+      label: swDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}),
+      preRides: pre.length,
+      postRides: post.length,
+      preWill: avg(pre, WILL_I),
+      postWill: avg(post, WILL_I),
+      preStopsNone: stopsPct(pre,'None'),
+      postStopsNone: stopsPct(post,'None'),
+    };
+  });
+
+  // Overall before/after averages
+  const allPre=windows.filter(w=>w.preWill!==null);
+  const allPost=windows.filter(w=>w.postWill!==null);
+  const avgPreWill=allPre.length?(allPre.reduce((s,w)=>s+w.preWill,0)/allPre.length).toFixed(1):null;
+  const avgPostWill=allPost.length?(allPost.reduce((s,w)=>s+w.postWill,0)/allPost.length).toFixed(1):null;
+  const willDelta=avgPreWill&&avgPostWill?(avgPostWill-avgPreWill).toFixed(1):null;
+
+  const avgPreStops=allPre.filter(w=>w.preStopsNone!==null);
+  const avgPostStops=allPost.filter(w=>w.postStopsNone!==null);
+  const preStopsAvg=avgPreStops.length?Math.round(avgPreStops.reduce((s,w)=>s+w.preStopsNone,0)/avgPreStops.length):null;
+  const postStopsAvg=avgPostStops.length?Math.round(avgPostStops.reduce((s,w)=>s+w.postStopsNone,0)/avgPostStops.length):null;
+
+  // Baseline day-to-day willingness variation (independent of shockwave)
+  const allRidden=valid.filter(({r})=>r[RODE_I]==='Y');
+  const willValues=allRidden.map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+  let dayToDayVar=null;
+  if(willValues.length>1){
+    let totalDiff=0;
+    for(let i=1;i<willValues.length;i++) totalDiff+=Math.abs(willValues[i]-willValues[i-1]);
+    dayToDayVar=Math.round(totalDiff/(willValues.length-1)*100)/100;
+  }
+
+  // On-time vs overdue analysis (30 day cadence)
+  const sortedSW=[...swDates].sort((a,b)=>a-b);
+  const onTime=[], overdue=[];
+  sortedSW.forEach((sw,i)=>{
+    if(i===0){onTime.push({date:sw,gap:null});return;}
+    const gap=Math.round((sw-sortedSW[i-1])/DAY);
+    if(gap<=35) onTime.push({date:sw,gap});
+    else overdue.push({date:sw,gap});
+  });
+
+  function avgWillAfter(swList){
+    const vals=[];
+    swList.forEach(({date})=>{
+      const after14=new Date(date.getTime()+14*DAY);
+      const post=valid.filter(({d,r})=>d>date&&d<=after14&&r[RODE_I]==='Y');
+      post.forEach(({r})=>{const w=parseFloat(r[WILL_I]);if(!isNaN(w))vals.push(w);});
+    });
+    return vals.length?(Math.round(vals.reduce((s,v)=>s+v,0)/vals.length*100)/100):null;
+  }
+  const onTimeAvg=onTime.length>1?avgWillAfter(onTime):null;
+  const overdueAvg=overdue.length?avgWillAfter(overdue):null;
+
+  function arrow(d){
+    if(d===null) return '';
+    const n=parseFloat(d);
+    if(n>0) return '<span style="color:#3B6D11">▲ +'+Math.abs(n)+'</span>';
+    if(n<0) return '<span style="color:#A32D2D">▼ '+Math.abs(n)+'</span>';
+    return '<span style="color:var(--muted)">—</span>';
+  }
+
+  el.innerHTML=`
+    <div style="display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));margin-top:12px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Shockwave sessions</div>
+        <div style="font-size:24px;font-weight:500">${swDates.length}</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Avg willingness change</div>
+        <div style="font-size:24px;font-weight:500">${willDelta!==null?arrow(willDelta):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${avgPreWill||'—'} before → ${avgPostWill||'—'} after</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Rides w/ no stops change</div>
+        <div style="font-size:24px;font-weight:500">${preStopsAvg!==null&&postStopsAvg!==null?arrow(postStopsAvg-preStopsAvg)+'%':'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${preStopsAvg!==null?preStopsAvg+'%':'—'} before → ${postStopsAvg!==null?postStopsAvg+'%':'—'} after</div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Baseline day-to-day variation</div>
+        <div style="font-size:24px;font-weight:500">${dayToDayVar!==null?'±'+dayToDayVar:'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">Avg ride-to-ride willingness change</div>
+      </div>
+    </div>
+    ${onTime.length>1||overdue.length?'<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">On-time (≤35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500">'+(onTimeAvg!==null?onTimeAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+(onTime.length-1)+' session'+(onTime.length-1!==1?'s':'')+' on cadence</div></div><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Overdue (>35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500;color:'+(overdueAvg!==null&&onTimeAvg!==null&&overdueAvg<onTimeAvg?'#A32D2D':'var(--text)')+'">'+( overdueAvg!==null?overdueAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+overdue.length+' session'+(overdue.length!==1?'s':'')+' overdue'+(overdue.length?' · avg '+Math.round(overdue.reduce(function(s,o){return s+o.gap},0)/overdue.length)+' days gap':'')+'</div></div></div>':''}
+  `;
+
+  // Chart: willingness before/after each shockwave
+  const labels=windows.map(w=>w.label);
+  if(CH.intervention) CH.intervention.destroy();
+  CH.intervention=new Chart(document.getElementById('cIntervention'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Avg willingness — 14 days before',data:windows.map(w=>w.preWill),backgroundColor:'rgba(160,112,15,0.6)',borderRadius:2},
+        {label:'Avg willingness — 14 days after',data:windows.map(w=>w.postWill),backgroundColor:'rgba(59,109,17,0.6)',borderRadius:2},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y}}
+      },
+      scales:{
+        x:{ticks:{font:{family:'DM Mono',size:9}}},
+        y:{min:0,max:5,ticks:{font:{family:'DM Sans',size:9}}}
+      }
     }
   });
 
-  const banner = document.getElementById('reminderBanner');
-  const list   = document.getElementById('reminderList');
-  if (items.length) {
-    list.innerHTML = items.map((i,idx) => `<div class="reminder-item${i.overdue?' reminder-overdue':''}" style="display:flex;justify-content:space-between;align-items:center">${i.overdue?'⚠ OVERDUE: ':''}${i.text}<button onclick="dismissReminder('${i.entryIdx}','${i.followupDate}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:8px" title="Dismiss">✕</button></div>`).join('');
-    banner.classList.add('show');
-  } else {
-    banner.classList.remove('show');
+  // Detail table
+  detail.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Date</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Rides before</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Will before</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Rides after</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Will after</th>
+          <th style="text-align:right;padding:4px 8px;font-size:11px;color:var(--muted);font-weight:500">Δ</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${windows.map(w=>{
+          const d=w.postWill!==null&&w.preWill!==null?(w.postWill-w.preWill).toFixed(1):null;
+          return '<tr style="border-top:1px solid var(--border)">'
+            +'<td style="padding:4px 8px;font-weight:500">'+w.label+'</td>'
+            +'<td style="padding:4px 8px;text-align:right;color:var(--muted)">'+w.preRides+'</td>'
+            +'<td style="padding:4px 8px;text-align:right">'+(w.preWill!==null?w.preWill:'—')+'</td>'
+            +'<td style="padding:4px 8px;text-align:right;color:var(--muted)">'+w.postRides+'</td>'
+            +'<td style="padding:4px 8px;text-align:right">'+(w.postWill!==null?w.postWill:'—')+'</td>'
+            +'<td style="padding:4px 8px;text-align:right">'+arrow(d)+'</td>'
+            +'</tr>';
+        }).join('')}
+      </tbody>
+    </table>`;
+
+  // Clinical significance note
+  const sig=document.createElement('div');
+  sig.style.cssText='font-size:12px;line-height:1.7;color:#5A4A3A;margin-top:16px;padding:12px 16px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30';
+  const validWindows=windows.filter(w=>w.preWill!==null&&w.postWill!==null);
+  const improved=validWindows.filter(w=>w.postWill>w.preWill).length;
+  const declined=validWindows.filter(w=>w.postWill<w.preWill).length;
+  const unchanged=validWindows.filter(w=>w.postWill===w.preWill).length;
+  const delta=willDelta?parseFloat(willDelta):0;
+  let interpretation='';
+  if(validWindows.length<3){
+    interpretation='<strong>Insufficient data.</strong> Fewer than 3 shockwave sessions with before/after ride data. More sessions needed to identify a reliable pattern.';
+  } else if(delta>=0.5&&improved>=validWindows.length*0.6){
+    interpretation='<strong>Clinically meaningful positive association.</strong> Willingness improved by an average of '+Math.abs(delta).toFixed(1)+' points post-shockwave, with improvement observed in '+improved+' of '+validWindows.length+' sessions. This suggests shockwave is contributing to measurable ride quality gains. Consider maintaining current cadence.';
+  } else if(delta>0&&delta<0.5){
+    interpretation='<strong>Mild positive trend, not clinically significant.</strong> Average improvement of '+Math.abs(delta).toFixed(1)+' points is within normal day-to-day variation. Shockwave may be contributing but the effect size is small relative to other variables (barn move, warm-up protocol, injections). '+improved+' of '+validWindows.length+' sessions showed improvement.';
+  } else if(delta<=0){
+    interpretation='<strong>No measurable benefit detected.</strong> Average willingness did not improve post-shockwave (delta: '+delta.toFixed(1)+'). This does not mean shockwave is ineffective — the benefit may be in pain management rather than behavioral willingness, or other variables may be masking the effect. '+declined+' of '+validWindows.length+' sessions showed decline post-shockwave.';
   }
+  if(preStopsAvg!==null&&postStopsAvg!==null){
+    const stopsDelta=postStopsAvg-preStopsAvg;
+    if(stopsDelta>10) interpretation+=' Rides with no stops increased by '+stopsDelta+'% post-shockwave, which supports a positive pain management effect.';
+    else if(stopsDelta<-10) interpretation+=' However, rides with no stops decreased by '+Math.abs(stopsDelta)+'% post-shockwave, suggesting other factors may be contributing to stops.';
+  }
+  interpretation+='<br><span style="color:#888;font-size:11px">Note: This analysis uses a 14-day before/after window. Shockwave effects typically build over 1–2 weeks. Confounding variables (injections, farrier, barn changes, weather) are not controlled for. Correlation is not causation.</span>';
+  sig.innerHTML=interpretation;
+  detail.parentElement.appendChild(sig);
 }
 
-function dismissReminder(entryIdx, followupDate) {
-  const entries = getVetEntries();
-  const i = parseInt(entryIdx);
-  if (entries[i] && entries[i].followupDate === followupDate) {
-    entries[i].followupDate = '';
-    entries[i].followupNotes = '';
-    localStorage.setItem('m_vet', JSON.stringify(entries));
-    checkReminders();
-  }
+// ── SHOCKWAVE BY AREA ─────────────────────────────────────────────────
+function swRegions(str){
+  // Map a free area string into normalized region tags
+  const s=String(str||'').toLowerCase();
+  const regs=[];
+  if(/quad|hip/.test(s)) regs.push('Quad/Hip');
+  if(/\bsi\b|sacro/.test(s)) regs.push('SI');
+  if(/neck|c6|c7|cervical/.test(s)) regs.push('Neck (C6/7)');
+  if(/hock/.test(s)) regs.push('Hock');
+  if(/stifle/.test(s)) regs.push('Stifle');
+  if(/other/.test(s)) regs.push('Other');
+  return regs;
 }
 
-// Set default dates for vet/bw forms
-function initVetBwDates() {
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('vetDate').value = today;
-  document.getElementById('bwDate').value = today;
+function buildShockwaveByArea(valid){
+  const el=document.getElementById('swAreaContent');
+  if(!el) return;
+  if(!valid.length){ el.textContent='No data.'; return; }
+  const WILL_I=11, SW_I=27, AREA_I=36, RODE_I=5;
+  const DAY=86400000;
+
+  function deltaFor(swDate){
+    const before14=new Date(swDate.getTime()-14*DAY);
+    const after14=new Date(swDate.getTime()+14*DAY);
+    const pre=valid.filter(({d,r})=>d>=before14&&d<swDate&&r[RODE_I]==='Y').map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+    const post=valid.filter(({d,r})=>d>swDate&&d<=after14&&r[RODE_I]==='Y').map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+    if(!pre.length||!post.length) return null;
+    const a=pre.reduce((s,v)=>s+v,0)/pre.length, b=post.reduce((s,v)=>s+v,0)/post.length;
+    return {pre:a,post:b,delta:b-a};
+  }
+
+  // Collect shockwave sessions with regions + delta
+  const sessions=[];
+  valid.forEach(({d,r})=>{
+    if(r[SW_I]!=='Y') return;
+    const regs=swRegions(r[AREA_I]);
+    sessions.push({date:d, regions:regs, logged:regs.length>0, dd:deltaFor(d)});
+  });
+
+  if(!sessions.length){ el.innerHTML='<div style="color:var(--muted)">No shockwave sessions logged.</div>'; return; }
+
+  const logged=sessions.filter(s=>s.logged);
+  const notLogged=sessions.length-logged.length;
+
+  if(!logged.length){
+    el.innerHTML=`<div style="padding:12px 14px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30;line-height:1.6">
+      <strong>No areas logged yet.</strong> ${sessions.length} shockwave session${sessions.length!==1?'s':''} on record, none with a treated-area tag.
+      Start selecting areas on the entry form when you log shockwave and this breakdown will populate — quad-only vs +SI vs +neck.</div>`;
+    return;
+  }
+
+  // Per-region aggregation
+  const REGIONS=['Quad/Hip','SI','Neck (C6/7)','Hock','Stifle','Other'];
+  const rows=REGIONS.map(reg=>{
+    const inReg=logged.filter(s=>s.regions.includes(reg));
+    const withDelta=inReg.filter(s=>s.dd);
+    const avg=withDelta.length?withDelta.reduce((s,x)=>s+x.dd.delta,0)/withDelta.length:null;
+    return {reg,sessions:inReg.length,scored:withDelta.length,avg};
+  }).filter(r=>r.sessions>0);
+
+  const arrow=v=>v===null?'<span style="color:var(--muted)">—</span>':(v>0.05?'<span style="color:#3B6D11">▲ +'+v.toFixed(1)+'</span>':v<-0.05?'<span style="color:#A32D2D">▼ '+v.toFixed(1)+'</span>':'<span style="color:var(--muted)">± '+Math.abs(v).toFixed(1)+'</span>');
+
+  // Neck vs no-neck (the C6/7 question)
+  const neck=logged.filter(s=>s.regions.includes('Neck (C6/7)')&&s.dd);
+  const noNeck=logged.filter(s=>!s.regions.includes('Neck (C6/7)')&&s.dd);
+  const neckAvg=neck.length?neck.reduce((s,x)=>s+x.dd.delta,0)/neck.length:null;
+  const noNeckAvg=noNeck.length?noNeck.reduce((s,x)=>s+x.dd.delta,0)/noNeck.length:null;
+
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Region treated</th>
+      <th style="text-align:right;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Sessions</th>
+      <th style="text-align:right;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Avg willingness Δ</th>
+    </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    html+=`<tr style="border-top:1px solid var(--border)">
+      <td style="padding:6px 8px;font-weight:500;color:var(--text)">${r.reg}</td>
+      <td style="padding:6px 8px;text-align:right;color:var(--muted)">${r.sessions}${r.scored<r.sessions?' <span style="font-size:10px">('+r.scored+' scored)</span>':''}</td>
+      <td style="padding:6px 8px;text-align:right">${arrow(r.avg)}</td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+
+  // Neck comparison block
+  if(neck.length||noNeck.length){
+    html+=`<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:14px">
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sessions including neck</div>
+        <div style="font-size:22px;font-weight:500">${neckAvg!==null?arrow(neckAvg):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${neck.length} scored session${neck.length!==1?'s':''}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sessions without neck</div>
+        <div style="font-size:22px;font-weight:500">${noNeckAvg!==null?arrow(noNeckAvg):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${noNeck.length} scored session${noNeck.length!==1?'s':''}</div>
+      </div>
+    </div>`;
+  }
+
+  // Interpretation / caveat
+  let note='';
+  const scoredTotal=logged.filter(s=>s.dd).length;
+  if(scoredTotal<3){
+    note=`<strong>Early data.</strong> Only ${scoredTotal} logged session${scoredTotal!==1?'s':''} with before/after ride data. Keep tagging areas — the neck-vs-no-neck comparison is where the C6/7 answer will show up.`;
+  } else if(neck.length&&noNeck.length&&neckAvg!==null&&noNeckAvg!==null){
+    const diff=neckAvg-noNeckAvg;
+    if(diff>0.3) note=`<strong>Adding the neck tracks with a larger willingness gain</strong> (+${diff.toFixed(1)} vs sessions without it). Consistent with C6/7 being a real pain contributor — worth raising as evidence for direct cervical treatment.`;
+    else if(diff<-0.3) note=`<strong>Neck sessions show a smaller gain</strong> than sessions without it (${diff.toFixed(1)}). Doesn't rule the neck out — could reflect confounding (which sessions got neck added, and why) — but it's not yet supporting a willingness benefit.`;
+    else note=`<strong>No clear separation yet</strong> between neck and non-neck sessions (${diff>=0?'+':''}${diff.toFixed(1)}). More sessions needed to detect a difference this size.`;
+  }
+  note+=`<br><span style="color:#888;font-size:11px">Sessions treat multiple regions at once, so per-region deltas overlap and aren't cleanly attributable. 14-day window; confounders (injections, farrier, workload) not controlled.${notLogged?' '+notLogged+' shockwave session'+(notLogged!==1?'s':'')+' had no area logged and are excluded here.':''}</span>`;
+  html+=`<div style="font-size:12px;line-height:1.7;color:#5A4A3A;margin-top:14px;padding:12px 16px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30">${note}</div>`;
+
+  el.innerHTML=html;
 }
 
-// Show lameness card whenever visit type is lameness eval
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('chip') && e.target.closest('#s-vet')) {
-    const txt = e.target.textContent.trim();
-    if (['Lameness eval','Rehab check-in'].includes(txt)) {
-      setTimeout(() => { document.getElementById('vetLamenessCard').style.display = 'block'; }, 50);
-    }
+function buildAll(){
+  kill();
+  const data=D(), labels=data.map(d=>L(d));
+  buildStats(data);
+  if(data.length){
+    buildWorkload(data,labels);
+    buildPTCompliance(data,labels);
   }
+  buildGap();
+  buildRehabGoals(D.valid||[]);
+  buildWillDist(D.valid||[]);
+  buildStopsDist(D.valid||[]);
+  buildWillMonth(D.valid||[]);
+  buildStopsMonth(D.valid||[]);
+  buildGaitMonth(D.valid||[]);
+  buildInterventionAnalysis(D.valid||[]);
+  buildShockwaveByArea(D.valid||[]);
+}
+
+function setView(v,btn){
+  view=v;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  buildAll();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+window.addEventListener('load', ()=>{
+  const url=getScriptUrl();
+  if(url){ refreshData(); }
+  else { setStatus('No script URL — open Tracker → Settings to connect'); }
 });
-
-loadCfg();
-initDate();
-initVetBwDates();
-checkReminders();
-
 </script>
 </body>
 </html>
