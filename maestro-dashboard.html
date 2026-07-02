@@ -186,8 +186,9 @@ let view='weekly', CH={};
 let W=[], M=[], GAPS=[];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
+const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec';
 function getScriptUrl(){
-  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||''; }catch{ return ''; }
+  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||DEFAULT_SCRIPT_URL; }catch{ return DEFAULT_SCRIPT_URL; }
 }
 
 // ── STATUS ────────────────────────────────────────────────────────────
