@@ -126,15 +126,6 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div id="ptCompliance"></div>
 </div>
 
-<p class="section-label">Rest &amp; willingness</p>
-
-<div class="card">
-  <div class="card-title">Time off vs willingness</div>
-  <div class="card-sub">Average willingness by how many days since the previous ride</div>
-  <div class="cw h240"><canvas id="cGap"></canvas></div>
-  <div class="note" id="gapNote"></div>
-</div>
-
 <div class="card">
   <div class="card-title">Willingness distribution — all rides</div>
   <div class="card-sub">Percentage of rides at each willingness level (1–5)</div>
@@ -177,6 +168,15 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="card-title">Shockwave response by treated area</div>
   <div class="card-sub">Willingness change (14 days before → after) grouped by which region was shocked. Tests whether adding a region — the neck especially — moves the needle.</div>
   <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
+</div>
+
+<p class="section-label">Rest &amp; willingness</p>
+
+<div class="card">
+  <div class="card-title">Time off vs willingness</div>
+  <div class="card-sub">Average willingness by how many days since the previous ride</div>
+  <div id="gapBuckets"></div>
+  <div class="note" id="gapNote"></div>
 </div>
 
 <script>
@@ -527,7 +527,8 @@ function buildPTCompliance(data,labels){
 // ── TIME-OFF vs WILLINGNESS (bucketed bars) ───────────────────────────
 function buildGap(){
   const el=document.getElementById('gapNote');
-  if(!GAPS.length){ if(el) el.textContent=''; if(CH.gp){CH.gp.destroy();CH.gp=null;} return; }
+  const box=document.getElementById('gapBuckets');
+  if(!GAPS.length){ if(el) el.textContent=''; if(box) box.innerHTML=''; return; }
   // Bucket rides by rest length before them
   const buckets=[
     {key:'0–1 days',  test:g=>g.gap<=1},
@@ -539,43 +540,12 @@ function buildGap(){
     const avg=vals.length?vals.reduce((s,v)=>s+v,0)/vals.length:null;
     return {label:b.key,avg:avg,n:vals.length};
   });
-  const colFor=v=>v===null?'#D8D3C8':v>=4?'#3B6D11':v>=3?'#854F0B':'#A32D2D';
-  if(CH.gp) CH.gp.destroy();
-  CH.gp=new Chart(document.getElementById('cGap'),{
-    type:'bar',
-    data:{labels:rows.map(r=>r.label),datasets:[{
-      data:rows.map(r=>r.avg),
-      backgroundColor:rows.map(r=>colFor(r.avg)),
-      borderRadius:3,
-      barPercentage:0.6,
-    }]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{backgroundColor:'#1C1A16',bodyFont:{family:'DM Sans',size:11},padding:8,callbacks:{
-          label:ctx=>' Avg willingness: '+(ctx.raw!=null?ctx.raw.toFixed(1):'—')+' (n='+rows[ctx.dataIndex].n+')'
-        }}
-      },
-      scales:{
-        x:{title:{display:true,text:'Days since previous ride',font:{family:'DM Sans',size:10}},ticks:{font:{family:'DM Sans',size:11},color:'#706E67'},grid:{display:false}},
-        y:{title:{display:true,text:'Avg willingness (1–5)',font:{family:'DM Sans',size:10}},min:1,max:5,ticks:{stepSize:1,font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
-      }
-    },
-    plugins:[{
-      id:'gapCounts',
-      afterDatasetsDraw(chart){
-        const{ctx,scales:{x,y}}=chart;
-        ctx.save();ctx.font='500 11px DM Sans';ctx.fillStyle='#706E67';ctx.textAlign='center';
-        rows.forEach((r,i)=>{
-          const xPos=x.getPixelForValue(i);
-          ctx.fillText(r.avg!=null?r.avg.toFixed(1):'—',xPos,(r.avg!=null?y.getPixelForValue(r.avg):y.bottom)-8);
-          ctx.fillText('n='+r.n,xPos,y.bottom+18);
-        });
-        ctx.restore();
-      }
-    }]
-  });
+  const colFor=v=>v===null?'#B4B2A9':v>=4?'#3B6D11':v>=3?'#854F0B':'#A32D2D';
+  if(box) box.innerHTML='<div class="sg" style="margin-bottom:0">'+rows.map(r=>
+    '<div class="sc"><div class="sv" style="color:'+colFor(r.avg)+'">'+(r.avg!=null?r.avg.toFixed(1):'—')+
+    '<span style="font-size:12px;color:var(--muted);font-weight:400"> /5</span></div>'+
+    '<div class="sl">'+r.label+' · n='+r.n+'</div></div>'
+  ).join('')+'</div>';
   // Correlation readout across all rides
   const n=GAPS.length,xs=GAPS.map(g=>g.gap),ys=GAPS.map(g=>g.will);
   const mx=xs.reduce((s,v)=>s+v,0)/n,my=ys.reduce((s,v)=>s+v,0)/n;
@@ -602,7 +572,7 @@ function buildWillDist(valid){
   });
   const total=Object.values(willCounts).reduce((s,v)=>s+v,0);
   if(!total) return;
-  const labels=['1 — Spontaneous halts, very reluctant','2 — Very reluctant, needs crop throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
+  const labels=['1 — Very reluctant, stuck >3 min despite crop','2 — Reluctant, needs significant encouragement throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
   const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
   const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
   if(CH.willDist) CH.willDist.destroy();
