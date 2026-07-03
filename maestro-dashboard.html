@@ -6,10 +6,10 @@
 <title>Maestro — Progress Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#F7F5F0;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
 h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .sub{font-size:13px;color:var(--muted);margin-bottom:24px}
 .section-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:32px 0 12px}
@@ -19,17 +19,17 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cw{position:relative;width:100%}
 .h240{height:240px}.h200{height:200px}.h280{height:280px}.h260{height:260px}
 .toggle-row{display:flex;gap:8px;margin-bottom:18px}
-.tbtn{font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
+.tbtn{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
 .tbtn.on{background:var(--text);color:white;border-color:var(--text)}
 .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .sc{background:var(--bg);border-radius:10px;padding:12px 14px}
 .sv{font-size:22px;font-weight:500;letter-spacing:-.3px}
 .sl{font-size:11px;color:var(--muted);margin-top:2px}
-.sc.g .sv{color:#3B6D11}.sc.w .sv{color:#854F0B}.sc.b .sv{color:#A32D2D}
+.sc.g .sv{color:#00BB77}.sc.w .sv{color:#B77A15}.sc.b .sv{color:#C0492B}
 .ann{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
 .ai{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
 .ad{width:12px;height:12px;border-radius:2px;flex-shrink:0}
-.note{font-size:12px;color:#5A4A3A;font-style:italic;margin-top:12px;padding:10px 14px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30;line-height:1.6}
+.note{font-size:12px;color:#0A4266;font-style:italic;margin-top:12px;padding:10px 14px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC;line-height:1.6}
 .pb{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pl{font-size:12px;color:var(--muted);width:64px;flex-shrink:0;font-family:'DM Mono',monospace}
 .pt{flex:1;height:8px;background:#EDE9E0;border-radius:4px;overflow:hidden;position:relative}
@@ -43,8 +43,8 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
 .cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
 .cmp-table td.cmp-now{color:var(--text);font-weight:500}
-.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
-.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
+.cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
+.cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
 .cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
 .cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
 .cmp-table th:first-child{text-align:left}
@@ -52,8 +52,8 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
 .cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
 .cmp-table td.cmp-now{color:var(--text);font-weight:500}
-.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
-.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
+.cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
+.cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
 </style>
 
 <style id="maestro-nav-style">
@@ -63,7 +63,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   background:#1A1814;
   padding:0 16px;
   height:46px;
-  font-family:'DM Sans',sans-serif;
+  font-family:'Plus Jakarta Sans',sans-serif;
 }
 .mnav-brand{
   font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
@@ -94,9 +94,9 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 <p class="sub" id="trackingRange">Post-rehab tracking · loading...</p>
 
 
-<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11"></div>
+<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #00BB77"></div>
 
-<div class="card" id="rehabGoals" style="margin-bottom:24px;border-left:3px solid #534AB7">
+<div class="card" id="rehabGoals" style="margin-bottom:24px;border-left:3px solid #0098CC">
   <div class="card-title">Rehab milestones</div>
   <div id="rehabGoalsContent" style="font-size:13px;color:var(--muted)">Loading...</div>
 </div>
@@ -454,10 +454,10 @@ function bandPlugin(data){
 function base(){
   return {
     responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},padding:9}},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'Plus Jakarta Sans',size:11},bodyFont:{family:'Plus Jakarta Sans',size:11},padding:9}},
     scales:{
       x:{ticks:{font:{family:'DM Mono',size:9},maxRotation:45,color:'#706E67'},grid:{color:'rgba(0,0,0,0.04)'}},
-      y:{ticks:{font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
+      y:{ticks:{font:{family:'Plus Jakarta Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
     }
   };
 }
@@ -489,15 +489,15 @@ function buildStats(data){
 // ── WORKLOAD ──────────────────────────────────────────────────────────
 function buildWorkload(data,labels){
   const o=base();
-  o.plugins.legend={display:true,position:'top',labels:{font:{family:'DM Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
+  o.plugins.legend={display:true,position:'top',labels:{font:{family:'Plus Jakarta Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
   o.scales.y.stacked=true; o.scales.x.stacked=true;
-  o.scales.y.title={display:true,text:'minutes',font:{family:'DM Sans',size:10},color:'#706E67'};
+  o.scales.y.title={display:true,text:'minutes',font:{family:'Plus Jakarta Sans',size:10},color:'#706E67'};
   CH.wl=new Chart(document.getElementById('cWorkload'),{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(59,109,17,0.65)', borderColor:'#3B6D11',borderWidth:.5,borderRadius:2},
+      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(59,109,17,0.65)', borderColor:'#00BB77',borderWidth:.5,borderRadius:2},
       {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(186,117,23,0.65)',borderColor:'#BA7517',borderWidth:.5,borderRadius:2},
-      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(162,45,45,0.65)', borderColor:'#A32D2D',borderWidth:.5,borderRadius:2},
+      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(162,45,45,0.65)', borderColor:'#C0492B',borderWidth:.5,borderRadius:2},
     ]},options:o
   });
 }
@@ -513,7 +513,7 @@ function buildPTCompliance(data,labels){
   const pct=total?Math.round(met/total*100):null;
   const unit=view==='weekly'?'weeks':'months';
   if(pct===null){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">Not enough logged days to assess.</div>'; return; }
-  const col=pct>=70?'#3B6D11':pct>=40?'#854F0B':'#A32D2D';
+  const col=pct>=70?'#00BB77':pct>=40?'#B77A15':'#C0492B';
   el.innerHTML=`
     <div style="display:flex;align-items:baseline;gap:10px">
       <span style="font-size:40px;font-weight:500;letter-spacing:-1px;color:${col}">${pct}%</span>
@@ -540,7 +540,7 @@ function buildGap(){
     const avg=vals.length?vals.reduce((s,v)=>s+v,0)/vals.length:null;
     return {label:b.key,avg:avg,n:vals.length};
   });
-  const colFor=v=>v===null?'#B4B2A9':v>=4?'#3B6D11':v>=3?'#854F0B':'#A32D2D';
+  const colFor=v=>v===null?'#B4B2A9':v>=4?'#00BB77':v>=3?'#B77A15':'#C0492B';
   if(box) box.innerHTML='<div class="sg" style="margin-bottom:0">'+rows.map(r=>
     '<div class="sc"><div class="sv" style="color:'+colFor(r.avg)+'">'+(r.avg!=null?r.avg.toFixed(1):'—')+
     '<span style="font-size:12px;color:var(--muted);font-weight:400"> /5</span></div>'+
@@ -574,13 +574,13 @@ function buildWillDist(valid){
   if(!total) return;
   const labels=['1 — Very reluctant, stuck >3 min despite crop','2 — Reluctant, needs significant encouragement throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
   const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
-  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
+  const colors=['#C0492B','#D9633F','#E3A93C','#57C69A','#00BB77'];
   if(CH.willDist) CH.willDist.destroy();
   CH.willDist=new Chart(document.getElementById('cWillDist'),{
     type:'doughnut',
     data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+      plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:10}},
         tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+willCounts[ctx.dataIndex+1]+' rides)'}}
       }
     }
@@ -606,13 +606,13 @@ function buildStopsDist(valid){
   if(!total) return;
   const labels=['None','Few','Many'];
   const pcts=[Math.round(counts.None/total*100),Math.round(counts.Few/total*100),Math.round(counts.Many/total*100)];
-  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  const colors=['#00BB77','#E3A93C','#C0492B'];
   if(CH.stopsDist) CH.stopsDist.destroy();
   CH.stopsDist=new Chart(document.getElementById('cStopsDist'),{
     type:'doughnut',
     data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+      plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:10}},
         tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+[counts.None,counts.Few,counts.Many][ctx.dataIndex]+' rides)'}}
       }
     }
@@ -637,7 +637,7 @@ function buildWillMonth(valid){
   });
   const keys=Object.keys(months).sort();
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
+  const colors=['#C0492B','#D9633F','#E3A93C','#57C69A','#00BB77'];
   const datasets=[1,2,3,4,5].map((lvl,i)=>({
     label:'Will '+lvl,
     data:keys.map(k=>Math.round(months[k][lvl]/months[k].total*100)),
@@ -649,11 +649,11 @@ function buildWillMonth(valid){
     type:'bar',
     data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
-              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'Plus Jakarta Sans',size:9}}}}
     },
     plugins:[{
       id:'willTotals',
@@ -661,7 +661,7 @@ function buildWillMonth(valid){
         const{ctx,scales:{x,y}}=chart;
         const totals=keys.map(k=>months[k].total);
         ctx.save();
-        ctx.font='500 10px DM Sans';
+        ctx.font='500 10px Plus Jakarta Sans';
         ctx.fillStyle='#6B6760';
         ctx.textAlign='center';
         totals.forEach((t,i)=>{
@@ -695,7 +695,7 @@ function buildStopsMonth(valid){
   });
   const keys=Object.keys(months).sort();
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  const colors=['#00BB77','#E3A93C','#C0492B'];
   const datasets=['None','Few','Many'].map((cat,i)=>({
     label:cat,
     data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
@@ -707,11 +707,11 @@ function buildStopsMonth(valid){
     type:'bar',
     data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
-              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'Plus Jakarta Sans',size:9}}}}
     },
     plugins:[{
       id:'stopsTotals',
@@ -719,7 +719,7 @@ function buildStopsMonth(valid){
         const{ctx,scales:{x,y}}=chart;
         const totals=keys.map(k=>months[k].total);
         ctx.save();
-        ctx.font='500 10px DM Sans';
+        ctx.font='500 10px Plus Jakarta Sans';
         ctx.fillStyle='#6B6760';
         ctx.textAlign='center';
         totals.forEach((t,i)=>{
@@ -755,7 +755,7 @@ function buildGaitMonth(valid){
   const keys=Object.keys(months).sort();
   if(!keys.length) return;
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#6B8F3A','#185FA5','#534AB7'];
+  const colors=['#57C69A','#00719C','#0098CC'];
   const datasets=['Walk only','W/T','W/T/C'].map((cat,i)=>({
     label:cat,
     data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
@@ -767,11 +767,11 @@ function buildGaitMonth(valid){
     type:'bar',
     data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
-              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'Plus Jakarta Sans',size:9}}}}
     },
     plugins:[{
       id:'gaitTotals',
@@ -779,7 +779,7 @@ function buildGaitMonth(valid){
         const{ctx,scales:{x,y}}=chart;
         const totals=keys.map(k=>months[k].total);
         ctx.save();
-        ctx.font='500 10px DM Sans';
+        ctx.font='500 10px Plus Jakarta Sans';
         ctx.fillStyle='#6B6760';
         ctx.textAlign='center';
         totals.forEach((t,i)=>{
@@ -852,7 +852,7 @@ function buildRehabGoals(valid){
 
   function progressBar(pct,met){
     return `<div style="height:8px;background:var(--border);border-radius:4px;margin:6px 0 4px;overflow:hidden">
-      <div style="height:100%;width:${Math.round(pct)}%;background:${met?'#3B6D11':'#534AB7'};border-radius:4px;transition:width 0.3s"></div>
+      <div style="height:100%;width:${Math.round(pct)}%;background:${met?'#00BB77':'#0098CC'};border-radius:4px;transition:width 0.3s"></div>
     </div>`;
   }
 
@@ -860,13 +860,13 @@ function buildRehabGoals(valid){
     <div style="display:grid;gap:16px;grid-template-columns:1fr 1fr">
       <div>
         <div style="font-weight:500;color:var(--text);margin-bottom:4px">${haltGoalMet?'✓':'○'} Days since last spontaneous halt</div>
-        <div style="font-size:28px;font-weight:500;color:${haltGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${daysSinceHalt!==null?daysSinceHalt:'—'}</div>
+        <div style="font-size:28px;font-weight:500;color:${haltGoalMet?'#00BB77':'var(--text)'};letter-spacing:-0.5px">${daysSinceHalt!==null?daysSinceHalt:'—'}</div>
         ${progressBar(haltProgress,haltGoalMet)}
         <div style="font-size:11px;color:var(--muted)">Goal: 30 days${haltGoalMet?' — achieved':''}${lastHalt?' · Last halt: '+lastHalt.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):' · No halts recorded'}</div>
       </div>
       <div>
         <div style="font-weight:500;color:var(--text);margin-bottom:4px">${willGoalMet?'✓':'○'} Rides at 5/5 (last 30 days)</div>
-        <div style="font-size:28px;font-weight:500;color:${willGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${pct5}%</div>
+        <div style="font-size:28px;font-weight:500;color:${willGoalMet?'#00BB77':'var(--text)'};letter-spacing:-0.5px">${pct5}%</div>
         ${progressBar(willProgress,willGoalMet)}
         <div style="font-size:11px;color:var(--muted)">Goal: 90%+ · ${fives}/${last30Will.length} rides at 5/5 · ${pct45}% at 4+ · Last 30 days</div>
       </div>
@@ -874,7 +874,7 @@ function buildRehabGoals(valid){
     <div style="margin-top:16px">
       <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} No reluctance or stops (last 30 days)</div>
       <div style="display:flex;align-items:baseline;gap:8px">
-        <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
+        <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#00BB77':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
         <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had reluctance (halt, sticky, or stops)</span>
       </div>
       ${progressBar(100-stickyPct,stickyPct===0)}
@@ -883,14 +883,14 @@ function buildRehabGoals(valid){
     <div style="margin-top:16px">
       <div style="font-weight:500;color:var(--text);margin-bottom:8px">Gait level (last 30 days)</div>
       <div style="display:flex;height:14px;border-radius:6px;overflow:hidden;gap:1px;margin-bottom:6px">
-        ${gaitWO?'<div style="flex:'+gaitWO+';background:#6B8F3A" title="Walk only: '+gaitWO+'%"></div>':''}
-        ${gaitWT?'<div style="flex:'+gaitWT+';background:#185FA5" title="W/T: '+gaitWT+'%"></div>':''}
-        ${gaitWTC?'<div style="flex:'+gaitWTC+';background:#534AB7" title="W/T/C: '+gaitWTC+'%"></div>':''}
+        ${gaitWO?'<div style="flex:'+gaitWO+';background:#57C69A" title="Walk only: '+gaitWO+'%"></div>':''}
+        ${gaitWT?'<div style="flex:'+gaitWT+';background:#00719C" title="W/T: '+gaitWT+'%"></div>':''}
+        ${gaitWTC?'<div style="flex:'+gaitWTC+';background:#0098CC" title="W/T/C: '+gaitWTC+'%"></div>':''}
       </div>
       <div style="display:flex;gap:16px;font-size:12px;color:var(--muted)">
-        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6B8F3A;margin-right:4px;vertical-align:middle"></span>Walk only ${gaitWO}% (${gaitWOn})</span>
-        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#185FA5;margin-right:4px;vertical-align:middle"></span>W/T ${gaitWT}% (${gaitWTn})</span>
-        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#534AB7;margin-right:4px;vertical-align:middle"></span>W/T/C ${gaitWTC}% (${gaitWTCn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#57C69A;margin-right:4px;vertical-align:middle"></span>Walk only ${gaitWO}% (${gaitWOn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#00719C;margin-right:4px;vertical-align:middle"></span>W/T ${gaitWT}% (${gaitWTn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#0098CC;margin-right:4px;vertical-align:middle"></span>W/T/C ${gaitWTC}% (${gaitWTCn})</span>
       </div>
     </div>`;
 }
@@ -991,8 +991,8 @@ function buildInterventionAnalysis(valid){
   function arrow(d){
     if(d===null) return '';
     const n=parseFloat(d);
-    if(n>0) return '<span style="color:#3B6D11">▲ +'+Math.abs(n)+'</span>';
-    if(n<0) return '<span style="color:#A32D2D">▼ '+Math.abs(n)+'</span>';
+    if(n>0) return '<span style="color:#00BB77">▲ +'+Math.abs(n)+'</span>';
+    if(n<0) return '<span style="color:#C0492B">▼ '+Math.abs(n)+'</span>';
     return '<span style="color:var(--muted)">—</span>';
   }
 
@@ -1018,7 +1018,7 @@ function buildInterventionAnalysis(valid){
         <div style="font-size:11px;color:var(--muted)">Avg ride-to-ride willingness change</div>
       </div>
     </div>
-    ${onTime.length>1||overdue.length?'<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">On-time (≤35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500">'+(onTimeAvg!==null?onTimeAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+(onTime.length-1)+' session'+(onTime.length-1!==1?'s':'')+' on cadence</div></div><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Overdue (>35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500;color:'+(overdueAvg!==null&&onTimeAvg!==null&&overdueAvg<onTimeAvg?'#A32D2D':'var(--text)')+'">'+( overdueAvg!==null?overdueAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+overdue.length+' session'+(overdue.length!==1?'s':'')+' overdue'+(overdue.length?' · avg '+Math.round(overdue.reduce(function(s,o){return s+o.gap},0)/overdue.length)+' days gap':'')+'</div></div></div>':''}
+    ${onTime.length>1||overdue.length?'<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">On-time (≤35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500">'+(onTimeAvg!==null?onTimeAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+(onTime.length-1)+' session'+(onTime.length-1!==1?'s':'')+' on cadence</div></div><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Overdue (>35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500;color:'+(overdueAvg!==null&&onTimeAvg!==null&&overdueAvg<onTimeAvg?'#C0492B':'var(--text)')+'">'+( overdueAvg!==null?overdueAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+overdue.length+' session'+(overdue.length!==1?'s':'')+' overdue'+(overdue.length?' · avg '+Math.round(overdue.reduce(function(s,o){return s+o.gap},0)/overdue.length)+' days gap':'')+'</div></div></div>':''}
   `;
 
   // Chart: willingness before/after each shockwave
@@ -1035,12 +1035,12 @@ function buildInterventionAnalysis(valid){
     },
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y}}
       },
       scales:{
         x:{ticks:{font:{family:'DM Mono',size:9}}},
-        y:{min:0,max:5,ticks:{font:{family:'DM Sans',size:9}}}
+        y:{min:0,max:5,ticks:{font:{family:'Plus Jakarta Sans',size:9}}}
       }
     }
   });
@@ -1075,7 +1075,7 @@ function buildInterventionAnalysis(valid){
 
   // Clinical significance note
   const sig=document.createElement('div');
-  sig.style.cssText='font-size:12px;line-height:1.7;color:#5A4A3A;margin-top:16px;padding:12px 16px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30';
+  sig.style.cssText='font-size:12px;line-height:1.7;color:#0A4266;margin-top:16px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC';
   const validWindows=windows.filter(w=>w.preWill!==null&&w.postWill!==null);
   const improved=validWindows.filter(w=>w.postWill>w.preWill).length;
   const declined=validWindows.filter(w=>w.postWill<w.preWill).length;
@@ -1146,7 +1146,7 @@ function buildShockwaveByArea(valid){
   const notLogged=sessions.length-logged.length;
 
   if(!logged.length){
-    el.innerHTML=`<div style="padding:12px 14px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30;line-height:1.6">
+    el.innerHTML=`<div style="padding:12px 14px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC;line-height:1.6">
       <strong>No areas logged yet.</strong> ${sessions.length} shockwave session${sessions.length!==1?'s':''} on record, none with a treated-area tag.
       Start selecting areas on the entry form when you log shockwave and this breakdown will populate — quad-only vs +SI vs +neck.</div>`;
     return;
@@ -1161,7 +1161,7 @@ function buildShockwaveByArea(valid){
     return {reg,sessions:inReg.length,scored:withDelta.length,avg};
   }).filter(r=>r.sessions>0);
 
-  const arrow=v=>v===null?'<span style="color:var(--muted)">—</span>':(v>0.05?'<span style="color:#3B6D11">▲ +'+v.toFixed(1)+'</span>':v<-0.05?'<span style="color:#A32D2D">▼ '+v.toFixed(1)+'</span>':'<span style="color:var(--muted)">± '+Math.abs(v).toFixed(1)+'</span>');
+  const arrow=v=>v===null?'<span style="color:var(--muted)">—</span>':(v>0.05?'<span style="color:#00BB77">▲ +'+v.toFixed(1)+'</span>':v<-0.05?'<span style="color:#C0492B">▼ '+v.toFixed(1)+'</span>':'<span style="color:var(--muted)">± '+Math.abs(v).toFixed(1)+'</span>');
 
   // Neck vs no-neck (the C6/7 question)
   const neck=logged.filter(s=>s.regions.includes('Neck (C6/7)')&&s.dd);
@@ -1212,7 +1212,7 @@ function buildShockwaveByArea(valid){
     else note=`<strong>No clear separation yet</strong> between neck and non-neck sessions (${diff>=0?'+':''}${diff.toFixed(1)}). More sessions needed to detect a difference this size.`;
   }
   note+=`<br><span style="color:#888;font-size:11px">Sessions treat multiple regions at once, so per-region deltas overlap and aren't cleanly attributable. 14-day window; confounders (injections, farrier, workload) not controlled.${notLogged?' '+notLogged+' shockwave session'+(notLogged!==1?'s':'')+' had no area logged and are excluded here.':''}</span>`;
-  html+=`<div style="font-size:12px;line-height:1.7;color:#5A4A3A;margin-top:14px;padding:12px 16px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30">${note}</div>`;
+  html+=`<div style="font-size:12px;line-height:1.7;color:#0A4266;margin-top:14px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">${note}</div>`;
 
   el.innerHTML=html;
 }
