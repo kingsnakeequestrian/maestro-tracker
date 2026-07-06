@@ -6,10 +6,10 @@
 <title>Maestro — Progress Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F5F0;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
+:root{--bg:#F4F7F7;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
 h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .sub{font-size:13px;color:var(--muted);margin-bottom:24px}
 .section-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:32px 0 12px}
@@ -19,17 +19,17 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cw{position:relative;width:100%}
 .h240{height:240px}.h200{height:200px}.h280{height:280px}.h260{height:260px}
 .toggle-row{display:flex;gap:8px;margin-bottom:18px}
-.tbtn{font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
+.tbtn{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
 .tbtn.on{background:var(--text);color:white;border-color:var(--text)}
 .sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .sc{background:var(--bg);border-radius:10px;padding:12px 14px}
 .sv{font-size:22px;font-weight:500;letter-spacing:-.3px}
 .sl{font-size:11px;color:var(--muted);margin-top:2px}
-.sc.g .sv{color:#3B6D11}.sc.w .sv{color:#854F0B}.sc.b .sv{color:#A32D2D}
+.sc.g .sv{color:#00BB77}.sc.w .sv{color:#B77A15}.sc.b .sv{color:#C0492B}
 .ann{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
 .ai{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
 .ad{width:12px;height:12px;border-radius:2px;flex-shrink:0}
-.note{font-size:12px;color:#5A4A3A;font-style:italic;margin-top:12px;padding:10px 14px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30;line-height:1.6}
+.note{font-size:12px;color:#0A4266;font-style:italic;margin-top:12px;padding:10px 14px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC;line-height:1.6}
 .pb{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pl{font-size:12px;color:var(--muted);width:64px;flex-shrink:0;font-family:'DM Mono',monospace}
 .pt{flex:1;height:8px;background:#EDE9E0;border-radius:4px;overflow:hidden;position:relative}
@@ -43,8 +43,8 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
 .cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
 .cmp-table td.cmp-now{color:var(--text);font-weight:500}
-.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
-.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
+.cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
+.cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
 .cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
 .cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
 .cmp-table th:first-child{text-align:left}
@@ -52,51 +52,60 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
 .cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
 .cmp-table td.cmp-now{color:var(--text);font-weight:500}
-.cmp-up{color:#3B6D11;font-size:11px;margin-left:4px}
-.cmp-dn{color:#A32D2D;font-size:11px;margin-left:4px}
+.cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
+.cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
 </style>
 
 <style id="maestro-nav-style">
 .mnav{
   position:sticky;top:0;z-index:999;
-  display:flex;align-items:center;gap:0;
-  background:#1A1814;
-  padding:0 16px;
-  height:46px;
-  font-family:'DM Sans',sans-serif;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;
 }
 .mnav-brand{
-  font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
-  margin-right:auto;letter-spacing:0.02em;white-space:nowrap;
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
 }
-.mnav-brand span{color:white}
-.mnav-links{display:flex;gap:2px}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
 .mnav-link{
-  font-size:12px;color:rgba(255,255,255,0.55);
-  text-decoration:none;padding:6px 12px;border-radius:6px;
-  transition:all 0.15s;white-space:nowrap;
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
 }
-.mnav-link:hover{color:white;background:rgba(255,255,255,0.1)}
-.mnav-link.active{color:white;background:rgba(255,255,255,0.15);font-weight:500}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
 @media(max-width:480px){
   .mnav-brand{display:none}
-  .mnav-links{gap:0}
-  .mnav-link{padding:6px 9px;font-size:11px}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
 }
 </style>
 </head>
 <body>
 <nav class="mnav">
   <span class="mnav-brand">Maestro <span>Djinto</span></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link active">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork Dashboard</a></div>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link active">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
 </nav>
 <h1>Maestro — Progress Dashboard</h1>
 <p class="sub" id="trackingRange">Post-rehab tracking · loading...</p>
 
 
-<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #3B6D11"></div>
+<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #00BB77"></div>
 
-<div class="card" id="rehabGoals" style="margin-bottom:24px;border-left:3px solid #534AB7">
+<div class="card" id="rehabGoals" style="margin-bottom:24px;border-left:3px solid #0098CC">
   <div class="card-title">Rehab milestones</div>
   <div id="rehabGoalsContent" style="font-size:13px;color:var(--muted)">Loading...</div>
 </div>
@@ -121,43 +130,9 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 </div>
 
 <div class="card">
-  <div class="card-title">Willingness, stops, SI reactivity &amp; cranky tack-up rate</div>
-  <div class="card-sub">Avg willingness (green solid) · stops score (red dashed) · SI reactive days (blue) · cranky tack-up % (amber dashed, right axis)</div>
-  <div class="cw h260"><canvas id="cWellness"></canvas></div>
-</div>
-
-<div class="card">
   <div class="card-title">PT exercise compliance</div>
-  <div class="card-sub">Target: 3–5 sessions per week. Green = met · amber = partial · red = below</div>
-  <div id="ptBars"></div>
-</div>
-
-<div class="card">
-  <div class="card-title">Session frequency — poles, equibands &amp; bodywork</div>
-  <div class="card-sub">Count per period</div>
-  <div class="cw h200"><canvas id="cFreq"></canvas></div>
-</div>
-
-<p class="section-label">Willingness trend &amp; correlations</p>
-
-<div class="card">
-  <div class="card-title">Willingness trend with interventions &amp; bodywork</div>
-  <div class="card-sub">Weekly mean willingness. Coloured bands = interventions. Open circles = weeks with bodywork.</div>
-  <div class="cw h280"><canvas id="cTrend"></canvas></div>
-  <div class="ann">
-    <span class="ai"><span class="ad" style="background:rgba(226,75,74,0.5)"></span>Shockwave</span>
-    <span class="ai"><span class="ad" style="background:rgba(24,95,165,0.5)"></span>PRP injections</span>
-    <span class="ai"><span class="ad" style="background:rgba(83,74,183,0.5)"></span>Laser started</span>
-    <span class="ai"><span class="ad" style="background:rgba(133,79,11,0.5)"></span>Barn move</span>
-    <span class="ai"><span class="ad" style="background:#3B6D11;border-radius:50%;width:10px;height:10px"></span>Bodywork week</span>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-title">Days since last ride vs willingness</div>
-  <div class="card-sub">Each dot = one ridden session (n=32). Line = average by gap length.</div>
-  <div class="cw h240"><canvas id="cGap"></canvas></div>
-  <div class="note" id="gapNote"></div>
+  <div class="card-sub">Share of weeks that hit the 3×/week target</div>
+  <div id="ptCompliance"></div>
 </div>
 
 <div class="card">
@@ -198,6 +173,21 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div id="interventionDetail" style="margin-top:12px"></div>
 </div>
 
+<div class="card" id="swAreaCard">
+  <div class="card-title">Shockwave response by treated area</div>
+  <div class="card-sub">Willingness change (14 days before → after) grouped by which region was shocked. Tests whether adding a region — the neck especially — moves the needle.</div>
+  <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
+</div>
+
+<p class="section-label">Rest &amp; willingness</p>
+
+<div class="card">
+  <div class="card-title">Time off vs willingness</div>
+  <div class="card-sub">Average willingness by how many days since the previous ride</div>
+  <div id="gapBuckets"></div>
+  <div class="note" id="gapNote"></div>
+</div>
+
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const LASER_START='2026-03-15';
@@ -205,8 +195,9 @@ let view='weekly', CH={};
 let W=[], M=[], GAPS=[];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
+const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec';
 function getScriptUrl(){
-  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||'https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec'; }catch{ return 'https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec'; }
+  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||DEFAULT_SCRIPT_URL; }catch{ return DEFAULT_SCRIPT_URL; }
 }
 
 // ── STATUS ────────────────────────────────────────────────────────────
@@ -472,10 +463,10 @@ function bandPlugin(data){
 function base(){
   return {
     responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:11},bodyFont:{family:'DM Sans',size:11},padding:9}},
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'Plus Jakarta Sans',size:11},bodyFont:{family:'Plus Jakarta Sans',size:11},padding:9}},
     scales:{
       x:{ticks:{font:{family:'DM Mono',size:9},maxRotation:45,color:'#706E67'},grid:{color:'rgba(0,0,0,0.04)'}},
-      y:{ticks:{font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
+      y:{ticks:{font:{family:'Plus Jakarta Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}
     }
   };
 }
@@ -507,151 +498,72 @@ function buildStats(data){
 // ── WORKLOAD ──────────────────────────────────────────────────────────
 function buildWorkload(data,labels){
   const o=base();
-  o.plugins.legend={display:true,position:'top',labels:{font:{family:'DM Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
+  o.plugins.legend={display:true,position:'top',labels:{font:{family:'Plus Jakarta Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
   o.scales.y.stacked=true; o.scales.x.stacked=true;
-  o.scales.y.title={display:true,text:'minutes',font:{family:'DM Sans',size:10},color:'#706E67'};
+  o.scales.y.title={display:true,text:'minutes',font:{family:'Plus Jakarta Sans',size:10},color:'#706E67'};
   CH.wl=new Chart(document.getElementById('cWorkload'),{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(59,109,17,0.65)', borderColor:'#3B6D11',borderWidth:.5,borderRadius:2},
-      {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(186,117,23,0.65)',borderColor:'#BA7517',borderWidth:.5,borderRadius:2},
-      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(162,45,45,0.65)', borderColor:'#A32D2D',borderWidth:.5,borderRadius:2},
+      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(0,187,119,0.55)', borderColor:'#00BB77',borderWidth:.5,borderRadius:2},
+      {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(0,152,204,0.55)', borderColor:'#0098CC',borderWidth:.5,borderRadius:2},
+      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(0,113,156,0.55)', borderColor:'#00719C',borderWidth:.5,borderRadius:2},
     ]},options:o
   });
 }
 
-// ── WELLNESS ──────────────────────────────────────────────────────────
-function buildWellness(data,labels){
-  const o=base();
-  o.scales.y={min:0,max:5,ticks:{font:{family:'DM Sans',size:10},color:'#706E67',stepSize:1},grid:{color:'rgba(0,0,0,0.05)'}};
-  o.scales.y2={position:'right',min:0,max:110,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9},color:'#854F0B'},grid:{drawOnChartArea:false}};
-  o.scales.y3={display:false,min:0,max:5};
-  o.plugins.tooltip={...o.plugins.tooltip,callbacks:{label:ctx=>{
-    const lb=ctx.dataset.label;
-    if(lb==='Willingness') return ' Willingness: '+(ctx.raw||'—');
-    if(lb==='Stops') return ' Stops score: '+(ctx.raw||'—');
-    if(lb==='SI') return ' SI reactive days: '+ctx.raw;
-    if(lb==='Cranky %') return ' Cranky tack-up: '+ctx.raw+'%';
-  }}};
-  CH.wn=new Chart(document.getElementById('cWellness'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Willingness',data:data.map(d=>d.will),borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.06)',borderWidth:2.5,pointBackgroundColor:'#3B6D11',pointRadius:4,tension:.35,fill:true,yAxisID:'y',spanGaps:true},
-      {label:'Stops',data:data.map(d=>d.stops),borderColor:'#E24B4A',backgroundColor:'transparent',borderWidth:1.8,pointBackgroundColor:'#E24B4A',pointRadius:3,tension:.3,borderDash:[4,3],yAxisID:'y',spanGaps:true},
-      {label:'SI',data:data.map(d=>d.si),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.07)',borderWidth:2,pointBackgroundColor:'#185FA5',pointRadius:4,tension:.2,fill:true,yAxisID:'y3',spanGaps:false},
-      {label:'Cranky %',data:data.map(d=>d.cranky_rate),borderColor:'#854F0B',backgroundColor:'transparent',borderWidth:1.8,pointBackgroundColor:'#854F0B',pointRadius:3,tension:.3,borderDash:[3,4],yAxisID:'y2',spanGaps:true},
-    ]},options:o
-  });
-}
-
-// ── PT COMPLIANCE ─────────────────────────────────────────────────────
-function buildPT(data,labels){
-  const el=document.getElementById('ptBars');
+// ── PT COMPLIANCE (single overall %) ──────────────────────────────────
+function buildPTCompliance(data,labels){
+  const el=document.getElementById('ptCompliance');
   if(!el) return;
-  const mx=Math.max(...data.map(d=>d.pt),5);
-  el.innerHTML=data.map((d,i)=>{
-    if(d.pt===0&&d.days<3) return '';
-    const pct=Math.round(d.pt/mx*100);
-    const col=d.pt>=3?'#3B6D11':d.pt>=2?'#854F0B':'#A32D2D';
-    const tp=Math.round(3/mx*100);
-    return `<div class="pb"><span class="pl">${labels[i]}</span><div class="pt"><div class="pf" style="width:${pct}%;background:${col}"></div><div style="position:absolute;top:0;left:${tp}%;width:1.5px;height:100%;background:rgba(0,0,0,0.22)"></div></div><span class="pc">${d.pt}x</span></div>`;
-  }).join('');
-  el.innerHTML+=`<div class="ph"><span style="width:2px;height:10px;background:rgba(0,0,0,0.22);display:inline-block"></span>Vertical line = 3× minimum target</div>`;
+  // Only count periods with enough logged days to fairly assess a weekly target
+  const assessable=data.filter(d=>d.days>=3);
+  const met=assessable.filter(d=>d.pt>=3).length;
+  const total=assessable.length;
+  const pct=total?Math.round(met/total*100):null;
+  const unit=view==='weekly'?'weeks':'months';
+  if(pct===null){ el.innerHTML='<div style="font-size:13px;color:var(--muted)">Not enough logged days to assess.</div>'; return; }
+  const col=pct>=70?'#00BB77':pct>=40?'#B77A15':'#C0492B';
+  el.innerHTML=`
+    <div style="display:flex;align-items:baseline;gap:10px">
+      <span style="font-size:40px;font-weight:500;letter-spacing:-1px;color:${col}">${pct}%</span>
+      <span style="font-size:13px;color:var(--muted)">of ${unit} hit the 3× target · ${met}/${total}</span>
+    </div>
+    <div style="height:10px;background:#EDE9E0;border-radius:5px;overflow:hidden;margin-top:10px">
+      <div style="height:100%;width:${pct}%;background:${col};border-radius:5px"></div>
+    </div>`;
 }
 
-// ── FREQUENCY ─────────────────────────────────────────────────────────
-function buildFreq(data,labels){
-  const o=base();
-  o.plugins.legend={display:true,position:'top',labels:{font:{family:'DM Sans',size:11},boxWidth:12,padding:14,color:'#706E67'}};
-  o.scales.y.ticks={...o.scales.y.ticks,stepSize:1};
-  CH.fr=new Chart(document.getElementById('cFreq'),{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'Poles',         data:data.map(d=>d.poles||0),        backgroundColor:'rgba(59,109,17,0.6)',  borderRadius:2},
-      {label:'Straddle Poles',data:data.map(d=>d.straddlepoles||0), backgroundColor:'rgba(59,109,17,0.3)',  borderRadius:2},
-      {label:'Treadmill',     data:data.map(d=>d.treadmill||0),     backgroundColor:'rgba(83,74,183,0.6)',  borderRadius:2},
-      {label:'Equibands',     data:data.map(d=>d.equi||0),          backgroundColor:'rgba(186,117,23,0.6)', borderRadius:2},
-      {label:'Bodywork',      data:data.map(d=>d.bodywork||0),      backgroundColor:'rgba(24,95,165,0.6)',  borderRadius:2},
-    ]},options:o
-  });
-}
-
-// ── TREND ─────────────────────────────────────────────────────────────
-function buildTrend(){
-  if(!W.length) return;
-  const data=W;
-  const labels=data.map(d=>L(d));
-  const bp=bandPlugin(data);
-  const bwPts=data.map(d=>d.bodywork>0&&d.will!==null?d.will:null);
-  const o=base();
-  o.scales.y={min:1,max:5.5,ticks:{stepSize:.5,font:{family:'DM Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}};
-  o.plugins.tooltip={...o.plugins.tooltip,callbacks:{label:ctx=>{
-    const d=data[ctx.dataIndex];
-    if(ctx.datasetIndex===0){
-      const p=[' Willingness: '+(ctx.raw||'—')];
-      if(d.shockwave>0)               p.push(' ⚡ Shockwave');
-      if(d.period==='2026-03-02')      p.push(' 💉 PRP injections');
-      if(d.period>=LASER_START)        p.push(' 🔦 Laser started');
-      if(d.bodywork>0)                 p.push(' 🤲 Bodywork ('+d.bodywork+' sessions)');
-      return p;
-    }
-    if(ctx.datasetIndex===1&&ctx.raw!==null) return ' Bodywork: '+data[ctx.dataIndex].bodywork+' sessions this week';
-    return null;
-  }}};
-  CH.tr=new Chart(document.getElementById('cTrend'),{
-    type:'line',plugins:[bp],
-    data:{labels,datasets:[
-      {
-        label:'Willingness',data:data.map(d=>d.will),
-        borderColor:'#3B6D11',backgroundColor:'rgba(59,109,17,0.07)',
-        borderWidth:2.5,
-        pointBackgroundColor:data.map(d=>d.shockwave>0?'#E24B4A':d.period==='2026-03-02'?'#185FA5':d.period>=LASER_START?'#534AB7':'#3B6D11'),
-        pointRadius:data.map(d=>d.shockwave>0||d.period==='2026-03-02'||d.period>=LASER_START?7:4),
-        tension:.35,fill:true,spanGaps:true,yAxisID:'y'
-      },
-      {
-        label:'Bodywork',data:bwPts,type:'scatter',
-        backgroundColor:'rgba(255,255,255,0)',borderColor:'#3B6D11',
-        borderWidth:2.2,pointStyle:'circle',pointRadius:9,pointHoverRadius:11,
-        yAxisID:'y'
-      }
-    ]},options:o
-  });
-}
-
-// ── GAP SCATTER ───────────────────────────────────────────────────────
+// ── TIME-OFF vs WILLINGNESS (bucketed bars) ───────────────────────────
 function buildGap(){
-  if(!GAPS.length) return;
-  const grouped={};
-  GAPS.forEach(g=>{ const k=Math.min(g.gap,10); (grouped[k]=grouped[k]||[]).push(g.will); });
-  const avgs=Object.entries(grouped).map(([k,v])=>({x:+k,y:parseFloat((v.reduce((s,x)=>s+x,0)/v.length).toFixed(1)),n:v.length})).sort((a,b)=>a.x-b.x);
-  const raw=GAPS.map(g=>({x:Math.min(g.gap,10),y:g.will}));
-  CH.gp=new Chart(document.getElementById('cGap'),{
-    type:'scatter',
-    data:{datasets:[
-      {label:'Individual rides',data:raw,backgroundColor:'rgba(59,109,17,0.35)',borderColor:'rgba(59,109,17,0.6)',pointRadius:5,pointHoverRadius:7},
-      {label:'Avg by gap',data:avgs,backgroundColor:'#1C1A16',borderColor:'#1C1A16',pointRadius:5,showLine:true,borderWidth:1.5,tension:.3},
-    ]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{display:true,position:'bottom',labels:{font:{family:'DM Sans',size:10},boxWidth:10,padding:10}},
-        tooltip:{backgroundColor:'#1C1A16',bodyFont:{family:'DM Sans',size:11},padding:8,callbacks:{
-          label:ctx=>ctx.datasetIndex===0?' Gap: '+ctx.raw.x+'d, Will: '+ctx.raw.y:' Avg will: '+ctx.raw.y+' (n='+(grouped[ctx.raw.x]||[]).length+')'
-        }}
-      },
-      scales:{
-        x:{title:{display:true,text:'Days since last ride',font:{family:'DM Sans',size:10}},min:0,max:11,ticks:{font:{family:'DM Mono',size:9},color:'#706E67',callback:v=>v>=10?'10+':v}},
-        y:{title:{display:true,text:'Willingness (1–5)',font:{family:'DM Sans',size:10}},min:1,max:5,ticks:{stepSize:1,font:{family:'DM Sans',size:10},color:'#706E67'}}
-      }
-    }
+  const el=document.getElementById('gapNote');
+  const box=document.getElementById('gapBuckets');
+  if(!GAPS.length){ if(el) el.textContent=''; if(box) box.innerHTML=''; return; }
+  // Bucket rides by rest length before them
+  const buckets=[
+    {key:'0–1 days',  test:g=>g.gap<=1},
+    {key:'2–3 days',  test:g=>g.gap>=2&&g.gap<=3},
+    {key:'4+ days',   test:g=>g.gap>=4},
+  ];
+  const rows=buckets.map(b=>{
+    const vals=GAPS.filter(b.test).map(g=>g.will);
+    const avg=vals.length?vals.reduce((s,v)=>s+v,0)/vals.length:null;
+    return {label:b.key,avg:avg,n:vals.length};
   });
-  if(!GAPS.length) return;
+  const colFor=v=>v===null?'#B4B2A9':v>=4?'#00BB77':v>=3?'#B77A15':'#C0492B';
+  if(box) box.innerHTML='<div class="sg" style="margin-bottom:0">'+rows.map(r=>
+    '<div class="sc"><div class="sv" style="color:'+colFor(r.avg)+'">'+(r.avg!=null?r.avg.toFixed(1):'—')+
+    '<span style="font-size:12px;color:var(--muted);font-weight:400"> /5</span></div>'+
+    '<div class="sl">'+r.label+' · n='+r.n+'</div></div>'
+  ).join('')+'</div>';
+  // Correlation readout across all rides
   const n=GAPS.length,xs=GAPS.map(g=>g.gap),ys=GAPS.map(g=>g.will);
   const mx=xs.reduce((s,v)=>s+v,0)/n,my=ys.reduce((s,v)=>s+v,0)/n;
-  const r=(xs.reduce((s,v,i)=>s+(v-mx)*(ys[i]-my),0)/Math.sqrt(xs.reduce((s,v)=>s+(v-mx)**2,0)*ys.reduce((s,v)=>s+(v-my)**2,0))).toFixed(2);
-  const el=document.getElementById('gapNote');
-  if(el) el.textContent=`Pearson r = ${r} — ${Math.abs(r)<0.2?'little to no':'moderate'} correlation. ${Math.abs(r)<0.2?`Rest duration alone doesn't predict willingness — other factors (pain level, what was asked) appear to matter more.`:`Longer gaps tend to ${parseFloat(r)>0?'increase':'decrease'} willingness slightly.`} Based on ${n} ridden sessions.`;
+  const denom=Math.sqrt(xs.reduce((s,v)=>s+(v-mx)**2,0)*ys.reduce((s,v)=>s+(v-my)**2,0));
+  const r=denom?(xs.reduce((s,v,i)=>s+(v-mx)*(ys[i]-my),0)/denom):0;
+  const rr=r.toFixed(2);
+  const strength=Math.abs(r)<0.2?'little to no':Math.abs(r)<0.4?'a weak':'a moderate';
+  const dirn=Math.abs(r)<0.2?`Days off alone don't predict willingness — pain level and what's asked appear to matter more.`:`Longer rest gaps tend to ${r>0?'raise':'lower'} willingness.`;
+  if(el) el.textContent=`Pearson r = ${rr} — ${strength} correlation. ${dirn} Based on ${n} ridden sessions.`;
 }
 
 // ── BUILD ALL ─────────────────────────────────────────────────────────
@@ -669,15 +581,15 @@ function buildWillDist(valid){
   });
   const total=Object.values(willCounts).reduce((s,v)=>s+v,0);
   if(!total) return;
-  const labels=['1 — Spontaneous halts, very reluctant','2 — Very reluctant, needs crop throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
+  const labels=['1 — Very reluctant, stuck >3 min despite crop','2 — Reluctant, needs significant encouragement throughout','3 — Reluctant, minimal crop (<2x)','4 — Near baseline, no crop needed','5 — Baseline, zero reluctance'];
   const pcts=Object.values(willCounts).map(v=>Math.round(v/total*100));
-  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
+  const colors=['#C0492B','#D9633F','#E3A93C','#57C69A','#00BB77'];
   if(CH.willDist) CH.willDist.destroy();
   CH.willDist=new Chart(document.getElementById('cWillDist'),{
     type:'doughnut',
     data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+      plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:10}},
         tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+willCounts[ctx.dataIndex+1]+' rides)'}}
       }
     }
@@ -703,13 +615,13 @@ function buildStopsDist(valid){
   if(!total) return;
   const labels=['None','Few','Many'];
   const pcts=[Math.round(counts.None/total*100),Math.round(counts.Few/total*100),Math.round(counts.Many/total*100)];
-  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  const colors=['#00BB77','#E3A93C','#C0492B'];
   if(CH.stopsDist) CH.stopsDist.destroy();
   CH.stopsDist=new Chart(document.getElementById('cStopsDist'),{
     type:'doughnut',
     data:{labels,datasets:[{data:pcts,backgroundColor:colors,borderWidth:1,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'right',labels:{font:{family:'DM Sans',size:11},padding:10}},
+      plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:10}},
         tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+'% ('+[counts.None,counts.Few,counts.Many][ctx.dataIndex]+' rides)'}}
       }
     }
@@ -734,7 +646,7 @@ function buildWillMonth(valid){
   });
   const keys=Object.keys(months).sort();
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#A32D2D','#D85A30','#ff9900','#6B8F3A','#3B6D11'];
+  const colors=['#C0492B','#D9633F','#E3A93C','#57C69A','#00BB77'];
   const datasets=[1,2,3,4,5].map((lvl,i)=>({
     label:'Will '+lvl,
     data:keys.map(k=>Math.round(months[k][lvl]/months[k].total*100)),
@@ -746,11 +658,11 @@ function buildWillMonth(valid){
     type:'bar',
     data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
-              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'Plus Jakarta Sans',size:9}}}}
     },
     plugins:[{
       id:'willTotals',
@@ -758,7 +670,7 @@ function buildWillMonth(valid){
         const{ctx,scales:{x,y}}=chart;
         const totals=keys.map(k=>months[k].total);
         ctx.save();
-        ctx.font='500 10px DM Sans';
+        ctx.font='500 10px Plus Jakarta Sans';
         ctx.fillStyle='#6B6760';
         ctx.textAlign='center';
         totals.forEach((t,i)=>{
@@ -792,7 +704,7 @@ function buildStopsMonth(valid){
   });
   const keys=Object.keys(months).sort();
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#3B6D11','#B4A04A','#A32D2D'];
+  const colors=['#00BB77','#E3A93C','#C0492B'];
   const datasets=['None','Few','Many'].map((cat,i)=>({
     label:cat,
     data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
@@ -804,11 +716,11 @@ function buildStopsMonth(valid){
     type:'bar',
     data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
-              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'Plus Jakarta Sans',size:9}}}}
     },
     plugins:[{
       id:'stopsTotals',
@@ -816,7 +728,7 @@ function buildStopsMonth(valid){
         const{ctx,scales:{x,y}}=chart;
         const totals=keys.map(k=>months[k].total);
         ctx.save();
-        ctx.font='500 10px DM Sans';
+        ctx.font='500 10px Plus Jakarta Sans';
         ctx.fillStyle='#6B6760';
         ctx.textAlign='center';
         totals.forEach((t,i)=>{
@@ -852,7 +764,7 @@ function buildGaitMonth(valid){
   const keys=Object.keys(months).sort();
   if(!keys.length) return;
   const labels=keys.map(k=>{const[y,m]=k.split('-');return new Date(y,m-1).toLocaleDateString('en-US',{month:'short',year:'2-digit'});});
-  const colors=['#6B8F3A','#185FA5','#534AB7'];
+  const colors=['#57C69A','#00719C','#0098CC'];
   const datasets=['Walk only','W/T','W/T/C'].map((cat,i)=>({
     label:cat,
     data:keys.map(k=>months[k].total?Math.round(months[k][cat]/months[k].total*100):0),
@@ -864,11 +776,11 @@ function buildGaitMonth(valid){
     type:'bar',
     data:{labels,datasets},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}}
       },
       scales:{x:{stacked:true,ticks:{font:{family:'DM Mono',size:9}}},
-              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'DM Sans',size:9}}}}
+              y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{family:'Plus Jakarta Sans',size:9}}}}
     },
     plugins:[{
       id:'gaitTotals',
@@ -876,7 +788,7 @@ function buildGaitMonth(valid){
         const{ctx,scales:{x,y}}=chart;
         const totals=keys.map(k=>months[k].total);
         ctx.save();
-        ctx.font='500 10px DM Sans';
+        ctx.font='500 10px Plus Jakarta Sans';
         ctx.fillStyle='#6B6760';
         ctx.textAlign='center';
         totals.forEach((t,i)=>{
@@ -949,7 +861,7 @@ function buildRehabGoals(valid){
 
   function progressBar(pct,met){
     return `<div style="height:8px;background:var(--border);border-radius:4px;margin:6px 0 4px;overflow:hidden">
-      <div style="height:100%;width:${Math.round(pct)}%;background:${met?'#3B6D11':'#534AB7'};border-radius:4px;transition:width 0.3s"></div>
+      <div style="height:100%;width:${Math.round(pct)}%;background:${met?'#00BB77':'#0098CC'};border-radius:4px;transition:width 0.3s"></div>
     </div>`;
   }
 
@@ -957,13 +869,13 @@ function buildRehabGoals(valid){
     <div style="display:grid;gap:16px;grid-template-columns:1fr 1fr">
       <div>
         <div style="font-weight:500;color:var(--text);margin-bottom:4px">${haltGoalMet?'✓':'○'} Days since last spontaneous halt</div>
-        <div style="font-size:28px;font-weight:500;color:${haltGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${daysSinceHalt!==null?daysSinceHalt:'—'}</div>
+        <div style="font-size:28px;font-weight:500;color:${haltGoalMet?'#00BB77':'var(--text)'};letter-spacing:-0.5px">${daysSinceHalt!==null?daysSinceHalt:'—'}</div>
         ${progressBar(haltProgress,haltGoalMet)}
         <div style="font-size:11px;color:var(--muted)">Goal: 30 days${haltGoalMet?' — achieved':''}${lastHalt?' · Last halt: '+lastHalt.d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):' · No halts recorded'}</div>
       </div>
       <div>
         <div style="font-weight:500;color:var(--text);margin-bottom:4px">${willGoalMet?'✓':'○'} Rides at 5/5 (last 30 days)</div>
-        <div style="font-size:28px;font-weight:500;color:${willGoalMet?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${pct5}%</div>
+        <div style="font-size:28px;font-weight:500;color:${willGoalMet?'#00BB77':'var(--text)'};letter-spacing:-0.5px">${pct5}%</div>
         ${progressBar(willProgress,willGoalMet)}
         <div style="font-size:11px;color:var(--muted)">Goal: 90%+ · ${fives}/${last30Will.length} rides at 5/5 · ${pct45}% at 4+ · Last 30 days</div>
       </div>
@@ -971,7 +883,7 @@ function buildRehabGoals(valid){
     <div style="margin-top:16px">
       <div style="font-weight:500;color:var(--text);margin-bottom:4px">${stickyPct===0?'✓':'○'} No reluctance or stops (last 30 days)</div>
       <div style="display:flex;align-items:baseline;gap:8px">
-        <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#3B6D11':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
+        <span style="font-size:28px;font-weight:500;color:${stickyPct===0?'#00BB77':'var(--text)'};letter-spacing:-0.5px">${100-stickyPct}%</span>
         <span style="font-size:13px;color:var(--muted)">clean · ${stickyCount}/${last30Rides} rides had reluctance (halt, sticky, or stops)</span>
       </div>
       ${progressBar(100-stickyPct,stickyPct===0)}
@@ -980,14 +892,14 @@ function buildRehabGoals(valid){
     <div style="margin-top:16px">
       <div style="font-weight:500;color:var(--text);margin-bottom:8px">Gait level (last 30 days)</div>
       <div style="display:flex;height:14px;border-radius:6px;overflow:hidden;gap:1px;margin-bottom:6px">
-        ${gaitWO?'<div style="flex:'+gaitWO+';background:#6B8F3A" title="Walk only: '+gaitWO+'%"></div>':''}
-        ${gaitWT?'<div style="flex:'+gaitWT+';background:#185FA5" title="W/T: '+gaitWT+'%"></div>':''}
-        ${gaitWTC?'<div style="flex:'+gaitWTC+';background:#534AB7" title="W/T/C: '+gaitWTC+'%"></div>':''}
+        ${gaitWO?'<div style="flex:'+gaitWO+';background:#57C69A" title="Walk only: '+gaitWO+'%"></div>':''}
+        ${gaitWT?'<div style="flex:'+gaitWT+';background:#00719C" title="W/T: '+gaitWT+'%"></div>':''}
+        ${gaitWTC?'<div style="flex:'+gaitWTC+';background:#0098CC" title="W/T/C: '+gaitWTC+'%"></div>':''}
       </div>
       <div style="display:flex;gap:16px;font-size:12px;color:var(--muted)">
-        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#6B8F3A;margin-right:4px;vertical-align:middle"></span>Walk only ${gaitWO}% (${gaitWOn})</span>
-        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#185FA5;margin-right:4px;vertical-align:middle"></span>W/T ${gaitWT}% (${gaitWTn})</span>
-        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#534AB7;margin-right:4px;vertical-align:middle"></span>W/T/C ${gaitWTC}% (${gaitWTCn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#57C69A;margin-right:4px;vertical-align:middle"></span>Walk only ${gaitWO}% (${gaitWOn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#00719C;margin-right:4px;vertical-align:middle"></span>W/T ${gaitWT}% (${gaitWTn})</span>
+        <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#0098CC;margin-right:4px;vertical-align:middle"></span>W/T/C ${gaitWTC}% (${gaitWTCn})</span>
       </div>
     </div>`;
 }
@@ -1088,8 +1000,8 @@ function buildInterventionAnalysis(valid){
   function arrow(d){
     if(d===null) return '';
     const n=parseFloat(d);
-    if(n>0) return '<span style="color:#3B6D11">▲ +'+Math.abs(n)+'</span>';
-    if(n<0) return '<span style="color:#A32D2D">▼ '+Math.abs(n)+'</span>';
+    if(n>0) return '<span style="color:#00BB77">▲ +'+Math.abs(n)+'</span>';
+    if(n<0) return '<span style="color:#C0492B">▼ '+Math.abs(n)+'</span>';
     return '<span style="color:var(--muted)">—</span>';
   }
 
@@ -1115,7 +1027,7 @@ function buildInterventionAnalysis(valid){
         <div style="font-size:11px;color:var(--muted)">Avg ride-to-ride willingness change</div>
       </div>
     </div>
-    ${onTime.length>1||overdue.length?'<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">On-time (≤35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500">'+(onTimeAvg!==null?onTimeAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+(onTime.length-1)+' session'+(onTime.length-1!==1?'s':'')+' on cadence</div></div><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Overdue (>35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500;color:'+(overdueAvg!==null&&onTimeAvg!==null&&overdueAvg<onTimeAvg?'#A32D2D':'var(--text)')+'">'+( overdueAvg!==null?overdueAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+overdue.length+' session'+(overdue.length!==1?'s':'')+' overdue'+(overdue.length?' · avg '+Math.round(overdue.reduce(function(s,o){return s+o.gap},0)/overdue.length)+' days gap':'')+'</div></div></div>':''}
+    ${onTime.length>1||overdue.length?'<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:10px"><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">On-time (≤35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500">'+(onTimeAvg!==null?onTimeAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+(onTime.length-1)+' session'+(onTime.length-1!==1?'s':'')+' on cadence</div></div><div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 14px;text-align:center"><div style="font-size:11px;color:var(--muted);margin-bottom:4px">Overdue (>35 days) — avg willingness after</div><div style="font-size:24px;font-weight:500;color:'+(overdueAvg!==null&&onTimeAvg!==null&&overdueAvg<onTimeAvg?'#C0492B':'var(--text)')+'">'+( overdueAvg!==null?overdueAvg:'—')+'</div><div style="font-size:11px;color:var(--muted)">'+overdue.length+' session'+(overdue.length!==1?'s':'')+' overdue'+(overdue.length?' · avg '+Math.round(overdue.reduce(function(s,o){return s+o.gap},0)/overdue.length)+' days gap':'')+'</div></div></div>':''}
   `;
 
   // Chart: willingness before/after each shockwave
@@ -1126,18 +1038,18 @@ function buildInterventionAnalysis(valid){
     data:{
       labels,
       datasets:[
-        {label:'Avg willingness — 14 days before',data:windows.map(w=>w.preWill),backgroundColor:'rgba(160,112,15,0.6)',borderRadius:2},
-        {label:'Avg willingness — 14 days after',data:windows.map(w=>w.postWill),backgroundColor:'rgba(59,109,17,0.6)',borderRadius:2},
+        {label:'Avg willingness — 14 days before',data:windows.map(w=>w.preWill),backgroundColor:'rgba(136,134,127,0.5)',borderRadius:2},
+        {label:'Avg willingness — 14 days after',data:windows.map(w=>w.postWill),backgroundColor:'rgba(0,187,119,0.62)',borderRadius:2},
       ]
     },
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'DM Sans',size:10}}},
+      plugins:{legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
         tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y}}
       },
       scales:{
         x:{ticks:{font:{family:'DM Mono',size:9}}},
-        y:{min:0,max:5,ticks:{font:{family:'DM Sans',size:9}}}
+        y:{min:0,max:5,ticks:{font:{family:'Plus Jakarta Sans',size:9}}}
       }
     }
   });
@@ -1172,7 +1084,7 @@ function buildInterventionAnalysis(valid){
 
   // Clinical significance note
   const sig=document.createElement('div');
-  sig.style.cssText='font-size:12px;line-height:1.7;color:#5A4A3A;margin-top:16px;padding:12px 16px;background:#FDF6EE;border-radius:8px;border-left:3px solid #D85A30';
+  sig.style.cssText='font-size:12px;line-height:1.7;color:#0A4266;margin-top:16px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC';
   const validWindows=windows.filter(w=>w.preWill!==null&&w.postWill!==null);
   const improved=validWindows.filter(w=>w.postWill>w.preWill).length;
   const declined=validWindows.filter(w=>w.postWill<w.preWill).length;
@@ -1198,17 +1110,130 @@ function buildInterventionAnalysis(valid){
   detail.parentElement.appendChild(sig);
 }
 
+// ── SHOCKWAVE BY AREA ─────────────────────────────────────────────────
+function swRegions(str){
+  // Map a free area string into normalized region tags
+  const s=String(str||'').toLowerCase();
+  const regs=[];
+  if(/quad|hip/.test(s)) regs.push('Quad/Hip');
+  if(/\bsi\b|sacro/.test(s)) regs.push('SI');
+  if(/neck|c6|c7|cervical/.test(s)) regs.push('Neck (C6/7)');
+  if(/hock/.test(s)) regs.push('Hock');
+  if(/stifle/.test(s)) regs.push('Stifle');
+  if(/other/.test(s)) regs.push('Other');
+  return regs;
+}
+
+function buildShockwaveByArea(valid){
+  const el=document.getElementById('swAreaContent');
+  if(!el) return;
+  if(!valid.length){ el.textContent='No data.'; return; }
+  const WILL_I=11, SW_I=27, AREA_I=36, RODE_I=5;
+  const DAY=86400000;
+
+  function deltaFor(swDate){
+    const before14=new Date(swDate.getTime()-14*DAY);
+    const after14=new Date(swDate.getTime()+14*DAY);
+    const pre=valid.filter(({d,r})=>d>=before14&&d<swDate&&r[RODE_I]==='Y').map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+    const post=valid.filter(({d,r})=>d>swDate&&d<=after14&&r[RODE_I]==='Y').map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
+    if(!pre.length||!post.length) return null;
+    const a=pre.reduce((s,v)=>s+v,0)/pre.length, b=post.reduce((s,v)=>s+v,0)/post.length;
+    return {pre:a,post:b,delta:b-a};
+  }
+
+  // Collect shockwave sessions with regions + delta
+  const sessions=[];
+  valid.forEach(({d,r})=>{
+    if(r[SW_I]!=='Y') return;
+    const regs=swRegions(r[AREA_I]);
+    sessions.push({date:d, regions:regs, logged:regs.length>0, dd:deltaFor(d)});
+  });
+
+  if(!sessions.length){ el.innerHTML='<div style="color:var(--muted)">No shockwave sessions logged.</div>'; return; }
+
+  const logged=sessions.filter(s=>s.logged);
+  const notLogged=sessions.length-logged.length;
+
+  if(!logged.length){
+    el.innerHTML=`<div style="padding:12px 14px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC;line-height:1.6">
+      <strong>No areas logged yet.</strong> ${sessions.length} shockwave session${sessions.length!==1?'s':''} on record, none with a treated-area tag.
+      Start selecting areas on the entry form when you log shockwave and this breakdown will populate — quad-only vs +SI vs +neck.</div>`;
+    return;
+  }
+
+  // Per-region aggregation
+  const REGIONS=['Quad/Hip','SI','Neck (C6/7)','Hock','Stifle','Other'];
+  const rows=REGIONS.map(reg=>{
+    const inReg=logged.filter(s=>s.regions.includes(reg));
+    const withDelta=inReg.filter(s=>s.dd);
+    const avg=withDelta.length?withDelta.reduce((s,x)=>s+x.dd.delta,0)/withDelta.length:null;
+    return {reg,sessions:inReg.length,scored:withDelta.length,avg};
+  }).filter(r=>r.sessions>0);
+
+  const arrow=v=>v===null?'<span style="color:var(--muted)">—</span>':(v>0.05?'<span style="color:#00BB77">▲ +'+v.toFixed(1)+'</span>':v<-0.05?'<span style="color:#C0492B">▼ '+v.toFixed(1)+'</span>':'<span style="color:var(--muted)">± '+Math.abs(v).toFixed(1)+'</span>');
+
+  // Neck vs no-neck (the C6/7 question)
+  const neck=logged.filter(s=>s.regions.includes('Neck (C6/7)')&&s.dd);
+  const noNeck=logged.filter(s=>!s.regions.includes('Neck (C6/7)')&&s.dd);
+  const neckAvg=neck.length?neck.reduce((s,x)=>s+x.dd.delta,0)/neck.length:null;
+  const noNeckAvg=noNeck.length?noNeck.reduce((s,x)=>s+x.dd.delta,0)/noNeck.length:null;
+
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="border-bottom:1px solid var(--border)">
+      <th style="text-align:left;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Region treated</th>
+      <th style="text-align:right;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Sessions</th>
+      <th style="text-align:right;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Avg willingness Δ</th>
+    </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    html+=`<tr style="border-top:1px solid var(--border)">
+      <td style="padding:6px 8px;font-weight:500;color:var(--text)">${r.reg}</td>
+      <td style="padding:6px 8px;text-align:right;color:var(--muted)">${r.sessions}${r.scored<r.sessions?' <span style="font-size:10px">('+r.scored+' scored)</span>':''}</td>
+      <td style="padding:6px 8px;text-align:right">${arrow(r.avg)}</td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+
+  // Neck comparison block
+  if(neck.length||noNeck.length){
+    html+=`<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:14px">
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sessions including neck</div>
+        <div style="font-size:22px;font-weight:500">${neckAvg!==null?arrow(neckAvg):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${neck.length} scored session${neck.length!==1?'s':''}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sessions without neck</div>
+        <div style="font-size:22px;font-weight:500">${noNeckAvg!==null?arrow(noNeckAvg):'—'}</div>
+        <div style="font-size:11px;color:var(--muted)">${noNeck.length} scored session${noNeck.length!==1?'s':''}</div>
+      </div>
+    </div>`;
+  }
+
+  // Interpretation / caveat
+  let note='';
+  const scoredTotal=logged.filter(s=>s.dd).length;
+  if(scoredTotal<3){
+    note=`<strong>Early data.</strong> Only ${scoredTotal} logged session${scoredTotal!==1?'s':''} with before/after ride data. Keep tagging areas — the neck-vs-no-neck comparison is where the C6/7 answer will show up.`;
+  } else if(neck.length&&noNeck.length&&neckAvg!==null&&noNeckAvg!==null){
+    const diff=neckAvg-noNeckAvg;
+    if(diff>0.3) note=`<strong>Adding the neck tracks with a larger willingness gain</strong> (+${diff.toFixed(1)} vs sessions without it). Consistent with C6/7 being a real pain contributor — worth raising as evidence for direct cervical treatment.`;
+    else if(diff<-0.3) note=`<strong>Neck sessions show a smaller gain</strong> than sessions without it (${diff.toFixed(1)}). Doesn't rule the neck out — could reflect confounding (which sessions got neck added, and why) — but it's not yet supporting a willingness benefit.`;
+    else note=`<strong>No clear separation yet</strong> between neck and non-neck sessions (${diff>=0?'+':''}${diff.toFixed(1)}). More sessions needed to detect a difference this size.`;
+  }
+  note+=`<br><span style="color:#888;font-size:11px">Sessions treat multiple regions at once, so per-region deltas overlap and aren't cleanly attributable. 14-day window; confounders (injections, farrier, workload) not controlled.${notLogged?' '+notLogged+' shockwave session'+(notLogged!==1?'s':'')+' had no area logged and are excluded here.':''}</span>`;
+  html+=`<div style="font-size:12px;line-height:1.7;color:#0A4266;margin-top:14px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">${note}</div>`;
+
+  el.innerHTML=html;
+}
+
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
   buildStats(data);
   if(data.length){
     buildWorkload(data,labels);
-    buildWellness(data,labels);
-    buildPT(data,labels);
-    buildFreq(data,labels);
+    buildPTCompliance(data,labels);
   }
-  buildTrend();
   buildGap();
   buildRehabGoals(D.valid||[]);
   buildWillDist(D.valid||[]);
@@ -1217,6 +1242,7 @@ function buildAll(){
   buildStopsMonth(D.valid||[]);
   buildGaitMonth(D.valid||[]);
   buildInterventionAnalysis(D.valid||[]);
+  buildShockwaveByArea(D.valid||[]);
 }
 
 function setView(v,btn){
