@@ -8,7 +8,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#F7F5F0;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
+:root{--bg:#F4F7F7;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
 h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .sub{font-size:13px;color:var(--muted);margin-bottom:24px}
@@ -59,36 +59,45 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 <style id="maestro-nav-style">
 .mnav{
   position:sticky;top:0;z-index:999;
-  display:flex;align-items:center;gap:0;
-  background:#1A1814;
-  padding:0 16px;
-  height:46px;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
   font-family:'Plus Jakarta Sans',sans-serif;
 }
 .mnav-brand{
-  font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
-  margin-right:auto;letter-spacing:0.02em;white-space:nowrap;
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
 }
-.mnav-brand span{color:white}
-.mnav-links{display:flex;gap:2px}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
 .mnav-link{
-  font-size:12px;color:rgba(255,255,255,0.55);
-  text-decoration:none;padding:6px 12px;border-radius:6px;
-  transition:all 0.15s;white-space:nowrap;
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
 }
-.mnav-link:hover{color:white;background:rgba(255,255,255,0.1)}
-.mnav-link.active{color:white;background:rgba(255,255,255,0.15);font-weight:500}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
 @media(max-width:480px){
   .mnav-brand{display:none}
-  .mnav-links{gap:0}
-  .mnav-link{padding:6px 9px;font-size:11px}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
 }
 </style>
 </head>
 <body>
 <nav class="mnav">
   <span class="mnav-brand">Maestro <span>Djinto</span></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link active">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork Dashboard</a></div>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link active">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
 </nav>
 <h1>Maestro — Progress Dashboard</h1>
 <p class="sub" id="trackingRange">Post-rehab tracking · loading...</p>
@@ -495,9 +504,9 @@ function buildWorkload(data,labels){
   CH.wl=new Chart(document.getElementById('cWorkload'),{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(59,109,17,0.65)', borderColor:'#00BB77',borderWidth:.5,borderRadius:2},
-      {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(186,117,23,0.65)',borderColor:'#BA7517',borderWidth:.5,borderRadius:2},
-      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(162,45,45,0.65)', borderColor:'#C0492B',borderWidth:.5,borderRadius:2},
+      {label:'Walk',  data:data.map(d=>d.walk),   backgroundColor:'rgba(0,187,119,0.55)', borderColor:'#00BB77',borderWidth:.5,borderRadius:2},
+      {label:'Trot',  data:data.map(d=>d.trot),   backgroundColor:'rgba(0,152,204,0.55)', borderColor:'#0098CC',borderWidth:.5,borderRadius:2},
+      {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(0,113,156,0.55)', borderColor:'#00719C',borderWidth:.5,borderRadius:2},
     ]},options:o
   });
 }
@@ -1029,8 +1038,8 @@ function buildInterventionAnalysis(valid){
     data:{
       labels,
       datasets:[
-        {label:'Avg willingness — 14 days before',data:windows.map(w=>w.preWill),backgroundColor:'rgba(160,112,15,0.6)',borderRadius:2},
-        {label:'Avg willingness — 14 days after',data:windows.map(w=>w.postWill),backgroundColor:'rgba(59,109,17,0.6)',borderRadius:2},
+        {label:'Avg willingness — 14 days before',data:windows.map(w=>w.preWill),backgroundColor:'rgba(136,134,127,0.5)',borderRadius:2},
+        {label:'Avg willingness — 14 days after',data:windows.map(w=>w.postWill),backgroundColor:'rgba(0,187,119,0.62)',borderRadius:2},
       ]
     },
     options:{
