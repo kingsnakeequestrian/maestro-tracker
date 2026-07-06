@@ -665,7 +665,9 @@ function renderApptList(list,mode){
     const past=days<0;
     const fmt=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     const time=fmtTimeRange(a.start,a.end);
-    const cal=past?'':'<a href="'+gcalLink(a)+'" target="_blank" rel="noopener" title="Add to Google Calendar" style="font-size:11px;color:var(--vet);text-decoration:none;white-space:nowrap;margin-right:4px">＋ Calendar</a>';
+    // No manual "add to calendar" link — the appointments script auto-syncs each
+    // add to the Horse Appointments calendar. A manual link here caused duplicates.
+    const cal='';
     const right = mode==='local'
       ? '<button onclick="removeApptLocal('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
       : '<span style="font-size:10px;color:var(--muted);white-space:nowrap" title="Stored in the Appointments tab — edit or remove there">on sheet</span>';
