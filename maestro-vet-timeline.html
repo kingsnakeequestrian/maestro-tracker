@@ -184,10 +184,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <input type="time" id="apptStart" title="Start time (leave blank for all-day)" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
     <span style="font-size:12px;color:var(--muted)">to</span>
     <input type="time" id="apptEnd" title="End time" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <select id="apptType" title="Type" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+      <option>Vet</option><option>Farrier</option><option>Bodywork</option><option>Imaging</option><option>Other</option>
+    </select>
     <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;min-width:180px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
-    <button onclick="addAppt()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
+    <button id="apptAddBtn" onclick="addAppt()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
   </div>
-  <div style="font-size:11px;color:var(--muted);margin-top:6px">Leave times blank for an all-day entry. Timed entries generate a Google Calendar link.</div>
+  <div id="apptHint" style="font-size:11px;color:var(--muted);margin-top:6px">Leave times blank for an all-day entry. Appointments save to the Appointments tab and sync to the shared Horse Appointments calendar.</div>
 </div>
 
 <!-- VET HISTORY - DYNAMIC -->
@@ -421,7 +424,7 @@ async function loadVetHistory(){
       return db - da;
     });
 
-    console.log('[VetTimeline] Total rows:', rows.length, 'Dates:', rows.map(r=>r[0]));
+    console.log('[VetTimeline] Total rows:', rows.length);
     timeline.innerHTML = sorted.map(r => buildVisitCard(r)).join('');
     status.textContent = `${sorted.length} visits · Updated ${new Date().toLocaleTimeString()}`;
     buildDynamicAlerts(rows);
@@ -444,6 +447,9 @@ function buildDynamicAlerts(rows){
   rows.forEach(r=>{
     const d=new Date(r[0]);
     if(isNaN(d)) return;
+    // A future-dated row can't be a completed treatment — never let one count
+    // as the last one done (it would suppress a genuinely overdue alert).
+    if(d>today) return;
     const procs=String(r[4]||'').toLowerCase();
     const vtype=String(r[3]||'').toLowerCase();
     const injSite=String(r[14]||'').toLowerCase();
@@ -463,6 +469,7 @@ function buildDynamicAlerts(rows){
       json.data.rows.forEach(r=>{
         const d=new Date(r[2]); // date column in daily
         if(isNaN(d)) return;
+        if(d>today) return; // ignore pre-populated future rows
         if(r[27]==='Y' && (!lastSW || d>lastSW)) lastSW=d;  // shockwave col
         if(r[26]==='Y' && (!lastLaser || d>lastLaser)) lastLaser=d; // laser col
         if(r[28]==='Y' && (!lastFarrier || d>lastFarrier)) lastFarrier=d; // farrier col
@@ -518,27 +525,62 @@ function buildDynamicAlerts(rows){
   }
 }
 
-// ── UPCOMING APPOINTMENTS (localStorage) ─────────────────────────────
-function getAppts(){
-  try{return JSON.parse(localStorage.getItem('m_appts')||'[]');}catch{return [];}
+// ── UPCOMING APPOINTMENTS (dedicated Appointments tab, localStorage fallback) ──
+// Appointments live in their own "Appointments" tab, written and mirrored to
+// the shared Horse Appointments calendar by maestro-appointments-backend.gs.
+// Both read (GET ?action=upcoming) and write (POST append) go to that script's
+// URL. Kept fully separate from Vet Records, so nothing here can affect the
+// vet history list or the overdue-alert math.
+function getApptCfg(){
+  let c={}; try{ c=JSON.parse(localStorage.getItem('m_cfg')||'{}'); }catch{}
+  return { writeUrl:c.apptScriptUrl||'' };
 }
-function saveAppts(list){localStorage.setItem('m_appts',JSON.stringify(list));}
 
-function addAppt(){
+// localStorage fallback (used only when no appointments script URL is set)
+function getApptsLocal(){ try{return JSON.parse(localStorage.getItem('m_appts')||'[]');}catch{return [];} }
+function saveApptsLocal(list){ localStorage.setItem('m_appts',JSON.stringify(list)); }
+
+async function addAppt(){
   const dateEl=document.getElementById('apptDate');
   const startEl=document.getElementById('apptStart');
   const endEl=document.getElementById('apptEnd');
+  const typeEl=document.getElementById('apptType');
   const descEl=document.getElementById('apptDesc');
+  const btn=document.getElementById('apptAddBtn');
+  const hint=document.getElementById('apptHint');
   if(!dateEl.value||!descEl.value) return;
-  const list=getAppts();
-  list.push({date:dateEl.value,start:startEl.value||'',end:endEl.value||'',desc:descEl.value});
-  list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')));
-  saveAppts(list);
-  dateEl.value='';
-  startEl.value='';
-  endEl.value='';
-  descEl.value='';
-  renderAppts();
+  const appt={date:dateEl.value,start:startEl.value||'',end:endEl.value||'',
+              type:(typeEl&&typeEl.value)||'Vet',desc:descEl.value.trim()};
+  const {writeUrl}=getApptCfg();
+
+  if(writeUrl){
+    if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+    try{
+      const params=new URLSearchParams();
+      params.append('action','append');
+      params.append('date',appt.date);
+      params.append('start',appt.start);
+      params.append('end',appt.end);
+      params.append('type',appt.type);
+      params.append('provider','');
+      params.append('desc',appt.desc);
+      const resp=await fetch(writeUrl,{method:'POST',body:params});
+      const json=await resp.json();
+      if(!json.ok) throw new Error(json.error||'write failed');
+      if(hint) hint.textContent=(json.calendar==='timed'||json.calendar==='all-day')
+        ? 'Saved to sheet · added to Horse Appointments calendar.'
+        : 'Saved to sheet. Calendar sync pending — run the one-time authorization (see deploy notes).';
+    }catch(err){
+      if(hint) hint.textContent='Could not reach the appointments script — saved locally instead. '+err.message;
+      const list=getApptsLocal(); list.push(appt);
+      list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))); saveApptsLocal(list);
+    }finally{ if(btn){ btn.disabled=false; btn.textContent='Add'; } }
+  }else{
+    const list=getApptsLocal(); list.push(appt);
+    list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))); saveApptsLocal(list);
+  }
+  dateEl.value=''; startEl.value=''; endEl.value=''; descEl.value='';
+  loadAppts();
 }
 
 // Compact time-range label, e.g. "1:00–4:00 PM" or "9:30 AM–1:00 PM" (matches Winter's format)
@@ -574,15 +616,31 @@ function gcalLink(a){
   return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+dates;
 }
 
-function removeAppt(i){
-  const list=getAppts();
+function removeApptLocal(i){
+  const list=getApptsLocal();
   list.splice(i,1);
-  saveAppts(list);
-  renderAppts();
+  saveApptsLocal(list);
+  loadAppts();
 }
 
-function renderAppts(){
-  const list=getAppts();
+// Load upcoming appointments — from the Appointments tab when configured, else localStorage.
+async function loadAppts(){
+  const {writeUrl}=getApptCfg();
+  if(writeUrl){
+    try{
+      const resp=await fetch(writeUrl+'?action=upcoming');
+      const json=await resp.json();
+      if(!json.ok) throw new Error(json.error||'read failed');
+      const list=(json.appointments||[])
+        .sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')));
+      renderApptList(list,'sheet');
+      return;
+    }catch(err){ /* fall through to local */ }
+  }
+  renderApptList(getApptsLocal(),'local');
+}
+
+function renderApptList(list,mode){
   const el=document.getElementById('upcomingAppts');
   if(!el) return;
   if(!list.length){
@@ -597,18 +655,20 @@ function renderAppts(){
     const fmt=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
     const time=fmtTimeRange(a.start,a.end);
     const cal=past?'':'<a href="'+gcalLink(a)+'" target="_blank" rel="noopener" title="Add to Google Calendar" style="font-size:11px;color:var(--vet);text-decoration:none;white-space:nowrap;margin-right:4px">＋ Calendar</a>';
+    const right = mode==='local'
+      ? '<button onclick="removeApptLocal('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
+      : '<span style="font-size:10px;color:var(--muted);white-space:nowrap" title="Stored in the Appointments tab — edit or remove there">on sheet</span>';
     return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px'+(past?';opacity:0.5':'')+'">'
-      +'<div><div style="font-size:13px;font-weight:500">'+a.desc+'</div>'
+      +'<div><div style="font-size:13px;font-weight:500">'+a.desc+(a.type&&a.type!=='Vet'?' <span style="font-size:10px;color:var(--muted)">· '+a.type+'</span>':'')+'</div>'
       +'<div style="font-size:11px;color:var(--muted)">'+fmt+(time?' · '+time:'')+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
-      +'<div style="display:flex;align-items:center;gap:6px">'+cal
-      +'<button onclick="removeAppt('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
+      +'<div style="display:flex;align-items:center;gap:6px">'+cal+right
       +'</div></div>';
   }).join('');
 }
 
 window.addEventListener('load', ()=>{
   loadVetHistory();
-  renderAppts();
+  loadAppts();
 });
 </script>
 </body>
