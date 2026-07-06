@@ -10,22 +10,27 @@
 :root{
   --bg:#F4F7F7;
   --card:#FFFFFF;
-  --text:#1A1814;
-  --muted:#7A7468;
-  --border:rgba(0,0,0,0.09);
-  --radius:12px;
+  --text:#1C1A16;
+  --muted:#706E67;
+  --border:rgba(0,0,0,0.08);
+  --radius:14px;
 
-  --sw:#C0492B;   --sw-bg:#FDF0EF;   --sw-border:#E8A09B;
-  --inj:#1A5FA8;  --inj-bg:#EAF1FB;  --inj-border:#92B8E8;
-  --laser:#6B4FA8;--laser-bg:#F2EEF9;--laser-border:#B09FD8;
-  --bw:#2E7D52;   --bw-bg:#EAF4EE;   --bw-border:#8EC9A6;
-  --vet:#B77A15;  --vet-bg:#FBF3E4;  --vet-border:#D4A85A;
+  /* Category colors — aligned to Index + Progress Dashboard: jade, cyan,
+     deep-blue, forest, terracotta. No orange, no off-palette purple. */
+  --sw:#C0492B;   --sw-bg:#F6ECE8;   --sw-border:#D9633F;
+  --inj:#0098CC;  --inj-bg:#E4F4FB;  --inj-border:#7FCDE8;
+  --laser:#00719C;--laser-bg:#E1EEF4;--laser-border:#6FB0CC;
+  --bw:#1E8E63;   --bw-bg:#E4F1EB;   --bw-border:#7FC4A2;
+  --vet:#00A56A;  --vet-bg:#DFF4EA;  --vet-border:#57C69A;
+
+  /* Minimal warn accent, matching the dashboard's #B77A15 stat/warn usage */
+  --warn:#B77A15; --warn-bg:#FAEEDA;
 }
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);padding:32px 20px 80px;max-width:900px;margin:0 auto;line-height:1.5}
 
 /* HEADER */
 .header{margin-bottom:36px}
-.header h1{font-family:'Plus Jakarta Sans',serif;font-size:28px;font-weight:400;letter-spacing:-0.3px;margin-bottom:4px}
+.header h1{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .header p{font-size:13px;color:var(--muted)}
 
 /* LEGEND */
@@ -43,13 +48,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .alert-main{font-size:18px;font-weight:500;margin-bottom:2px}
 .alert-sub{font-size:12px;color:var(--muted)}
 .badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;margin-top:6px;letter-spacing:0.04em}
-.badge.due{background:#FFF0EE;color:var(--sw)}
-.badge.soon{background:#FFF8EC;color:var(--vet)}
-.badge.on-track{background:#EAF4EE;color:var(--bw)}
+.badge.due{background:var(--sw-bg);color:var(--sw)}
+.badge.soon{background:var(--warn-bg);color:var(--warn)}
+.badge.on-track{background:var(--bw-bg);color:var(--bw)}
 
 /* SECTION */
 .section{margin-bottom:40px}
-.section-title{font-family:'Plus Jakarta Sans',serif;font-size:16px;font-weight:400;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.section-title{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .section-dot{width:10px;height:10px;border-radius:50%}
 
 /* TIMELINE */
@@ -72,7 +77,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .tl-card.laser{border-left:3px solid var(--laser)}
 .tl-card.bw{border-left:3px solid var(--bw)}
 .tl-card.vet{border-left:3px solid var(--vet)}
-.tl-card.future{border-left:3px solid #D0CBC2;border-style:dashed;background:transparent}
+.tl-card.future{border-left:3px solid #C2C8C8;border-style:dashed;background:transparent}
 
 .tl-date{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:3px}
 .tl-title{font-size:14px;font-weight:500;margin-bottom:3px}
@@ -90,7 +95,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 /* PROGRESS BAR (for laser compliance) */
 .compliance-wrap{margin-top:8px}
 .compliance-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px;color:var(--muted)}
-.compliance-track{flex:1;height:5px;background:#EDE9E0;border-radius:3px;overflow:hidden}
+.compliance-track{flex:1;height:5px;background:#E7ECEC;border-radius:3px;overflow:hidden}
 .compliance-fill{height:100%;border-radius:3px}
 
 /* NEXT TREATMENT CHIP */
@@ -210,9 +215,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 
 
 <!-- LEFT TROCHANTER NOTE -->
-<div style="background:#FDF6EE;border-radius:12px;padding:18px 20px;border:1px solid #E8C97A;border-left:4px solid var(--vet);margin-bottom:40px">
-  <div style="font-size:13px;font-weight:500;margin-bottom:6px;color:var(--vet)">⚠ Untreated finding — Left 3rd trochanter entheseopathy</div>
-  <div style="font-size:12px;color:#5A4A3A;line-height:1.7">
+<div style="background:var(--sw-bg);border-radius:12px;padding:18px 20px;border:1px solid var(--sw-border);border-left:4px solid var(--sw);margin-bottom:40px">
+  <div style="font-size:13px;font-weight:500;margin-bottom:6px;color:var(--sw)">⚠ Untreated finding — Left 3rd trochanter entheseopathy</div>
+  <div style="font-size:12px;color:#6E3B2C;line-height:1.7">
     Bone scan (ESMR) showed <strong>focal, very intense IRU</strong> at left mid-femur (3rd trochanter region), with ultrasound confirming entheseous remodeling. This finding has <strong>never been directly treated</strong>. Right-side primary injury has driven compensatory left-side loading. Shockwave has stronger published evidence for enthesopathies than mesotherapy. Raise directly with Dr. Smith at next appointment.
   </div>
 </div>
@@ -246,7 +251,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 <!-- UPCOMING SCHEDULE -->
 <div class="section">
   <div class="section-title">
-    <span class="section-dot" style="background:#D0CBC2"></span>
+    <span class="section-dot" style="background:#C2C8C8"></span>
     Upcoming schedule
   </div>
   <div class="future-grid">
@@ -307,9 +312,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     </div>
   </div>
 
-  <div style="margin-top:16px;background:#EAF4EE;border-radius:12px;padding:16px 18px;border:1px solid #8EC9A6;border-left:4px solid var(--bw)">
+  <div style="margin-top:16px;background:var(--bw-bg);border-radius:12px;padding:16px 18px;border:1px solid var(--bw-border);border-left:4px solid var(--bw)">
     <div style="font-size:13px;font-weight:500;margin-bottom:8px;color:var(--bw)">New from Apr 1 eval (Dr. Gabby Solum)</div>
-    <div style="font-size:12px;color:#2E4A38;line-height:1.8">
+    <div style="font-size:12px;color:#186049;line-height:1.8">
       <strong>Injections:</strong> Bilateral hocks · Left stifle · Adequan series<br>
       <strong>Imaging:</strong> RF radiographs (angles, heel contraction) · RF tendon ultrasound (pending)<br>
       <strong>Shockwave:</strong> C6/C7 (1–2 rounds) · Right quad continuing<br>
@@ -322,8 +327,14 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 </div>
 
 <script>
+// Baked-in defaults so anyone opening the shared link can VIEW vet data and ADD
+// appointments without touching Settings. Your own Settings still override these.
+// Reads (vet history/alerts) are open; the timeline never writes clinical data —
+// its only write is appointments, which go to the appointments script below.
+const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec';
+const DEFAULT_APPT_URL='https://script.google.com/macros/s/AKfycbyuuFn4u6hqn2dzznnZjprTI0QbT-487_riS3S83uFgjN4X3grlHO94_Jqmc5v_1DqOow/exec';
 function getScriptUrl(){
-  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||''; }catch{ return ''; }
+  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||DEFAULT_SCRIPT_URL; }catch{ return DEFAULT_SCRIPT_URL; }
 }
 
 function typeColor(procedures, visitType){
@@ -508,7 +519,7 @@ function buildDynamicAlerts(rows){
     if(lastFarrier){
       const next=new Date(lastFarrier); next.setDate(next.getDate()+35);
       const days=daysUntil(next);
-      cards.push('<div class="alert-card" style="border-left-color:#2E7D52"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">5 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
+      cards.push('<div class="alert-card" style="border-left-color:var(--bw)"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">5 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
     }
 
 
@@ -533,7 +544,7 @@ function buildDynamicAlerts(rows){
 // vet history list or the overdue-alert math.
 function getApptCfg(){
   let c={}; try{ c=JSON.parse(localStorage.getItem('m_cfg')||'{}'); }catch{}
-  return { writeUrl:c.apptScriptUrl||'' };
+  return { writeUrl:c.apptScriptUrl||DEFAULT_APPT_URL };
 }
 
 // localStorage fallback (used only when no appointments script URL is set)
