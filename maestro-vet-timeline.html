@@ -4,28 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maestro — Treatment Timeline</title>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#F5F2EC;
+  --bg:#F4F7F7;
   --card:#FFFFFF;
   --text:#1A1814;
   --muted:#7A7468;
   --border:rgba(0,0,0,0.09);
   --radius:12px;
 
-  --sw:#C0392B;   --sw-bg:#FDF0EF;   --sw-border:#E8A09B;
+  --sw:#C0492B;   --sw-bg:#FDF0EF;   --sw-border:#E8A09B;
   --inj:#1A5FA8;  --inj-bg:#EAF1FB;  --inj-border:#92B8E8;
   --laser:#6B4FA8;--laser-bg:#F2EEF9;--laser-border:#B09FD8;
   --bw:#2E7D52;   --bw-bg:#EAF4EE;   --bw-border:#8EC9A6;
-  --vet:#8B5E14;  --vet-bg:#FBF3E4;  --vet-border:#D4A85A;
+  --vet:#B77A15;  --vet-bg:#FBF3E4;  --vet-border:#D4A85A;
 }
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);padding:32px 20px 80px;max-width:900px;margin:0 auto;line-height:1.5}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);padding:32px 20px 80px;max-width:900px;margin:0 auto;line-height:1.5}
 
 /* HEADER */
 .header{margin-bottom:36px}
-.header h1{font-family:'Libre Baskerville',serif;font-size:28px;font-weight:400;letter-spacing:-0.3px;margin-bottom:4px}
+.header h1{font-family:'Plus Jakarta Sans',serif;font-size:28px;font-weight:400;letter-spacing:-0.3px;margin-bottom:4px}
 .header p{font-size:13px;color:var(--muted)}
 
 /* LEGEND */
@@ -49,7 +49,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);pad
 
 /* SECTION */
 .section{margin-bottom:40px}
-.section-title{font-family:'Libre Baskerville',serif;font-size:16px;font-weight:400;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.section-title{font-family:'Plus Jakarta Sans',serif;font-size:16px;font-weight:400;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .section-dot{width:10px;height:10px;border-radius:50%}
 
 /* TIMELINE */
@@ -110,36 +110,45 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);pad
 <style id="maestro-nav-style">
 .mnav{
   position:sticky;top:0;z-index:999;
-  display:flex;align-items:center;gap:0;
-  background:#1A1814;
-  padding:0 16px;
-  height:46px;
-  font-family:'DM Sans',sans-serif;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;
 }
 .mnav-brand{
-  font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
-  margin-right:auto;letter-spacing:0.02em;white-space:nowrap;
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
 }
-.mnav-brand span{color:white}
-.mnav-links{display:flex;gap:2px}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
 .mnav-link{
-  font-size:12px;color:rgba(255,255,255,0.55);
-  text-decoration:none;padding:6px 12px;border-radius:6px;
-  transition:all 0.15s;white-space:nowrap;
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
 }
-.mnav-link:hover{color:white;background:rgba(255,255,255,0.1)}
-.mnav-link.active{color:white;background:rgba(255,255,255,0.15);font-weight:500}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
 @media(max-width:480px){
   .mnav-brand{display:none}
-  .mnav-links{gap:0}
-  .mnav-link{padding:6px 9px;font-size:11px}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
 }
 </style>
 </head>
 <body>
 <nav class="mnav">
   <span class="mnav-brand">Maestro <span>Djinto</span></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link active">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork Dashboard</a></div>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link active">Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
 </nav>
 
 <div class="header">
@@ -170,11 +179,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);pad
   <div id="upcomingAppts" style="display:grid;gap:8px">
     <div style="font-size:13px;color:var(--muted)">No upcoming appointments scheduled. Add them in the field below.</div>
   </div>
-  <div style="display:flex;gap:8px;margin-top:10px">
-    <input type="date" id="apptDate" style="font-family:'DM Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
-    <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;font-family:'DM Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
-    <button onclick="addAppt()" style="font-family:'DM Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+    <input type="date" id="apptDate" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <input type="time" id="apptStart" title="Start time (leave blank for all-day)" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <span style="font-size:12px;color:var(--muted)">to</span>
+    <input type="time" id="apptEnd" title="End time" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;min-width:180px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <button onclick="addAppt()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
   </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:6px">Leave times blank for an all-day entry. Timed entries generate a Google Calendar link.</div>
 </div>
 
 <!-- VET HISTORY - DYNAMIC -->
@@ -184,7 +197,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);pad
       <span class="section-dot" style="background:var(--vet)"></span>
       Vet visit history
     </span>
-    <button id="tlRefreshBtn" onclick="loadVetHistory()" style="font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer">Refresh</button>
+    <button id="tlRefreshBtn" onclick="loadVetHistory()" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer">Refresh</button>
   </div>
   <div id="vetHistoryStatus" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
   <div class="timeline" id="vetHistoryTimeline">
@@ -513,15 +526,52 @@ function saveAppts(list){localStorage.setItem('m_appts',JSON.stringify(list));}
 
 function addAppt(){
   const dateEl=document.getElementById('apptDate');
+  const startEl=document.getElementById('apptStart');
+  const endEl=document.getElementById('apptEnd');
   const descEl=document.getElementById('apptDesc');
   if(!dateEl.value||!descEl.value) return;
   const list=getAppts();
-  list.push({date:dateEl.value,desc:descEl.value});
-  list.sort((a,b)=>a.date.localeCompare(b.date));
+  list.push({date:dateEl.value,start:startEl.value||'',end:endEl.value||'',desc:descEl.value});
+  list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')));
   saveAppts(list);
   dateEl.value='';
+  startEl.value='';
+  endEl.value='';
   descEl.value='';
   renderAppts();
+}
+
+// Compact time-range label, e.g. "1:00–4:00 PM" or "9:30 AM–1:00 PM" (matches Winter's format)
+function fmtTimeRange(start,end){
+  if(!start) return '';
+  const to12=(t)=>{
+    const [h,m]=t.split(':').map(Number);
+    const mer=h>=12?'PM':'AM';
+    const h12=h%12===0?12:h%12;
+    return {label:h12+':'+String(m).padStart(2,'0'),mer};
+  };
+  const s=to12(start);
+  if(!end) return s.label+' '+s.mer;
+  const e=to12(end);
+  return s.mer===e.mer ? s.label+'–'+e.label+' '+e.mer : s.label+' '+s.mer+'–'+e.label+' '+e.mer;
+}
+
+// Build a Google Calendar "add event" link (title prefixed "Maestro —" to match the shared Horse Appointments calendar)
+function gcalLink(a){
+  const pad=(n)=>String(n).padStart(2,'0');
+  const ymd=a.date.replace(/-/g,'');
+  let dates;
+  if(a.start){
+    const st=a.start.replace(':','')+'00';
+    const en=(a.end||a.start).replace(':','')+'00';
+    dates=ymd+'T'+st+'/'+ymd+'T'+en;
+  }else{
+    const d=new Date(a.date+'T12:00:00'); d.setDate(d.getDate()+1);
+    const nxt=''+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+    dates=ymd+'/'+nxt;
+  }
+  const title='Maestro — '+a.desc;
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+dates;
 }
 
 function removeAppt(i){
@@ -545,11 +595,14 @@ function renderAppts(){
     const days=Math.round((d-today)/86400000);
     const past=days<0;
     const fmt=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-    return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center'+(past?';opacity:0.5':'')+'">'
+    const time=fmtTimeRange(a.start,a.end);
+    const cal=past?'':'<a href="'+gcalLink(a)+'" target="_blank" rel="noopener" title="Add to Google Calendar" style="font-size:11px;color:var(--vet);text-decoration:none;white-space:nowrap;margin-right:4px">＋ Calendar</a>';
+    return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px'+(past?';opacity:0.5':'')+'">'
       +'<div><div style="font-size:13px;font-weight:500">'+a.desc+'</div>'
-      +'<div style="font-size:11px;color:var(--muted)">'+fmt+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+fmt+(time?' · '+time:'')+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:6px">'+cal
       +'<button onclick="removeAppt('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
-      +'</div>';
+      +'</div></div>';
   }).join('');
 }
 
