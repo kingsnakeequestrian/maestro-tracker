@@ -199,6 +199,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     </div>
     <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;min-width:180px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
     <button id="apptAddBtn" onclick="addAppt()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
+    <button id="apptCancelBtn" onclick="cancelApptEdit()" style="display:none;font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer">Cancel</button>
   </div>
   <div id="apptHint" style="font-size:11px;color:var(--muted);margin-top:6px">Leave times blank for an all-day entry. Appointments save to the Appointments tab and sync to the shared Horse Appointments calendar.</div>
 </div>
@@ -570,6 +571,36 @@ async function addAppt(){
               type:types.join(', ')||'Vet',desc:descEl.value.trim()};
   const {writeUrl}=getApptCfg();
 
+  // ── Edit mode: save changes to an existing appointment ──
+  // Carries the original date+desc so the backend replaces the right row/event
+  // even when the date or description changed.
+  if(_editKey){
+    if(!writeUrl) return;
+    if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+    try{
+      const params=new URLSearchParams();
+      params.append('action','edit');
+      params.append('oldDate',_editKey.date);
+      params.append('oldDesc',_editKey.desc);
+      params.append('date',appt.date);
+      params.append('start',appt.start);
+      params.append('end',appt.end);
+      params.append('type',appt.type);
+      params.append('provider','');
+      params.append('desc',appt.desc);
+      const resp=await fetch(writeUrl,{method:'POST',body:params});
+      const json=await resp.json();
+      if(!json.ok) throw new Error(json.error||'edit failed');
+      if(hint) hint.textContent='Changes saved · calendar updated.';
+      cancelApptEdit();
+    }catch(err){
+      if(hint) hint.textContent='Could not save changes: '+err.message;
+    }finally{ if(btn){ btn.disabled=false; if(_editKey) btn.textContent='Save changes'; } }
+    loadAppts();
+    return;
+  }
+
+  // ── Add mode ──
   if(writeUrl){
     if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
     try{
@@ -602,6 +633,29 @@ async function addAppt(){
 }
 
 function toggleTypeChip(el){ el.classList.toggle('sel'); }
+
+// ── Edit an existing appointment (populates the form, then Save changes) ──
+let _editKey=null;
+function editApptSheet(i){
+  const a=_renderedAppts[i]; if(!a) return;
+  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.value=v||'';};
+  set('apptDate',a.date); set('apptStart',a.start); set('apptEnd',a.end); set('apptDesc',a.desc);
+  const types=String(a.type||'Vet').split(',').map(s=>s.trim());
+  document.querySelectorAll('#apptTypeChips .tchip').forEach(c=>c.classList.toggle('sel',types.includes(c.dataset.type)));
+  _editKey={date:a.date,desc:a.desc};
+  const btn=document.getElementById('apptAddBtn'); if(btn) btn.textContent='Save changes';
+  const cxl=document.getElementById('apptCancelBtn'); if(cxl) cxl.style.display='';
+  const hint=document.getElementById('apptHint'); if(hint) hint.textContent='Editing "'+a.desc+'" — change the fields, then Save changes (or Cancel).';
+  const de=document.getElementById('apptDate'); if(de&&de.scrollIntoView) de.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function cancelApptEdit(){
+  _editKey=null;
+  ['apptDate','apptStart','apptEnd','apptDesc'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  document.querySelectorAll('#apptTypeChips .tchip').forEach(c=>c.classList.toggle('sel',c.dataset.type==='Vet'));
+  const btn=document.getElementById('apptAddBtn'); if(btn) btn.textContent='Add';
+  const cxl=document.getElementById('apptCancelBtn'); if(cxl) cxl.style.display='none';
+  const hint=document.getElementById('apptHint'); if(hint) hint.textContent='Leave times blank for an all-day entry. Appointments save to the Appointments tab and sync to the shared Horse Appointments calendar.';
+}
 
 // Compact time-range label, e.g. "1:00–4:00 PM" or "9:30 AM–1:00 PM" (matches Winter's format)
 function fmtTimeRange(start,end){
@@ -700,7 +754,8 @@ function renderApptList(list,mode){
     const cal='';
     const right = mode==='local'
       ? '<button onclick="removeApptLocal('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
-      : '<button onclick="removeApptSheet('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Delete — removes from the sheet and the calendar">✕</button>';
+      : '<button onclick="editApptSheet('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px" title="Edit this appointment">✎</button>'
+        +'<button onclick="removeApptSheet('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Delete — removes from the sheet and the calendar">✕</button>';
     return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px'+(past?';opacity:0.5':'')+'">'
       +'<div><div style="font-size:13px;font-weight:500">'+a.desc+(a.type&&a.type!=='Vet'?' <span style="font-size:10px;color:var(--muted)">· '+a.type+'</span>':'')+'</div>'
       +'<div style="font-size:11px;color:var(--muted)">'+fmt+(time?' · '+time:'')+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
