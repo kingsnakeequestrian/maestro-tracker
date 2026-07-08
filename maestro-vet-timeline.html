@@ -38,15 +38,16 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:5px 10px;background:var(--card);border-radius:20px;border:1px solid var(--border)}
 .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
+/* Appointment type chips (multi-select) */
+.tchip{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:6px 11px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.tchip.sel{background:var(--vet);border-color:var(--vet);color:#fff;font-weight:500}
+
 /* UPCOMING ALERT CARDS */
-.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:36px}
-.alert-card{background:var(--card);border-radius:var(--radius);padding:16px 18px;border:1px solid var(--border);border-left:4px solid var(--sw)}
-.alert-card.laser{border-left-color:var(--laser)}
-.alert-card.inj{border-left-color:var(--inj)}
-.alert-card.ok{border-left-color:var(--bw)}
-.alert-title{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:6px}
-.alert-main{font-size:18px;font-weight:500;margin-bottom:2px}
-.alert-sub{font-size:12px;color:var(--muted)}
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:30px}
+.alert-card{background:var(--card);border-radius:var(--radius);padding:11px 13px;border:1px solid var(--border)}
+.alert-title{font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px}
+.alert-main{font-size:15px;font-weight:500;margin-bottom:2px}
+.alert-sub{font-size:11px;color:var(--muted)}
 .badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;margin-top:6px;letter-spacing:0.04em}
 .badge.due{background:var(--sw-bg);color:var(--sw)}
 .badge.soon{background:var(--warn-bg);color:var(--warn)}
@@ -189,9 +190,13 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
     <input type="time" id="apptStart" title="Start time (leave blank for all-day)" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
     <span style="font-size:12px;color:var(--muted)">to</span>
     <input type="time" id="apptEnd" title="End time" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
-    <select id="apptType" title="Type" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
-      <option>Vet</option><option>Farrier</option><option>Bodywork</option><option>Imaging</option><option>Other</option>
-    </select>
+    <div id="apptTypeChips" title="Type — pick one or more (e.g. Vet + Farrier)" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+      <button type="button" class="tchip sel" data-type="Vet" onclick="toggleTypeChip(this)">Vet</button>
+      <button type="button" class="tchip" data-type="Farrier" onclick="toggleTypeChip(this)">Farrier</button>
+      <button type="button" class="tchip" data-type="Bodywork" onclick="toggleTypeChip(this)">Bodywork</button>
+      <button type="button" class="tchip" data-type="Imaging" onclick="toggleTypeChip(this)">Imaging</button>
+      <button type="button" class="tchip" data-type="Other" onclick="toggleTypeChip(this)">Other</button>
+    </div>
     <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;min-width:180px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
     <button id="apptAddBtn" onclick="addAppt()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
   </div>
@@ -519,7 +524,7 @@ function buildDynamicAlerts(rows){
     if(lastFarrier){
       const next=new Date(lastFarrier); next.setDate(next.getDate()+35);
       const days=daysUntil(next);
-      cards.push('<div class="alert-card" style="border-left-color:var(--bw)"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">5 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
+      cards.push('<div class="alert-card"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">5 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
     }
 
 
@@ -528,7 +533,7 @@ function buildDynamicAlerts(rows){
     if(lastInj){
       const next=new Date(lastInj); next.setMonth(next.getMonth()+6);
       const days=daysUntil(next);
-      cards.push('<div class="alert-card inj" style="border-left-color:#5B8DB8"><div class="alert-title">6-month injection review</div><div class="alert-main">'+fmt(next)+'</div><div class="alert-sub">6 months from last injection '+fmt(lastInj)+'</div>'+badgeFor(days)+'</div>');
+      cards.push('<div class="alert-card"><div class="alert-title">6-month injection review</div><div class="alert-main">'+fmt(next)+'</div><div class="alert-sub">6 months from last injection '+fmt(lastInj)+'</div>'+badgeFor(days)+'</div>');
     }
 
     const el=document.getElementById('dynamicAlerts');
@@ -555,13 +560,14 @@ async function addAppt(){
   const dateEl=document.getElementById('apptDate');
   const startEl=document.getElementById('apptStart');
   const endEl=document.getElementById('apptEnd');
-  const typeEl=document.getElementById('apptType');
   const descEl=document.getElementById('apptDesc');
   const btn=document.getElementById('apptAddBtn');
   const hint=document.getElementById('apptHint');
   if(!dateEl.value||!descEl.value) return;
+  // Type can be more than one (e.g. Vet + Farrier on a combined visit)
+  const types=[...document.querySelectorAll('#apptTypeChips .tchip.sel')].map(el=>el.dataset.type);
   const appt={date:dateEl.value,start:startEl.value||'',end:endEl.value||'',
-              type:(typeEl&&typeEl.value)||'Vet',desc:descEl.value.trim()};
+              type:types.join(', ')||'Vet',desc:descEl.value.trim()};
   const {writeUrl}=getApptCfg();
 
   if(writeUrl){
@@ -591,8 +597,11 @@ async function addAppt(){
     list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))); saveApptsLocal(list);
   }
   dateEl.value=''; startEl.value=''; endEl.value=''; descEl.value='';
+  document.querySelectorAll('#apptTypeChips .tchip').forEach(c=>c.classList.toggle('sel',c.dataset.type==='Vet'));
   loadAppts();
 }
+
+function toggleTypeChip(el){ el.classList.toggle('sel'); }
 
 // Compact time-range label, e.g. "1:00–4:00 PM" or "9:30 AM–1:00 PM" (matches Winter's format)
 function fmtTimeRange(start,end){
@@ -634,6 +643,25 @@ function removeApptLocal(i){
   loadAppts();
 }
 
+// Delete a sheet-backed appointment — removes it from the Appointments tab AND the calendar.
+async function removeApptSheet(i){
+  const a=_renderedAppts[i];
+  if(!a) return;
+  if(!confirm('Delete "'+a.desc+'" on '+a.date+'?\nThis removes it from the sheet and the calendar.')) return;
+  const {writeUrl}=getApptCfg();
+  if(!writeUrl){ renderApptList(getApptsLocal(),'local'); return; }
+  try{
+    const params=new URLSearchParams();
+    params.append('action','delete');
+    params.append('date',a.date);
+    params.append('desc',a.desc);
+    const resp=await fetch(writeUrl,{method:'POST',body:params});
+    const json=await resp.json();
+    if(!json.ok) throw new Error(json.error||'delete failed');
+  }catch(err){ alert('Could not delete: '+err.message); }
+  loadAppts();
+}
+
 // Load upcoming appointments — from the Appointments tab when configured, else localStorage.
 async function loadAppts(){
   const {writeUrl}=getApptCfg();
@@ -651,7 +679,9 @@ async function loadAppts(){
   renderApptList(getApptsLocal(),'local');
 }
 
+let _renderedAppts=[];
 function renderApptList(list,mode){
+  _renderedAppts=list;
   const el=document.getElementById('upcomingAppts');
   if(!el) return;
   if(!list.length){
@@ -670,7 +700,7 @@ function renderApptList(list,mode){
     const cal='';
     const right = mode==='local'
       ? '<button onclick="removeApptLocal('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
-      : '<span style="font-size:10px;color:var(--muted);white-space:nowrap" title="Stored in the Appointments tab — edit or remove there">on sheet</span>';
+      : '<button onclick="removeApptSheet('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Delete — removes from the sheet and the calendar">✕</button>';
     return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px'+(past?';opacity:0.5':'')+'">'
       +'<div><div style="font-size:13px;font-weight:500">'+a.desc+(a.type&&a.type!=='Vet'?' <span style="font-size:10px;color:var(--muted)">· '+a.type+'</span>':'')+'</div>'
       +'<div style="font-size:11px;color:var(--muted)">'+fmt+(time?' · '+time:'')+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
