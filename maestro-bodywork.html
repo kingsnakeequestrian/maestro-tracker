@@ -97,8 +97,9 @@
 
 <div class="page-header">
   <h1>Maestro — Bodywork Analysis</h1>
-  <p>Barrio Performance Therapy &nbsp;·&nbsp; 34 sessions &nbsp;·&nbsp; Aug 2024 – Apr 2026</p>
+  <p id="subtitle">Barrio Performance Therapy · 35 sessions · Aug 2024 – Jun 2026</p>
 </div>
+<div id="pendingReview"></div>
 
 <div class="card">
   <div class="card-title">Session reactivity over time</div>
@@ -214,7 +215,7 @@
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#F0997B;"></span>9–13 sessions</span>
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#D85A30;"></span>14+ sessions</span>
   </div>
-  <div class="note">Right-side dominance noted in 13 of 34 sessions. Low back / glutes present in 21 of 34 sessions and has never fully cleared. Aug 2024 showed significant left-side restriction (neck, shoulder, triceps, glutes) consistent with compensation pattern pre-diagnosis.</div>
+  <div class="note">Right-side dominance noted in 13 of 35 sessions. Low back / glutes present in 21 of 35 sessions and has never fully cleared. Aug 2024 showed significant left-side restriction (neck, shoulder, triceps, glutes) consistent with compensation pattern pre-diagnosis.</div>
 </div>
 <div class="notes-section">
   <div class="notes-title">Recent session notes</div>
@@ -224,42 +225,12 @@
 
 
 <script>
-const S=[
-  {d:'8/28/24',o:'mixed',p:0,a:['neck','shoulder','forearms','glutes_med','glutes_sup'],s:{'neck': 'L', 'shoulder': 'L', 'forearms': 'L', 'glutes_med': 'L', 'glutes_sup': 'L'}},
-  {d:'12/16/24',o:'mixed',p:1.5,a:['thoracic','neck','lowback','glutes_med','glutes_sup','forearms','hind_right'],s:{'thoracic': 'B', 'neck': 'L', 'lowback': 'L', 'glutes_med': 'L', 'glutes_sup': 'L', 'forearms': 'L', 'hind_right': 'R'}},
-  {d:'1/26/25',o:'concern',p:2.5,a:['neck','shoulder','thoracic','glutes_med','glutes_sup','lowback','si'],s:{'neck': 'B', 'shoulder': 'L', 'thoracic': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'lowback': 'L', 'si': 'B'}},
-  {d:'2/21/25',o:'concern',p:1.5,a:['glutes_med','glutes_sup','shoulder','neck'],s:{'glutes_med': 'B', 'glutes_sup': 'B', 'shoulder': 'L', 'neck': 'L'}},
-  {d:'3/28/25',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','si'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'si': 'B'}},
-  {d:'6/27/25',o:'good',p:1.0,a:['lowback','glutes_med','glutes_sup','forearms'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'forearms': 'B'}},
-  {d:'7/22/25',o:'good',p:1.5,a:['lowback','si'],s:{'lowback': 'B', 'si': 'B'}},
-  {d:'7/31/25',o:'good',p:1.0,a:[]},
-  {d:'11/22/25',o:'concern',p:2.5,a:['midback'],s:{'midback': 'B'}},
-  {d:'11/28/25',o:'concern',p:1.0,a:['lowback','glutes_med','glutes_sup'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B'}},
-  {d:'12/5/25',o:'mixed',p:2.0,a:[]},
-  {d:'12/13/25',o:'concern',p:2.5,a:['withers'],s:{'withers': 'R'}},
-  {d:'12/18/25',o:'mixed',p:1.5,a:['lowback','glutes_med','glutes_sup'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B'}},
-  {d:'12/31/25',o:'concern',p:0,a:['glutes_med','glutes_sup','neck','forearms','hind_right'],s:{'glutes_med': 'B', 'glutes_sup': 'B', 'neck': 'B', 'forearms': 'B', 'hind_right': 'R'}},
-  {d:'1/9/26',o:'mixed',p:1.5,a:['shoulder','lowback'],s:{'shoulder': 'L', 'lowback': 'L'}},
-  {d:'1/14/26',o:'mixed',p:1.5,a:['glutes_med','glutes_sup','lowback'],s:{'glutes_med': 'R', 'glutes_sup': 'R', 'lowback': 'L'}},
-  {d:'1/21/26',o:'mixed',p:2.0,a:['lowback'],s:{'lowback': 'B'}},
-  {d:'1/26/26',o:'mixed',p:2.0,a:['neck','lowback','glutes_med','glutes_sup','poll'],s:{'neck': 'B', 'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'poll': 'B'}},
-  {d:'2/12/26',o:'mixed',p:2.0,a:['neck','thoracic','si'],s:{'neck': 'B', 'thoracic': 'R', 'si': 'B'}},
-  {d:'2/25/26',o:'mixed',p:2.0,a:['glutes_med','glutes_sup'],s:{'glutes_med': 'B', 'glutes_sup': 'B'}},
-  {d:'3/4/26',o:'good',p:1.5,a:['glutes_med','glutes_sup'],s:{'glutes_med': 'B', 'glutes_sup': 'B'}},
-  {d:'3/11/26',o:'good',p:1.0,a:['lowback'],s:{'lowback': 'B'}},
-  {d:'3/16/26',o:'mixed',p:1.5,a:['lowback','si'],s:{'lowback': 'B', 'si': 'B'}},
-  {d:'3/25/26',o:'mixed',p:1.5,a:['lowback','glutes_med','glutes_sup','si'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'si': 'B'}},
-  {d:'4/2/26',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','si','neck','thoracic'],s:{'lowback': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'si': 'B', 'neck': 'B', 'thoracic': 'B'}},
-  {d:'4/7/26',o:'mixed',p:1.5,a:['si','glutes_med','glutes_sup','neck','shoulder'],s:{'si': 'B', 'glutes_med': 'B', 'glutes_sup': 'B', 'neck': 'B', 'shoulder': 'L'}},
-  {d:'4/15/26',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','neck','thoracic'],s:{'lowback':'R','glutes_med': 'R', 'glutes_sup': 'R','neck':'B','thoracic':'R'}},
-  {d:'4/21/26',o:'concern',p:2.5,a:['lowback','glutes_med','glutes_sup','midback','neck','shoulder'],s:{'lowback':'R','glutes_med':'R','glutes_sup':'R','midback':'R','neck':'B','shoulder':'L'}},
-  {d:'4/30/26',o:'concern',p:1.5,a:['poll','neck','shoulder','lowback','si','glutes_med','glutes_sup'],s:{'poll':'L','neck':'B','shoulder':'B','lowback':'B','si':'B','glutes_med':'B','glutes_sup':'B'}},
-  {d:'5/6/26',o:'mixed',p:2.0,a:['shoulder','neck','lowback','glutes_med','glutes_sup'],s:{'shoulder':'B','neck':'B','lowback':'R','glutes_med':'R','glutes_sup':'R'}},
-  {d:'5/13/26',o:'mixed',p:2.0,a:['lowback','glutes_med','glutes_sup','shoulder','neck'],s:{'lowback':'L','glutes_med':'B','glutes_sup':'B','shoulder':'B','neck':'B'}},
-  {d:'5/21/26',o:'mixed',p:2.0,a:['neck','shoulder','lowback','glutes_med','glutes_sup'],s:{'neck':'L','shoulder':'R','lowback':'B','glutes_med':'B','glutes_sup':'B'}},
-  {d:'6/8/26',o:'mixed',p:2.0,a:['lowback','shoulder','neck','glutes_med','glutes_sup'],s:{'lowback':'B','shoulder':'R','neck':'L','glutes_med':'B','glutes_sup':'B'}},
-  {d:'6/11/26',o:'good',p:0,a:['shoulder','forearms','glutes_med','glutes_sup'],s:{'shoulder':'B','forearms':'B','glutes_med':'B','glutes_sup':'B'}},
-];
+const EXEC_URL='https://script.google.com/macros/s/AKfycbwC6nbEKsxQrHaofxI_-P-fLf69TlnmFlN2sdgPXIYD0rNhN6iV5Oy5KaQu30q_hw2k/exec';
+
+// Live data comes from bodywork-data.json in Drive (served by the Apps Script).
+// This seed is only a fallback shown if that fetch fails.
+let S=[{"d":"8/28/24","o":"mixed","p":0,"a":["neck","shoulder","forearms","glutes_med","glutes_sup"],"s":{"neck":"L","shoulder":"L","forearms":"L","glutes_med":"L","glutes_sup":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/16/24","o":"mixed","p":1.5,"a":["thoracic","neck","lowback","glutes_med","glutes_sup","forearms","hind_right"],"s":{"thoracic":"B","neck":"L","lowback":"L","glutes_med":"L","glutes_sup":"L","forearms":"L","hind_right":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/26/25","o":"concern","p":2.5,"a":["neck","shoulder","thoracic","glutes_med","glutes_sup","lowback","si"],"s":{"neck":"B","shoulder":"L","thoracic":"B","glutes_med":"B","glutes_sup":"B","lowback":"L","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"2/21/25","o":"concern","p":1.5,"a":["glutes_med","glutes_sup","shoulder","neck"],"s":{"glutes_med":"B","glutes_sup":"B","shoulder":"L","neck":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/28/25","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","si"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/27/25","o":"good","p":1.0,"a":["lowback","glutes_med","glutes_sup","forearms"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","forearms":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"7/22/25","o":"good","p":1.5,"a":["lowback","si"],"s":{"lowback":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"7/31/25","o":"good","p":1.0,"a":[],"s":{},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"11/22/25","o":"concern","p":2.5,"a":["midback"],"s":{"midback":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"11/28/25","o":"concern","p":1.0,"a":["lowback","glutes_med","glutes_sup"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/5/25","o":"mixed","p":2.0,"a":[],"s":{},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/13/25","o":"concern","p":2.5,"a":["withers"],"s":{"withers":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/18/25","o":"mixed","p":1.5,"a":["lowback","glutes_med","glutes_sup"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/31/25","o":"concern","p":0,"a":["glutes_med","glutes_sup","neck","forearms","hind_right"],"s":{"glutes_med":"B","glutes_sup":"B","neck":"B","forearms":"B","hind_right":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/9/26","o":"mixed","p":1.5,"a":["shoulder","lowback"],"s":{"shoulder":"L","lowback":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/14/26","o":"mixed","p":1.5,"a":["glutes_med","glutes_sup","lowback"],"s":{"glutes_med":"R","glutes_sup":"R","lowback":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/21/26","o":"mixed","p":2.0,"a":["lowback"],"s":{"lowback":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/26/26","o":"mixed","p":2.0,"a":["neck","lowback","glutes_med","glutes_sup","poll"],"s":{"neck":"B","lowback":"B","glutes_med":"B","glutes_sup":"B","poll":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"2/12/26","o":"mixed","p":2.0,"a":["neck","thoracic","si"],"s":{"neck":"B","thoracic":"R","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"2/25/26","o":"mixed","p":2.0,"a":["glutes_med","glutes_sup"],"s":{"glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/4/26","o":"good","p":1.5,"a":["glutes_med","glutes_sup"],"s":{"glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/11/26","o":"good","p":1.0,"a":["lowback"],"s":{"lowback":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/16/26","o":"mixed","p":1.5,"a":["lowback","si"],"s":{"lowback":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/25/26","o":"mixed","p":1.5,"a":["lowback","glutes_med","glutes_sup","si"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/2/26","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","si","neck","thoracic"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","si":"B","neck":"B","thoracic":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/7/26","o":"mixed","p":1.5,"a":["si","glutes_med","glutes_sup","neck","shoulder"],"s":{"si":"B","glutes_med":"B","glutes_sup":"B","neck":"B","shoulder":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/15/26","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","neck","thoracic"],"s":{"lowback":"R","glutes_med":"R","glutes_sup":"R","neck":"B","thoracic":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/21/26","o":"concern","p":2.5,"a":["lowback","glutes_med","glutes_sup","midback","neck","shoulder"],"s":{"lowback":"R","glutes_med":"R","glutes_sup":"R","midback":"R","neck":"B","shoulder":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/30/26","o":"concern","p":1.5,"a":["poll","neck","shoulder","lowback","si","glutes_med","glutes_sup"],"s":{"poll":"L","neck":"B","shoulder":"B","lowback":"B","si":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"5/6/26","o":"mixed","p":2.0,"a":["shoulder","neck","lowback","glutes_med","glutes_sup"],"s":{"shoulder":"B","neck":"B","lowback":"R","glutes_med":"R","glutes_sup":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"5/13/26","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","shoulder","neck"],"s":{"lowback":"L","glutes_med":"B","glutes_sup":"B","shoulder":"B","neck":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"5/21/26","o":"mixed","p":2.0,"a":["neck","shoulder","lowback","glutes_med","glutes_sup"],"s":{"neck":"L","shoulder":"R","lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/8/26","o":"mixed","p":2.0,"a":["lowback","shoulder","neck","glutes_med","glutes_sup"],"s":{"lowback":"B","shoulder":"R","neck":"L","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/11/26","o":"good","p":0,"a":["shoulder","forearms","glutes_med","glutes_sup"],"s":{"shoulder":"B","forearms":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/17/26","o":"good","p":1.5,"a":["lowback","glutes_med","glutes_sup"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""}];
+
 const RD=[
   {id:'glutes_med',label:'Glutes — medial (med. gluteal)'},
   {id:'glutes_sup',label:'Glutes — superficial (sup. gluteal)'},
@@ -274,26 +245,35 @@ const RD=[
   {id:'forearms',label:'Forearms'},
   {id:'hind_right',label:'Hind right'},
 ];
-const C={};
-const CS={};
-RD.forEach(r=>{C[r.id]=0;CS[r.id]={R:0,B:0,L:0};});
-S.forEach(s=>{
-  s.a.forEach(a=>{
-    if(C[a]!==undefined){
-      C[a]++;
-      const side=(s.s&&s.s[a])||'B';
-      if(CS[a][side]!==undefined) CS[a][side]++;
-      else CS[a]['B']++;
-    }
+
+let C={},CS={},MX=1,N=0,tlChart=null;
+
+function VIS(){return S.filter(function(s){return s.status!=='pending';});}
+function PEND(){return S.filter(function(s){return s.status==='pending';});}
+
+function compute(){
+  const V=VIS();
+  C={};CS={};
+  RD.forEach(function(r){C[r.id]=0;CS[r.id]={R:0,B:0,L:0};});
+  V.forEach(function(s){
+    (s.a||[]).forEach(function(a){
+      if(C[a]!==undefined){
+        C[a]++;
+        var side=(s.s&&s.s[a])||'B';
+        if(CS[a][side]!==undefined)CS[a][side]++; else CS[a]['B']++;
+      }
+    });
   });
-});
-const MX=Math.max(...Object.values(C));
-const N=S.length;
+  MX=Math.max(1,...Object.values(C));
+  N=V.length;
+}
+
 function hf(n){if(!n)return'#F0EDE6';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D85A30';}
 function hs(n){if(!n)return'#BCB8AF';const t=n/MX;if(t<0.25)return'#C8880A';if(t<0.5)return'#9A5E08';if(t<0.75)return'#A83818';return'#7A2808';}
 function bclr(n){if(!n)return'#D3D1C7';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D85A30';}
+
 function applyHeat(){
-  RD.forEach(r=>{
+  RD.forEach(function(r){
     const el=document.getElementById('region-'+r.id);
     if(!el)return;
     const n=C[r.id];
@@ -302,115 +282,141 @@ function applyHeat(){
     el.setAttribute('stroke-width',n>0?'2.0':'1.2');
   });
 }
-function hlRegion(id,el){
-  const row=document.getElementById('row-'+id);
-  if(row)row.style.background='#F0EDE6';
-  el.setAttribute('stroke','#185FA5');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');
-}
-function resetRegion(el){
-  const id=el.id.replace('region-','');
-  const row=document.getElementById('row-'+id);
-  if(row)row.style.background='';
-  const n=C[id]||0;
-  el.setAttribute('stroke',hs(n));el.setAttribute('stroke-width',n>0?'2.0':'1.2');el.setAttribute('opacity','0.82');
-}
-function hlFromRow(id){
-  const el=document.getElementById('region-'+id);
-  if(el){el.setAttribute('stroke','#185FA5');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}
-}
-function resetFromRow(id){
-  const el=document.getElementById('region-'+id);
-  if(!el)return;
-  const n=C[id]||0;
-  el.setAttribute('stroke',hs(n));el.setAttribute('stroke-width',n>0?'2.0':'1.2');el.setAttribute('opacity','0.82');
-}
+function hlRegion(id,el){const row=document.getElementById('row-'+id);if(row)row.style.background='#F0EDE6';el.setAttribute('stroke','#185FA5');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}
+function resetRegion(el){const id=el.id.replace('region-','');const row=document.getElementById('row-'+id);if(row)row.style.background='';const n=C[id]||0;el.setAttribute('stroke',hs(n));el.setAttribute('stroke-width',n>0?'2.0':'1.2');el.setAttribute('opacity','0.82');}
+function hlFromRow(id){const el=document.getElementById('region-'+id);if(el){el.setAttribute('stroke','#185FA5');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}}
+function resetFromRow(id){const el=document.getElementById('region-'+id);if(!el)return;const n=C[id]||0;el.setAttribute('stroke',hs(n));el.setAttribute('stroke-width',n>0?'2.0':'1.2');el.setAttribute('opacity','0.82');}
+
 function buildKey(){
-  const sorted=[...RD].sort((a,b)=>C[b.id]-C[a.id]);
-  document.getElementById('regionList').innerHTML=sorted.map(r=>{
-    const n=C[r.id];const pct=Math.round(n/N*100);
+  const sorted=[...RD].sort(function(a,b){return C[b.id]-C[a.id];});
+  document.getElementById('regionList').innerHTML=sorted.map(function(r){
+    const n=C[r.id];const pct=N?Math.round(n/N*100):0;
     const w=MX>0?Math.round(n/MX*100):0;
     const f=hf(n);const s_=hs(n);const b=bclr(n);
     const sd=CS[r.id];
-    const total_s=sd.R+sd.B+sd.L||1;
-    const sideBar=n>0?`<div class="side-bar">
-      ${sd.L?`<div class="side-seg-l" style="flex:${sd.L}"></div>`:''}
-      ${sd.B?`<div class="side-seg-b" style="flex:${sd.B}"></div>`:''}
-      ${sd.R?`<div class="side-seg-r" style="flex:${sd.R}"></div>`:''}
-    </div>
-    <div class="side-counts">
-      ${sd.L?`<span class="sc-l">${sd.L}L</span>`:''}
-      ${sd.B?`<span class="sc-b">${sd.B}B</span>`:''}
-      ${sd.R?`<span class="sc-r">${sd.R}R</span>`:''}
-    </div>`:'';
-    return`<div class="region-row" id="row-${r.id}"
-      onmouseenter="hlFromRow('${r.id}')" onmouseleave="resetFromRow('${r.id}')">
-      <span class="region-dot" style="background:${f};border:1.5px solid ${s_};"></span>
-      <div class="bar-wrap">
-        <span class="region-name">${r.label}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${w||3}%;background:${b};"></div></div>
-        <div class="bar-label">${n} sessions (${pct}%)</div>
-        ${sideBar}
-      </div>
-    </div>`;
+    const sideBar=n>0?'<div class="side-bar">'
+      +(sd.L?'<div class="side-seg-l" style="flex:'+sd.L+'"></div>':'')
+      +(sd.B?'<div class="side-seg-b" style="flex:'+sd.B+'"></div>':'')
+      +(sd.R?'<div class="side-seg-r" style="flex:'+sd.R+'"></div>':'')
+      +'</div><div class="side-counts">'
+      +(sd.L?'<span class="sc-l">'+sd.L+'L</span>':'')
+      +(sd.B?'<span class="sc-b">'+sd.B+'B</span>':'')
+      +(sd.R?'<span class="sc-r">'+sd.R+'R</span>':'')
+      +'</div>':'';
+    return '<div class="region-row" id="row-'+r.id+'" onmouseenter="hlFromRow(\''+r.id+'\')" onmouseleave="resetFromRow(\''+r.id+'\')">'
+      +'<span class="region-dot" style="background:'+f+';border:1.5px solid '+s_+';"></span>'
+      +'<div class="bar-wrap"><span class="region-name">'+r.label+'</span>'
+      +'<div class="bar-track"><div class="bar-fill" style="width:'+(w||3)+'%;background:'+b+';"></div></div>'
+      +'<div class="bar-label">'+n+' sessions ('+pct+'%)</div>'+sideBar+'</div></div>';
   }).join('');
 }
-const bgC=S.map(s=>s.o==='good'?'rgba(90,138,40,0.82)':s.o==='mixed'?'rgba(160,112,15,0.82)':'rgba(192,64,32,0.82)');
-const bdC=S.map(s=>s.o==='good'?'#3B6D11':s.o==='mixed'?'#7A5210':'#8C2A14');
-new Chart(document.getElementById('tlChart'),{
-  type:'bar',
-  data:{
-    labels:S.map(s=>s.d),
-    datasets:[
-      {type:'bar',data:S.map(s=>s.o==='good'?3:s.o==='mixed'?2:1),backgroundColor:bgC,borderColor:bdC,borderWidth:0.5,yAxisID:'y',order:2,borderRadius:3},
-      {type:'line',data:S.map(s=>s.p),borderColor:'#2E6FBF',backgroundColor:'rgba(46,111,191,0.06)',borderWidth:2,pointBackgroundColor:'#2E6FBF',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:5,tension:0.35,fill:false,yAxisID:'y2',order:1}
-    ]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:12},bodyFont:{family:'DM Sans',size:12},padding:10,callbacks:{label:ctx=>{
-      if(ctx.datasetIndex===1)return' PEMF: '+(ctx.raw===0?'None':ctx.raw===1?'Slight':ctx.raw===2?'Moderate':'Acute');
-      const v=ctx.raw;return' Session: '+(v===3?'Positive':v===2?'Mixed':'Concern');
-    }}}},
-    scales:{
-      x:{ticks:{font:{family:'DM Mono',size:10},maxRotation:52,autoSkip:false,color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}},
-      y:{min:0,max:3.9,ticks:{callback:v=>v===3?'Positive':v===2?'Mixed':v===1?'Concern':'',font:{family:'DM Sans',size:11},color:'#706E67'},grid:{color:'rgba(0,0,0,0.06)'}},
-      y2:{position:'right',min:0,max:3.3,ticks:{callback:v=>v===0?'None':v===1?'Slight':v===2?'Moderate':v===3?'Acute':'',font:{family:'DM Sans',size:11},color:'#2E6FBF'},grid:{drawOnChartArea:false}}
+
+function buildChart(){
+  const V=VIS();
+  const bgC=V.map(function(s){return s.o==='good'?'rgba(90,138,40,0.82)':s.o==='mixed'?'rgba(160,112,15,0.82)':'rgba(192,64,32,0.82)';});
+  const bdC=V.map(function(s){return s.o==='good'?'#3B6D11':s.o==='mixed'?'#7A5210':'#8C2A14';});
+  if(tlChart)tlChart.destroy();
+  tlChart=new Chart(document.getElementById('tlChart'),{
+    type:'bar',
+    data:{
+      labels:V.map(function(s){return s.d;}),
+      datasets:[
+        {type:'bar',data:V.map(function(s){return s.o==='good'?3:s.o==='mixed'?2:1;}),backgroundColor:bgC,borderColor:bdC,borderWidth:0.5,yAxisID:'y',order:2,borderRadius:3},
+        {type:'line',data:V.map(function(s){return s.p;}),borderColor:'#2E6FBF',backgroundColor:'rgba(46,111,191,0.06)',borderWidth:2,pointBackgroundColor:'#2E6FBF',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:5,tension:0.35,fill:false,yAxisID:'y2',order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:12},bodyFont:{family:'DM Sans',size:12},padding:10,callbacks:{label:function(ctx){
+        if(ctx.datasetIndex===1)return' PEMF: '+(ctx.raw===0?'None':ctx.raw===1?'Slight':ctx.raw===2?'Moderate':'Acute');
+        const v=ctx.raw;return' Session: '+(v===3?'Positive':v===2?'Mixed':'Concern');
+      }}}},
+      scales:{
+        x:{ticks:{font:{family:'DM Mono',size:10},maxRotation:52,autoSkip:false,color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}},
+        y:{min:0,max:3.9,ticks:{callback:function(v){return v===3?'Positive':v===2?'Mixed':v===1?'Concern':'';},font:{family:'DM Sans',size:11},color:'#706E67'},grid:{color:'rgba(0,0,0,0.06)'}},
+        y2:{position:'right',min:0,max:3.3,ticks:{callback:function(v){return v===0?'None':v===1?'Slight':v===2?'Moderate':v===3?'Acute':'';},font:{family:'DM Sans',size:11},color:'#2E6FBF'},grid:{drawOnChartArea:false}}
+      }
     }
-  }
-});
-applyHeat();
-buildKey();
+  });
+}
 
 // ── SESSION NOTES ────────────────────────────────────────────────────
-function getSessionNotes(){
-  try{return JSON.parse(localStorage.getItem('m_bw_notes')||'{}');}catch{return {};}
-}
-function saveSessionNote(date,text){
-  const notes=getSessionNotes();
-  notes[date]=text;
-  localStorage.setItem('m_bw_notes',JSON.stringify(notes));
-}
+function getSessionNotes(){try{return JSON.parse(localStorage.getItem('m_bw_notes')||'{}');}catch(e){return {};}}
+function saveSessionNote(date,text){const notes=getSessionNotes();notes[date]=text;localStorage.setItem('m_bw_notes',JSON.stringify(notes));}
 function renderSessionNotes(){
   const el=document.getElementById('sessionNotes');
-  if(!el) return;
+  if(!el)return;
   const notes=getSessionNotes();
-  const recent=S.slice(-6).reverse();
-  el.innerHTML=recent.map(s=>{
+  const recent=VIS().slice(-6).reverse();
+  el.innerHTML=recent.map(function(s){
     const toneClass=s.o==='good'?'good':s.o==='mixed'?'mixed':'concern';
     const toneLabel=s.o==='good'?'Positive':s.o==='mixed'?'Mixed':'Concern';
-    const areas=s.a.map(a=>a.replace('glutes_med','glutes med').replace('glutes_sup','glutes sup')).join(', ');
+    const areas=(s.a||[]).map(function(a){return a.replace('glutes_med','glutes med').replace('glutes_sup','glutes sup');}).join(', ');
     const saved=notes[s.d]||'';
-    return '<div class="note-card">'
-      +'<div class="note-header">'
+    return '<div class="note-card"><div class="note-header">'
       +'<span class="note-date">'+s.d+' · PEMF '+s.p+'</span>'
-      +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span>'
-      +'</div>'
+      +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span></div>'
       +'<div class="note-obs">Areas: '+areas+'</div>'
-      +'<textarea class="note-edit" placeholder="Add your notes from this session..." onchange="saveSessionNote(\''+s.d+'\',this.value)">'+saved+'</textarea>'
-      +'</div>';
+      +'<textarea class="note-edit" placeholder="Add your notes from this session..." onchange="saveSessionNote(\''+s.d+'\',this.value)">'+saved+'</textarea></div>';
   }).join('');
 }
-renderSessionNotes();
+
+// ── PENDING REVIEW (auto-read sessions awaiting approval) ─────────────
+function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function renderPending(){
+  const host=document.getElementById('pendingReview');
+  if(!host)return;
+  const P=PEND();
+  if(!P.length){host.innerHTML='';return;}
+  host.innerHTML='<div class="card" style="border-color:#E0A83C;background:#FDF6EE">'
+    +'<div class="card-title">Pending review — '+P.length+' new session'+(P.length>1?'s':'')+'</div>'
+    +'<div class="card-sub">Read automatically from new scans. Check each against the PDF, then approve to add it to the charts.</div>'
+    +P.map(function(s){
+      const toneClass=s.o==='good'?'good':s.o==='mixed'?'mixed':'concern';
+      const toneLabel=s.o==='good'?'Positive':s.o==='mixed'?'Mixed':'Concern';
+      const areas=(s.a||[]).map(function(a){return a.replace('glutes_med','glutes med').replace('glutes_sup','glutes sup');}).join(', ')||'none';
+      const sb=(s.a||[]).map(function(a){return a.replace('glutes_med','glutes med').replace('glutes_sup','glutes sup')+':'+((s.s&&s.s[a])||'B');}).join('   ');
+      const pdf=s.pdf?' · <a href="'+esc(s.pdf)+'" target="_blank" rel="noopener">source PDF</a>':'';
+      const obs=s.obs?'<div class="note-obs">“'+esc(s.obs)+'”</div>':'';
+      return '<div class="note-card"><div class="note-header">'
+        +'<span class="note-date">'+esc(s.d)+' · PEMF '+esc(s.p)+pdf+'</span>'
+        +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span></div>'
+        +'<div class="note-obs">Areas: '+esc(areas)+'</div>'
+        +(sb?'<div class="note-obs" style="font-size:12px">Side bias: '+esc(sb)+'</div>':'')
+        +obs
+        +'<button onclick="approve(\''+esc(s.fileId||'')+'\',\''+esc(s.d)+'\')" style="margin-top:10px;padding:7px 18px;border:none;border-radius:7px;background:#3B6D11;color:#fff;font-family:inherit;font-size:13px;cursor:pointer">Approve</button>'
+        +'</div>';
+    }).join('')
+    +'</div>';
+}
+
+function approve(fileId,date){
+  const body=new URLSearchParams();
+  body.set('action','setStatus');
+  body.set('status','approved');
+  if(fileId)body.set('fileId',fileId); else body.set('date',date);
+  fetch(EXEC_URL,{method:'POST',body:body}).catch(function(){});
+  S.forEach(function(s){if((fileId&&s.fileId===fileId)||(!fileId&&s.d===date))s.status='approved';});
+  renderAll();
+}
+
+function updateSubtitle(){
+  const el=document.getElementById('subtitle');
+  if(!el)return;
+  const V=VIS();const n=V.length;
+  el.textContent='Barrio Performance Therapy · '+n+' sessions'+(n?' · '+V[0].d+' – '+V[n-1].d:'');
+}
+
+function renderAll(){compute();buildChart();applyHeat();buildKey();renderSessionNotes();renderPending();updateSubtitle();}
+
+function loadLive(){
+  fetch(EXEC_URL+'?action=read')
+    .then(function(r){return r.json();})
+    .then(function(d){if(d&&d.sessions&&d.sessions.length)S=d.sessions;})
+    .catch(function(){})
+    .finally(function(){renderAll();});
+}
+loadLive();
 
 </script>
 </body>
