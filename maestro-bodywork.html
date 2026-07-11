@@ -6,47 +6,47 @@
 <title>Maestro — Bodywork Analysis</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
   *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-  :root { --bg:#F7F5F0; --card:#FFFFFF; --text:#1C1A16; --muted:#706E67; --border:rgba(0,0,0,0.09); --radius:14px; }
-  body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:32px 24px 64px; }
-  .page-header { margin-bottom:36px; }
-  .page-header h1 { font-size:28px; font-weight:500; letter-spacing:-0.5px; }
-  .page-header p { font-size:14px; color:var(--muted); margin-top:4px; }
-  .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:28px 28px 24px; margin-bottom:20px; }
-  .card-title { font-size:15px; font-weight:500; margin-bottom:4px; }
-  .card-sub { font-size:13px; color:var(--muted); margin-bottom:20px; }
+  :root { --bg:#F4F7F7; --card:#FFFFFF; --text:#1C1A16; --muted:#706E67; --border:rgba(0,0,0,0.08); --radius:14px; }
+  body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:28px 20px 72px; max-width:980px; margin:0 auto; }
+  .page-header { margin-bottom:24px; }
+  .page-header h1 { font-size:26px; font-weight:500; letter-spacing:-0.4px; margin-bottom:4px; }
+  .page-header p { font-size:13px; color:var(--muted); }
+  .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:22px 22px 18px; margin-bottom:16px; }
+  .card-title { font-size:14px; font-weight:500; margin-bottom:3px; }
+  .card-sub { font-size:12px; color:var(--muted); margin-bottom:16px; }
   .legend { display:flex; gap:18px; flex-wrap:wrap; margin-bottom:16px; }
   .legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
   .legend-swatch { width:13px; height:13px; border-radius:3px; display:inline-block; }
-  .legend-line { width:22px; height:3px; background:#2E6FBF; border-radius:2px; display:inline-block; }
+  .legend-line { width:22px; height:3px; background:#00719C; border-radius:2px; display:inline-block; }
   .chart-wrap { position:relative; width:100%; height:300px; }
   .body-layout { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
   .horse-wrap { flex:1; min-width:340px; }
   .region-list { width:220px; flex-shrink:0; }
   .region-row { display:flex; align-items:center; gap:10px; padding:5px 6px; border-radius:7px; cursor:default; transition:background 0.15s; margin-bottom:5px; }
-  .region-row:hover { background:#F0EDE6; }
+  .region-row:hover { background:#E9EEEE; }
   .region-dot { width:12px; height:12px; border-radius:2px; flex-shrink:0; }
   .side-bar { display:flex; height:7px; border-radius:3px; overflow:hidden; gap:1px; margin-top:4px; }
-  .side-seg-r { background:#D85A30; }
+  .side-seg-r { background:#D9633F; }
   .side-seg-b { background:#B4B2A9; }
-  .side-seg-l { background:#185FA5; }
+  .side-seg-l { background:#00719C; }
   .side-counts { font-size:10px; display:flex; gap:6px; margin-top:2px; }
   .notes-section { margin-top:32px; }
-  .notes-title { font-family:'Libre Baskerville',serif; font-size:17px; margin-bottom:14px; color:#1C1A16; }
+  .notes-title { font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
   .note-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; }
   .note-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
   .note-date { font-family:'DM Mono',monospace; font-size:12px; color:#6B6760; }
   .note-tone { font-size:11px; font-weight:500; padding:2px 8px; border-radius:12px; }
-  .note-tone.good { background:#EAF3DE; color:#2A5020; }
+  .note-tone.good { background:#E1F3EA; color:#1E7D57; }
   .note-tone.mixed { background:#FDF3E3; color:#5C3308; }
-  .note-tone.concern { background:#FEF0EC; color:#6B1A08; }
-  .note-obs { font-size:13px; color:#5A4A3A; line-height:1.5; margin-bottom:8px; font-style:italic; }
-  .note-edit { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:#1C1A16; resize:vertical; min-height:60px; line-height:1.5; }
-  .note-edit:focus { outline:none; border-color:#3B5E35; }
-  .sc-r { color:#993C1D; }
+  .note-tone.concern { background:#FBEAE4; color:#9A2A12; }
+  .note-obs { font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:8px; font-style:italic; }
+  .note-edit { width:100%; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; padding:8px 10px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:#1C1A16; resize:vertical; min-height:60px; line-height:1.5; }
+  .note-edit:focus { outline:none; border-color:#00A56A; }
+  .sc-r { color:#A0451F; }
   .sc-b { color:#5F5E5A; }
-  .sc-l { color:#185FA5; }
+  .sc-l { color:#00719C; }
   .bar-wrap { flex:1; }
   .region-name { font-size:12px; flex:1; color:var(--text); }
   .bar-wrap { width:78px; }
@@ -56,43 +56,52 @@
   .heat-legend { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; padding-top:16px; border-top:1px solid var(--border); }
   .heat-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--muted); }
   .heat-swatch { width:13px; height:13px; border-radius:2px; display:inline-block; border:1px solid rgba(0,0,0,0.12); }
-  .note { font-size:12px; color:#5A4A3A; font-style:italic; margin-top:14px; padding:10px 14px; background:#FDF6EE; border-radius:8px; border-left:3px solid #D85A30; line-height:1.6; }
+  .note { font-size:12px; color:#0A4266; font-style:italic; margin-top:14px; padding:10px 14px; background:#EAF6FB; border-radius:8px; border-left:3px solid #0098CC; line-height:1.6; }
   .heat-region { cursor:default; }
 </style>
 
 <style id="maestro-nav-style">
 .mnav{
   position:sticky;top:0;z-index:999;
-  display:flex;align-items:center;gap:0;
-  background:#1A1814;
-  padding:0 16px;
-  height:46px;
-  font-family:'DM Sans',sans-serif;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;
 }
 .mnav-brand{
-  font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
-  margin-right:auto;letter-spacing:0.02em;white-space:nowrap;
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
 }
-.mnav-brand span{color:white}
-.mnav-links{display:flex;gap:2px}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
 .mnav-link{
-  font-size:12px;color:rgba(255,255,255,0.55);
-  text-decoration:none;padding:6px 12px;border-radius:6px;
-  transition:all 0.15s;white-space:nowrap;
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
 }
-.mnav-link:hover{color:white;background:rgba(255,255,255,0.1)}
-.mnav-link.active{color:white;background:rgba(255,255,255,0.15);font-weight:500}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
 @media(max-width:480px){
   .mnav-brand{display:none}
-  .mnav-links{gap:0}
-  .mnav-link{padding:6px 9px;font-size:11px}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
 }
 </style>
 </head>
 <body>
 <nav class="mnav">
   <span class="mnav-brand">Maestro <span>Djinto</span></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New Entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress Dashboard</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Veterinary Timeline</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link active">Bodywork Dashboard</a></div>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link active">Bodywork</a></div>
 </nav>
 
 <div class="page-header">
@@ -103,25 +112,25 @@
 
 <div class="card">
   <div class="card-title">Session reactivity over time</div>
-  <div class="card-sub">Overall session tone (bars) and PEMF reactivity level (line) across all 20 sessions</div>
+  <div class="card-sub">Overall session tone (bars) and PEMF reactivity level (line) across all <span id="sesCount1">–</span> sessions</div>
   <div class="legend">
-    <span class="legend-item"><span class="legend-swatch" style="background:rgba(90,138,40,0.8);border:1px solid #3B6D11;"></span>Positive</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:rgba(160,112,15,0.8);border:1px solid #7A5210;"></span>Mixed</span>
-    <span class="legend-item"><span class="legend-swatch" style="background:rgba(192,64,32,0.8);border:1px solid #8C2A14;"></span>Concern</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:rgba(0,165,106,0.8);border:1px solid #00A56A;"></span>Positive</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:rgba(227,169,60,0.8);border:1px solid #B77A15;"></span>Mixed</span>
+    <span class="legend-item"><span class="legend-swatch" style="background:rgba(192,73,43,0.8);border:1px solid #C0492B;"></span>Concern</span>
     <span class="legend-item"><span class="legend-line"></span>PEMF reactivity (right axis)</span>
   </div>
   <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:16px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px">
     <strong style="color:var(--text)">Session tone classification</strong> — based on clinical reactivity, not demeanor<br>
-    <span style="color:#3B6D11">Positive</span> — PEMF ≤ 1.5 and ≤ 2 reactive areas. Minimal fasciculations, low palpation sensitivity.<br>
-    <span style="color:#7A5210">Mixed</span> — PEMF 2.0 or 3+ reactive areas. Moderate fasciculations present; may feel good overall but body is still reactive.<br>
-    <span style="color:#8C2A14">Concern</span> — PEMF 2.5+ or explicit soreness noted. Significant fasciculations, multiple reactive areas, or therapist flags specific findings.
+    <span style="color:#00A56A">Positive</span> — PEMF ≤ 1.5 and ≤ 2 reactive areas. Minimal fasciculations, low palpation sensitivity.<br>
+    <span style="color:#B77A15">Mixed</span> — PEMF 2.0 or 3+ reactive areas. Moderate fasciculations present; may feel good overall but body is still reactive.<br>
+    <span style="color:#C0492B">Concern</span> — PEMF 2.5+ or explicit soreness noted. Significant fasciculations, multiple reactive areas, or therapist flags specific findings.
   </div>
   <div class="chart-wrap"><canvas id="tlChart"></canvas></div>
 </div>
 
 <div class="card">
   <div class="card-title">Body region heat map</div>
-  <div class="card-sub">Shading = frequency flagged across 20 sessions. Hover a region or row to highlight.</div>
+  <div class="card-sub">Shading = frequency flagged across <span id="sesCount2">–</span> sessions. Hover a region or row to highlight.</div>
 
   <div class="body-layout">
     <div class="horse-wrap">
@@ -183,7 +192,7 @@
                  onmouseenter="hlRegion('hind_right',this)" onmouseleave="resetRegion(this)"/>
 
         <!-- Labels -->
-        <g font-family="DM Sans, sans-serif" font-size="9" fill="#1C1A16" pointer-events="none" text-anchor="middle" font-weight="500">
+        <g font-family="Plus Jakarta Sans, sans-serif" font-size="9" fill="#1C1A16" pointer-events="none" text-anchor="middle" font-weight="500">
           <text x="128" y="92">poll</text>
           <text x="230" y="134">neck</text>
           <text x="360" y="112">withers</text>
@@ -201,19 +210,19 @@
       </svg>
     </div>
     <div style="margin-bottom:8px;display:flex;gap:10px;font-size:11px;color:#5F5E5A">
-  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#185FA5;margin-right:3px;vertical-align:middle"></span>Left</span>
+  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#00719C;margin-right:3px;vertical-align:middle"></span>Left</span>
   <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#B4B2A9;margin-right:3px;vertical-align:middle"></span>Bilateral</span>
-  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#D85A30;margin-right:3px;vertical-align:middle"></span>Right</span>
+  <span><span style="display:inline-block;width:8px;height:8px;border-radius:1px;background:#D9633F;margin-right:3px;vertical-align:middle"></span>Right</span>
 </div>
 <div class="region-list" id="regionList"></div>
   </div>
 
   <div class="heat-legend">
-    <span class="heat-legend-item"><span class="heat-swatch" style="background:#F0EDE6;"></span>Not flagged</span>
+    <span class="heat-legend-item"><span class="heat-swatch" style="background:#E9EEEE;"></span>Not flagged</span>
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#FAC775;"></span>1–3 sessions</span>
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#EF9F27;"></span>4–8 sessions</span>
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#F0997B;"></span>9–13 sessions</span>
-    <span class="heat-legend-item"><span class="heat-swatch" style="background:#D85A30;"></span>14+ sessions</span>
+    <span class="heat-legend-item"><span class="heat-swatch" style="background:#D9633F;"></span>14+ sessions</span>
   </div>
   <div class="note">Right-side dominance noted in 13 of 35 sessions. Low back / glutes present in 21 of 35 sessions and has never fully cleared. Aug 2024 showed significant left-side restriction (neck, shoulder, triceps, glutes) consistent with compensation pattern pre-diagnosis.</div>
 </div>
@@ -268,9 +277,9 @@ function compute(){
   N=V.length;
 }
 
-function hf(n){if(!n)return'#F0EDE6';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D85A30';}
+function hf(n){if(!n)return'#E9EEEE';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D9633F';}
 function hs(n){if(!n)return'#BCB8AF';const t=n/MX;if(t<0.25)return'#C8880A';if(t<0.5)return'#9A5E08';if(t<0.75)return'#A83818';return'#7A2808';}
-function bclr(n){if(!n)return'#D3D1C7';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D85A30';}
+function bclr(n){if(!n)return'#D3D1C7';const t=n/MX;if(t<0.25)return'#FAC775';if(t<0.5)return'#EF9F27';if(t<0.75)return'#F0997B';return'#D9633F';}
 
 function applyHeat(){
   RD.forEach(function(r){
@@ -282,9 +291,9 @@ function applyHeat(){
     el.setAttribute('stroke-width',n>0?'2.0':'1.2');
   });
 }
-function hlRegion(id,el){const row=document.getElementById('row-'+id);if(row)row.style.background='#F0EDE6';el.setAttribute('stroke','#185FA5');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}
+function hlRegion(id,el){const row=document.getElementById('row-'+id);if(row)row.style.background='#E9EEEE';el.setAttribute('stroke','#00719C');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}
 function resetRegion(el){const id=el.id.replace('region-','');const row=document.getElementById('row-'+id);if(row)row.style.background='';const n=C[id]||0;el.setAttribute('stroke',hs(n));el.setAttribute('stroke-width',n>0?'2.0':'1.2');el.setAttribute('opacity','0.82');}
-function hlFromRow(id){const el=document.getElementById('region-'+id);if(el){el.setAttribute('stroke','#185FA5');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}}
+function hlFromRow(id){const el=document.getElementById('region-'+id);if(el){el.setAttribute('stroke','#00719C');el.setAttribute('stroke-width','3');el.setAttribute('opacity','0.92');}}
 function resetFromRow(id){const el=document.getElementById('region-'+id);if(!el)return;const n=C[id]||0;el.setAttribute('stroke',hs(n));el.setAttribute('stroke-width',n>0?'2.0':'1.2');el.setAttribute('opacity','0.82');}
 
 function buildKey(){
@@ -313,8 +322,8 @@ function buildKey(){
 
 function buildChart(){
   const V=VIS();
-  const bgC=V.map(function(s){return s.o==='good'?'rgba(90,138,40,0.82)':s.o==='mixed'?'rgba(160,112,15,0.82)':'rgba(192,64,32,0.82)';});
-  const bdC=V.map(function(s){return s.o==='good'?'#3B6D11':s.o==='mixed'?'#7A5210':'#8C2A14';});
+  const bgC=V.map(function(s){return s.o==='good'?'rgba(0,165,106,0.82)':s.o==='mixed'?'rgba(227,169,60,0.82)':'rgba(192,73,43,0.82)';});
+  const bdC=V.map(function(s){return s.o==='good'?'#00A56A':s.o==='mixed'?'#B77A15':'#C0492B';});
   if(tlChart)tlChart.destroy();
   tlChart=new Chart(document.getElementById('tlChart'),{
     type:'bar',
@@ -322,19 +331,19 @@ function buildChart(){
       labels:V.map(function(s){return s.d;}),
       datasets:[
         {type:'bar',data:V.map(function(s){return s.o==='good'?3:s.o==='mixed'?2:1;}),backgroundColor:bgC,borderColor:bdC,borderWidth:0.5,yAxisID:'y',order:2,borderRadius:3},
-        {type:'line',data:V.map(function(s){return s.p;}),borderColor:'#2E6FBF',backgroundColor:'rgba(46,111,191,0.06)',borderWidth:2,pointBackgroundColor:'#2E6FBF',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:5,tension:0.35,fill:false,yAxisID:'y2',order:1}
+        {type:'line',data:V.map(function(s){return s.p;}),borderColor:'#00719C',backgroundColor:'rgba(0,113,156,0.06)',borderWidth:2,pointBackgroundColor:'#00719C',pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:5,tension:0.35,fill:false,yAxisID:'y2',order:1}
       ]
     },
     options:{
       responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'DM Sans',size:12},bodyFont:{family:'DM Sans',size:12},padding:10,callbacks:{label:function(ctx){
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'Plus Jakarta Sans',size:12},bodyFont:{family:'Plus Jakarta Sans',size:12},padding:10,callbacks:{label:function(ctx){
         if(ctx.datasetIndex===1)return' PEMF: '+(ctx.raw===0?'None':ctx.raw===1?'Slight':ctx.raw===2?'Moderate':'Acute');
         const v=ctx.raw;return' Session: '+(v===3?'Positive':v===2?'Mixed':'Concern');
       }}}},
       scales:{
         x:{ticks:{font:{family:'DM Mono',size:10},maxRotation:52,autoSkip:false,color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}},
-        y:{min:0,max:3.9,ticks:{callback:function(v){return v===3?'Positive':v===2?'Mixed':v===1?'Concern':'';},font:{family:'DM Sans',size:11},color:'#706E67'},grid:{color:'rgba(0,0,0,0.06)'}},
-        y2:{position:'right',min:0,max:3.3,ticks:{callback:function(v){return v===0?'None':v===1?'Slight':v===2?'Moderate':v===3?'Acute':'';},font:{family:'DM Sans',size:11},color:'#2E6FBF'},grid:{drawOnChartArea:false}}
+        y:{min:0,max:3.9,ticks:{callback:function(v){return v===3?'Positive':v===2?'Mixed':v===1?'Concern':'';},font:{family:'Plus Jakarta Sans',size:11},color:'#706E67'},grid:{color:'rgba(0,0,0,0.06)'}},
+        y2:{position:'right',min:0,max:3.3,ticks:{callback:function(v){return v===0?'None':v===1?'Slight':v===2?'Moderate':v===3?'Acute':'';},font:{family:'Plus Jakarta Sans',size:11},color:'#00719C'},grid:{drawOnChartArea:false}}
       }
     }
   });
@@ -368,7 +377,7 @@ function renderPending(){
   if(!host)return;
   const P=PEND();
   if(!P.length){host.innerHTML='';return;}
-  host.innerHTML='<div class="card" style="border-color:#E0A83C;background:#FDF6EE">'
+  host.innerHTML='<div class="card" style="border-color:#E3A93C;background:#FCF4E4">'
     +'<div class="card-title">Pending review — '+P.length+' new session'+(P.length>1?'s':'')+'</div>'
     +'<div class="card-sub">Read automatically from new scans. Check each against the PDF, then approve to add it to the charts.</div>'
     +P.map(function(s){
@@ -384,7 +393,7 @@ function renderPending(){
         +'<div class="note-obs">Areas: '+esc(areas)+'</div>'
         +(sb?'<div class="note-obs" style="font-size:12px">Side bias: '+esc(sb)+'</div>':'')
         +obs
-        +'<button onclick="approve(\''+esc(s.fileId||'')+'\',\''+esc(s.d)+'\')" style="margin-top:10px;padding:7px 18px;border:none;border-radius:7px;background:#3B6D11;color:#fff;font-family:inherit;font-size:13px;cursor:pointer">Approve</button>'
+        +'<button onclick="approve(\''+esc(s.fileId||'')+'\',\''+esc(s.d)+'\')" style="margin-top:10px;padding:7px 18px;border:none;border-radius:7px;background:#00A56A;color:#fff;font-family:inherit;font-size:13px;cursor:pointer">Approve</button>'
         +'</div>';
     }).join('')
     +'</div>';
@@ -405,6 +414,8 @@ function updateSubtitle(){
   if(!el)return;
   const V=VIS();const n=V.length;
   el.textContent='Barrio Performance Therapy · '+n+' sessions'+(n?' · '+V[0].d+' – '+V[n-1].d:'');
+  const c1=document.getElementById('sesCount1');if(c1)c1.textContent=n;
+  const c2=document.getElementById('sesCount2');if(c2)c2.textContent=n;
 }
 
 function renderAll(){compute();buildChart();applyHeat();buildKey();renderSessionNotes();renderPending();updateSubtitle();}
