@@ -173,6 +173,13 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div id="interventionDetail" style="margin-top:12px"></div>
 </div>
 
+<div class="card" id="swDecayCard">
+  <div class="card-title">Willingness vs days since shockwave</div>
+  <div class="card-sub">The decay curve: average ride willingness binned by how many days after the last shockwave, against the pre-shockwave baseline. Shows how long the effect holds and when re-treatment is due.</div>
+  <div class="cw" style="height:300px"><canvas id="cDecay"></canvas></div>
+  <div id="decayNote" style="margin-top:12px"></div>
+</div>
+
 <div class="card" id="swAreaCard">
   <div class="card-title">Shockwave response by treated area</div>
   <div class="card-sub">Willingness change (14 days before → after) grouped by which region was shocked. Tests whether adding a region — the neck especially — moves the needle.</div>
@@ -1110,6 +1117,107 @@ function buildInterventionAnalysis(valid){
   detail.parentElement.appendChild(sig);
 }
 
+// ── SHOCKWAVE DECAY: willingness vs days since last shockwave ──────────
+function buildShockwaveDecay(valid){
+  const note=document.getElementById('decayNote');
+  if(!valid.length) return;
+  const WILL_I=11, SW_I=27, RODE_I=5, DAY=86400000;
+
+  const swDates=[];
+  valid.forEach(({d,r})=>{ if(r[SW_I]==='Y') swDates.push(d); });
+  swDates.sort((a,b)=>a-b);
+  if(swDates.length<2){
+    if(CH.decay){ CH.decay.destroy(); CH.decay=null; }
+    if(note) note.innerHTML='<div style="font-size:12px;color:var(--muted)">Need at least two shockwave sessions with rides in between to plot a decay curve.</div>';
+    return;
+  }
+
+  // Pre-shockwave baseline: avg willingness in the 14 days before each shockwave
+  const preVals=[];
+  swDates.forEach(sw=>{
+    const b14=new Date(sw.getTime()-14*DAY);
+    valid.forEach(({d,r})=>{ if(d>=b14&&d<sw&&r[RODE_I]==='Y'){ const w=parseFloat(r[WILL_I]); if(!isNaN(w)) preVals.push(w); } });
+  });
+  const baseline=preVals.length?preVals.reduce((s,v)=>s+v,0)/preVals.length:null;
+
+  // For each ridden day, days since the most recent PRIOR shockwave
+  const pts=[];
+  valid.forEach(({d,r})=>{
+    if(r[RODE_I]!=='Y') return;
+    const w=parseFloat(r[WILL_I]); if(isNaN(w)) return;
+    let prev=null;
+    for(let i=swDates.length-1;i>=0;i--){ if(swDates[i]<=d){ prev=swDates[i]; break; } }
+    if(!prev) return;
+    const days=Math.floor((d-prev)/DAY);
+    if(days>55) return; // drop long tails — likely a missed cycle, not a real data point
+    pts.push({days,w});
+  });
+
+  const bins=[[0,6],[7,13],[14,20],[21,27],[28,34],[35,41],[42,55]];
+  const binLabels=['0–6','7–13','14–20','21–27','28–34','35–41','42+'];
+  const binData=bins.map(([lo,hi])=>{
+    const vs=pts.filter(p=>p.days>=lo&&p.days<=hi).map(p=>p.w);
+    return vs.length?Math.round(vs.reduce((s,v)=>s+v,0)/vs.length*100)/100:null;
+  });
+  const binN=bins.map(([lo,hi])=>pts.filter(p=>p.days>=lo&&p.days<=hi).length);
+
+  if(CH.decay) CH.decay.destroy();
+  CH.decay=new Chart(document.getElementById('cDecay'),{
+    type:'line',
+    data:{
+      labels:binLabels,
+      datasets:[
+        {label:'Avg willingness',data:binData,borderColor:'#0098CC',backgroundColor:'rgba(0,152,204,0.10)',borderWidth:2,pointRadius:4,pointBackgroundColor:'#0098CC',tension:0.3,spanGaps:true,fill:true},
+        baseline!==null?{label:'Pre-shockwave baseline',data:binLabels.map(()=>Math.round(baseline*100)/100),borderColor:'#88867F',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}:null
+      ].filter(Boolean)
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{font:{family:'Plus Jakarta Sans',size:10}}},
+        tooltip:{callbacks:{label:ctx=>{
+          if(ctx.dataset.label==='Pre-shockwave baseline') return 'Baseline: '+ctx.parsed.y;
+          const n=binN[ctx.dataIndex];
+          return 'Willingness: '+(ctx.parsed.y==null?'—':ctx.parsed.y)+'  ('+n+' ride'+(n!==1?'s':'')+')';
+        }}}
+      },
+      scales:{
+        x:{title:{display:true,text:'Days since last shockwave',font:{family:'Plus Jakarta Sans',size:10}},ticks:{font:{family:'DM Mono',size:9}}},
+        y:{min:0,max:5,ticks:{font:{family:'Plus Jakarta Sans',size:9}}}
+      }
+    }
+  });
+
+  if(note){
+    const early=[binData[0],binData[1]].filter(v=>v!=null);
+    const late=[binData[4],binData[5],binData[6]].filter(v=>v!=null);
+    const earlyAvg=early.length?early.reduce((s,v)=>s+v,0)/early.length:null;
+    const lateAvg=late.length?late.reduce((s,v)=>s+v,0)/late.length:null;
+    let crossLabel=null;
+    if(baseline!==null){
+      for(let i=0;i<binData.length;i++){ if(binData[i]!=null&&binData[i]<=baseline){ crossLabel=binLabels[i]; break; } }
+    }
+    let txt='';
+    const totalPts=pts.length;
+    if(totalPts<8){
+      txt='<strong>Early read.</strong> Only '+totalPts+' post-shockwave ride'+(totalPts!==1?'s':'')+' mapped so far — the curve will sharpen as more accrue.';
+    } else if(earlyAvg!==null&&lateAvg!==null){
+      const drop=(earlyAvg-lateAvg).toFixed(1);
+      if(earlyAvg>lateAvg+0.2){
+        txt='<strong>Effect fades with time.</strong> Willingness averages '+earlyAvg.toFixed(1)+' in the first two weeks and '+lateAvg.toFixed(1)+' by weeks 4–6 (a '+drop+'-point drop).';
+        if(crossLabel) txt+=' It falls back to the pre-shockwave baseline around the <strong>'+crossLabel+' day</strong> window — the practical argument for re-treating before then.';
+        else txt+=' It stays above the pre-shockwave baseline across the window shown.';
+      } else if(lateAvg>earlyAvg+0.2){
+        txt='<strong>No decay visible — if anything it climbs.</strong> Later-window willingness ('+lateAvg.toFixed(1)+') sits above the first two weeks ('+earlyAvg.toFixed(1)+'), pointing to other drivers (conditioning, injections, workload) rather than a fading shockwave effect.';
+      } else {
+        txt='<strong>Flat.</strong> Willingness holds near '+earlyAvg.toFixed(1)+' across the window with no clear decay — the cadence isn\'t obviously leaving a gap, but the signal is small against day-to-day noise.';
+      }
+    }
+    txt+='<br><span style="color:#888;font-size:11px">Each point is the average willingness of rides that fell that many days after the most recent shockwave, pooled across all shockwaves. Overlapping treatments, injections, farrier and workload aren\'t controlled for. Rides beyond 55 days are dropped as likely missed cycles.</span>';
+    note.innerHTML='<div style="font-size:12px;line-height:1.7;color:#0A4266;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">'+txt+'</div>';
+  }
+}
+
 // ── SHOCKWAVE BY AREA ─────────────────────────────────────────────────
 function swRegions(str){
   // Map a free area string into normalized region tags
@@ -1242,6 +1350,7 @@ function buildAll(){
   buildStopsMonth(D.valid||[]);
   buildGaitMonth(D.valid||[]);
   buildInterventionAnalysis(D.valid||[]);
+  buildShockwaveDecay(D.valid||[]);
   buildShockwaveByArea(D.valid||[]);
 }
 
