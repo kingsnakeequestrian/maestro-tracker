@@ -2,227 +2,115 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Maestro Tracker</title>
-
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maestro — Appointments & Vet History</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
-:root {
-  --bg: #F4F7F7;
-  --surface: #FFFFFF;
-  --surface2: #EDEFEE;
-  --border: #DCDEDC;
-  --border-light: #E8EAE9;
-  --text: #141A1C;
-  --text-mid: #5C5850;
-  --text-muted: #9AA0A4;
-  --green-bg: #DFF4EA; --green: #00A56A; --green-border: #57C69A;
-  --amber-bg: #FAEEDA; --amber: #B77A15; --amber-border: #E3A93C;
-  --red-bg: #F6ECE8; --red: #C0492B; --red-border: #D9633F;
-  --blue-bg: #E4F4FB; --blue: #0098CC; --blue-border: #7FCDE8;
-  --accent: #00A56A; --accent-light: #DFF4EA;
-  --radius: 12px; --radius-sm: 8px;
-  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Plus Jakarta Sans', -apple-system, sans-serif;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F7F7;
+  --card:#FFFFFF;
+  --text:#1C1A16;
+  --muted:#706E67;
+  --border:rgba(0,0,0,0.08);
+  --radius:14px;
+
+  /* Category colors — aligned to Index + Progress Dashboard: jade, cyan,
+     deep-blue, forest, terracotta. No orange, no off-palette purple. */
+  --sw:#C0492B;   --sw-bg:#F6ECE8;   --sw-border:#D9633F;
+  --inj:#0098CC;  --inj-bg:#E4F4FB;  --inj-border:#7FCDE8;
+  --laser:#00719C;--laser-bg:#E1EEF4;--laser-border:#6FB0CC;
+  --bw:#1E8E63;   --bw-bg:#E4F1EB;   --bw-border:#7FC4A2;
+  --vet:#00A56A;  --vet-bg:#DFF4EA;  --vet-border:#57C69A;
+
+  /* Minimal warn accent, matching the dashboard's #B77A15 stat/warn usage */
+  --warn:#B77A15; --warn-bg:#FAEEDA;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);padding:32px 20px 80px;max-width:900px;margin:0 auto;line-height:1.5}
 
 /* HEADER */
-.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px 10px; position: sticky; top: 0; z-index: 100; }
-.app-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-.app-title { font-family: var(--font-display); font-size: 21px; color: var(--text); letter-spacing: -0.3px; }
-.app-title span { font-style: italic; color: var(--accent); }
-.header-right { display: flex; align-items: center; gap: 8px; }
-.day-badge { background: var(--accent-light); color: var(--accent); font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
-.sync-status { font-size: 11px; padding: 4px 9px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
-.sync-status.connected { background: var(--green-bg); color: var(--green); }
-.sync-status.disconnected { background: var(--surface2); color: var(--text-muted); cursor: pointer; border: 1px solid var(--border); }
-.sync-status.syncing { background: var(--blue-bg); color: var(--blue); }
-.date-row { display: flex; align-items: center; gap: 8px; }
-.date-row input[type="date"] { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; flex: 1; outline: none; -webkit-appearance: none; }
-.date-row input[type="date"]:focus { border-color: var(--accent); }
+.header{margin-bottom:36px}
+.header h1{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
+.header p{font-size:13px;color:var(--muted)}
 
-/* NAV */
-.nav-tabs { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 16px; border-bottom: 1px solid var(--border-light); background: var(--surface); }
-.nav-tab { flex-shrink: 0; font-family: var(--font); font-size: 12.5px; font-weight: 400; color: var(--text-muted); background: var(--surface2); border: none; padding: 7px 13px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-.nav-tab.active { background: var(--accent); color: #fff; font-weight: 600; }
-.nav-tab.has-data::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--blue); border-radius: 50%; margin-left: 5px; vertical-align: middle; margin-top: -2px; }
+/* LEGEND */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:5px 10px;background:var(--card);border-radius:20px;border:1px solid var(--border)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-/* CONTENT */
-.content { padding: 14px 14px 110px; }
-.section { display: none; }
-.section.active { display: block; }
+/* Appointment type chips (multi-select) */
+.tchip{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:6px 11px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.tchip.sel{background:var(--vet);border-color:var(--vet);color:#fff;font-weight:500}
 
-/* CARDS */
-.card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
-.card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 13px; }
+/* UPCOMING ALERT CARDS */
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:30px}
+.alert-card{background:var(--card);border-radius:var(--radius);padding:11px 13px;border:1px solid var(--border)}
+.alert-title{font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px}
+.alert-main{font-size:15px;font-weight:500;margin-bottom:2px}
+.alert-sub{font-size:11px;color:var(--muted)}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;margin-top:6px;letter-spacing:0.04em}
+.badge.due{background:var(--sw-bg);color:var(--sw)}
+.badge.soon{background:var(--warn-bg);color:var(--warn)}
+.badge.on-track{background:var(--bw-bg);color:var(--bw)}
 
-/* FIELDS */
-.field { margin-bottom: 13px; }
-.field:last-child { margin-bottom: 0; }
-label { display: block; font-size: 13px; color: var(--text-mid); margin-bottom: 5px; }
-input[type="text"], input[type="number"], textarea, select {
-  width: 100%; font-family: var(--font); font-size: 15px; color: var(--text);
-  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 9px 11px; outline: none; -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
-}
-input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: var(--accent); background: var(--surface); }
-textarea { resize: none; min-height: 76px; line-height: 1.5; }
-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239C9488' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
+/* SECTION */
+.section{margin-bottom:40px}
+.section-title{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.section-dot{width:10px;height:10px;border-radius:50%}
 
-/* TOGGLES */
-.toggle-group { display: flex; gap: 7px; }
-.toggle-btn { flex: 1; font-family: var(--font); font-size: 14px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
-.toggle-btn.sel-yes { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
-.toggle-btn.sel-no { background: var(--surface2); color: var(--text-mid); border-color: var(--border); }
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:0;width:1.5px;background:linear-gradient(to bottom,var(--border),transparent)}
 
-/* SCORES */
-.score-group { display: flex; gap: 5px; }
-.score-btn { flex: 1; font-family: var(--font); font-size: 15px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 4px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
-.score-btn[data-v="1"].sel { background: var(--red-bg); color: var(--red); border-color: var(--red-border); font-weight: 500; }
-.score-btn[data-v="2"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
-.score-btn[data-v="3"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
-.score-btn[data-v="4"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
-.score-btn[data-v="5"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
-.score-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; min-height: 15px; }
+.tl-item{position:relative;margin-bottom:20px}
+.tl-dot{position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 0 1.5px currentColor;flex-shrink:0}
+.tl-dot.sw{color:var(--sw);background:var(--sw)}
+.tl-dot.inj{color:var(--inj);background:var(--inj)}
+.tl-dot.laser{color:var(--laser);background:var(--laser)}
+.tl-dot.bw{color:var(--bw);background:var(--bw)}
+.tl-dot.vet{color:var(--vet);background:var(--vet)}
+.tl-dot.future{background:white}
 
-/* CHIPS */
-.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { font-family: var(--font); font-size: 13px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; -webkit-appearance: none; white-space: nowrap; }
-.chip.sel { background: var(--accent-light); color: var(--accent); border-color: var(--green-border); font-weight: 500; }
+.tl-card{background:var(--card);border-radius:10px;padding:14px 16px;border:1px solid var(--border);transition:box-shadow 0.15s}
+.tl-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.tl-card.sw{border-left:3px solid var(--sw)}
+.tl-card.inj{border-left:3px solid var(--inj)}
+.tl-card.laser{border-left:3px solid var(--laser)}
+.tl-card.bw{border-left:3px solid var(--bw)}
+.tl-card.vet{border-left:3px solid var(--vet)}
+.tl-card.future{border-left:3px solid #C2C8C8;border-style:dashed;background:transparent}
 
-/* DURATION ROW */
-.dur-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.dur-row label { font-size: 12px; }
-.dur-row input { text-align: center; }
+.tl-date{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:3px}
+.tl-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.tl-site{font-size:12px;color:var(--muted);margin-bottom:4px}
+.tl-note{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5}
 
-/* CONDITIONAL */
-.cond { display: none; }
-.cond.show { display: block; }
+.tl-window{margin-top:8px;padding:8px 10px;border-radius:7px;font-size:11px;line-height:1.6}
+.tl-window.sw{background:var(--sw-bg);color:var(--sw)}
+.tl-window.inj{background:var(--inj-bg);color:var(--inj)}
+.tl-window.laser{background:var(--laser-bg);color:var(--laser)}
 
-/* SEVERITY */
-.sev-group { display: flex; flex-direction: column; gap: 7px; }
-.sev-opt { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
-.sev-opt.sel { background: var(--amber-bg); border-color: var(--amber-border); }
-.sev-opt.sel.severe { background: var(--red-bg); border-color: var(--red-border); }
-.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid var(--border); transition: all 0.15s; }
-.sev-opt.sel .sev-dot { background: #E3A93C; border-color: #E3A93C; }
-.sev-opt.sel.severe .sev-dot { background: #D9633F; border-color: #D9633F; }
-.sev-label { font-size: 14px; color: var(--text-mid); }
-.sev-hint { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.sev-opt.sel .sev-label { color: var(--amber); font-weight: 500; }
-.sev-opt.sel.severe .sev-label { color: var(--red); }
+.tl-gap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin:6px 0 6px -24px;padding-left:24px}
+.tl-gap-line{flex:1;height:1px;background:var(--border);max-width:40px}
 
-/* DAY RATING */
-.rating-row { display: flex; gap: 8px; }
-.rating-btn { flex: 1; font-family: var(--font); font-size: 13px; border-radius: var(--radius-sm); padding: 11px 6px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; border: 1.5px solid transparent; }
-.rating-btn.good { background: var(--green-bg); color: var(--green); border-color: var(--border-light); }
-.rating-btn.ok   { background: var(--amber-bg); color: var(--amber); border-color: var(--border-light); }
-.rating-btn.bad  { background: var(--red-bg);   color: var(--red);   border-color: var(--border-light); }
-.rating-btn.sel.good { border-color: var(--green-border); font-weight: 600; }
-.rating-btn.sel.ok   { border-color: var(--amber-border); font-weight: 600; }
-.rating-btn.sel.bad  { border-color: var(--red-border);   font-weight: 600; }
+/* PROGRESS BAR (for laser compliance) */
+.compliance-wrap{margin-top:8px}
+.compliance-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px;color:var(--muted)}
+.compliance-track{flex:1;height:5px;background:#E7ECEC;border-radius:3px;overflow:hidden}
+.compliance-fill{height:100%;border-radius:3px}
 
-/* MEDIA */
-.upload-area { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 22px 14px; text-align: center; cursor: pointer; background: var(--surface2); transition: border-color 0.15s; position: relative; overflow: hidden; }
-.upload-area:hover { border-color: var(--accent); }
-.upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
-.upload-icon { font-size: 26px; margin-bottom: 6px; filter: grayscale(1) opacity(0.5); }
-.upload-label { font-size: 14px; color: var(--text-mid); }
-.upload-hint { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-.media-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 11px; }
-.m-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface2); border: 1px solid var(--border-light); }
-.m-thumb img, .m-thumb video { width: 100%; height: 100%; object-fit: cover; }
-.m-remove { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; background: rgba(0,0,0,0.55); border: none; border-radius: 50%; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
-.m-badge { position: absolute; bottom: 3px; left: 3px; background: rgba(0,0,0,0.58); color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
-.m-status { position: absolute; bottom: 3px; right: 3px; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
-.m-status.uploading { background: var(--blue-bg); color: var(--blue); }
-.m-status.done { background: var(--green-bg); color: var(--green); }
-.m-status.error { background: var(--red-bg); color: var(--red); }
+/* NEXT TREATMENT CHIP */
+.next-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:10px;margin-top:6px}
+.next-chip.sw{background:var(--sw-bg);color:var(--sw)}
+.next-chip.laser{background:var(--laser-bg);color:var(--laser)}
+.next-chip.inj{background:var(--inj-bg);color:var(--inj)}
 
-/* SETUP CARD */
-.setup-card { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
-.setup-card h3 { font-size: 13px; font-weight: 500; color: var(--blue); margin-bottom: 8px; }
-.setup-card p { font-size: 13px; color: #0098CC; line-height: 1.55; margin-bottom: 8px; }
-.setup-card p:last-child { margin-bottom: 0; }
-.setup-input { margin-top: 10px; }
-.setup-input label { color: var(--blue); font-size: 12px; margin-bottom: 4px; }
-.setup-input input { font-size: 13px; padding: 8px 10px; }
-.setup-btn { width: 100%; font-family: var(--font); font-size: 14px; font-weight: 500; color: white; background: var(--blue); border: none; border-radius: var(--radius-sm); padding: 11px; cursor: pointer; margin-top: 10px; transition: opacity 0.15s; }
-.setup-btn:active { opacity: 0.85; }
-
-/* SAVE BAR */
-.save-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--border-light); z-index: 200; }
-.save-btn { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: white; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; cursor: pointer; transition: opacity 0.15s; }
-.save-btn:active { opacity: 0.85; }
-.save-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
-
-/* HISTORY */
-.hist-entry { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 9px; cursor: pointer; }
-.hist-entry:hover { border-color: var(--border); }
-.hist-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
-.hist-date { font-size: 14px; font-weight: 500; }
-.hist-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
-.dot-good { background: var(--green); }
-.dot-ok { background: #E3A93C; }
-.dot-bad { background: #D9633F; }
-.dot-none { background: var(--border); }
-.hist-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
-.hist-notes { font-size: 13px; color: var(--text-mid); margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border-light); padding-top: 8px; display: none; }
-.hist-entry.open .hist-notes { display: block; }
-.hist-media { display: flex; gap: 5px; margin-top: 7px; overflow-x: auto; scrollbar-width: none; }
-.hist-media::-webkit-scrollbar { display: none; }
-.hist-media img, .hist-media video { flex-shrink: 0; width: 54px; height: 54px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-light); }
-.empty-hist { text-align: center; padding: 44px 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
-
-/* DIVIDER */
-.div { height: 1px; background: var(--border-light); margin: 12px 0; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* TOAST */
-.toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--text); color: white; font-size: 13px; padding: 9px 18px; border-radius: 20px; opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 300; white-space: nowrap; max-width: 90vw; text-align: center; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.err { background: var(--red); }
-
-/* REMINDER BANNER */
-.reminder-banner { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: var(--radius-sm); padding: 10px 14px; margin: 10px 14px 0; display: none; }
-.reminder-banner.show { display: block; }
-.reminder-banner-title { font-size: 12px; font-weight: 500; color: var(--amber); margin-bottom: 4px; }
-.reminder-item { font-size: 13px; color: var(--amber); line-height: 1.5; padding: 3px 0; border-bottom: 1px solid var(--amber-border); }
-.reminder-item:last-child { border-bottom: none; }
-.reminder-overdue { color: var(--red); }
-
-/* ADD REMINDER */
-.reminder-add-bar { margin: 8px 14px 0; text-align: right; }
-.reminder-add-btn { font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--accent); background: none; border: none; cursor: pointer; padding: 4px 2px; }
-.add-reminder-form { display: flex; gap: 8px; margin-top: 8px; text-align: left; align-items: center; flex-wrap: wrap; }
-.add-reminder-form input[type="date"] { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; outline: none; -webkit-appearance: none; }
-.add-reminder-form input[type="text"] { flex: 1; min-width: 140px; }
-.add-reminder-form .rem-save { font-family: var(--font); font-size: 14px; font-weight: 500; color: #fff; background: var(--accent); border: none; border-radius: var(--radius-sm); padding: 9px 16px; cursor: pointer; }
-.add-reminder-form .rem-cancel { font-family: var(--font); font-size: 14px; color: var(--text-mid); background: none; border: none; cursor: pointer; padding: 9px 6px; }
-
-/* VET / BODYWORK SPECIFIC */
-.procedures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.proc-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s; }
-.proc-item.sel { background: var(--accent-light); border-color: var(--green-border); }
-.proc-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.15s; }
-.proc-item.sel .proc-check { background: var(--accent); border-color: var(--accent); color: white; }
-.proc-label { font-size: 13px; color: var(--text-mid); }
-.proc-item.sel .proc-label { color: var(--accent); font-weight: 500; }
-
-/* MODALITY CHIPS for bodywork */
-.mod-chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
-
-/* VET save btn secondary */
-.save-btn-secondary { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 13px; cursor: pointer; margin-bottom: 8px; transition: opacity 0.15s; }
-.save-btn-secondary:active { opacity: 0.8; }
-
-/* INFO NOTE */
-.info-note { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; color: var(--blue); line-height: 1.55; }
-.info-note strong { font-weight: 500; display: block; margin-bottom: 3px; }
+/* FUTURE SECTION */
+.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.future-item{background:var(--card);border-radius:10px;padding:12px 14px;border:1px dashed var(--border)}
+.future-item-type{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.future-item-date{font-size:16px;font-weight:500;margin-bottom:2px}
+.future-item-sub{font-size:11px;color:var(--muted)}
 </style>
 
 <style id="maestro-nav-style">
@@ -266,1498 +154,678 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <body>
 <nav class="mnav">
   <span class="mnav-brand">Maestro <span>Djinto</span></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link active">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link active">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
 </nav>
 
-<div class="app-header">
-  <div class="app-header-top">
-    <div class="app-title"><span>Maestro</span> Daily Log</div>
-    <div class="header-right">
-      <div class="day-badge" id="dayBadge">TX —</div>
-      <div class="sync-status disconnected" id="syncStatus" onclick="showSection('settings')">Not connected</div>
-    </div>
-  </div>
-  <div class="date-row">
-    <input type="date" id="entryDate" onchange="onDateChange(this.value)">
+<div class="header">
+  <h1>Maestro — Appointments &amp; Vet History</h1>
+  <p>Ongoing treatment tracking · Shockwave · PRP / Injections · Class C Laser · Bodywork</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="leg"><span class="leg-dot" style="background:var(--sw)"></span>Shockwave</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--inj)"></span>Injection / PRP</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--laser)"></span>Class C Laser</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--bw)"></span>Bodywork</span>
+  <span class="leg"><span class="leg-dot" style="background:var(--vet)"></span>Lameness Eval</span>
+</div>
+
+<!-- UPCOMING ALERTS - DYNAMIC -->
+<div class="alerts" id="dynamicAlerts">
+  <div style="font-size:13px;color:var(--muted)">Loading alerts...</div>
+</div>
+
+<!-- MANUAL REMINDERS -->
+<div class="alerts" id="manualAlerts" style="margin-top:10px"></div>
+<div style="display:flex;gap:8px;margin-bottom:30px;margin-top:2px;flex-wrap:wrap;align-items:center">
+  <button id="remAddToggle" onclick="toggleRemForm()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px dashed var(--border);background:var(--card);color:var(--muted);cursor:pointer">+ Add reminder</button>
+  <div id="remForm" style="display:none;gap:8px;flex-wrap:wrap;align-items:center">
+    <input type="date" id="remDate" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <input type="text" id="remNote" placeholder="e.g. Order joint supplement" onkeydown="if(event.key==='Enter')addManualAlert()" style="min-width:200px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <button onclick="addManualAlert()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Save</button>
+    <button onclick="toggleRemForm()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer">Cancel</button>
   </div>
 </div>
 
-<div class="nav-tabs" id="navTabs">
-  <button class="nav-tab active" data-s="ridden" onclick="showSection('ridden',this)">Ridden</button>
-  <button class="nav-tab" data-s="behavioral" onclick="showSection('behavioral',this)">Behavior</button>
-  <button class="nav-tab" data-s="lunge" onclick="showSection('lunge',this)">Lunge</button>
-  <button class="nav-tab" data-s="si" onclick="showSection('si',this)">SI</button>
-  <button class="nav-tab" data-s="modalities" onclick="showSection('modalities',this)">Modalities</button>
-  <button class="nav-tab" data-s="media" onclick="showSection('media',this)">Media</button>
-  <button class="nav-tab" data-s="notes" onclick="showSection('notes',this)">Notes</button>
-  <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
-  <button class="nav-tab" data-s="vet" onclick="showSection('vet',this)">Vet</button>
-  <button class="nav-tab" data-s="bodywork" onclick="showSection('bodywork',this)">Bodywork</button>
-  <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
+<!-- UPCOMING APPOINTMENTS -->
+<div style="margin-bottom:24px">
+  <div class="section-title" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span class="section-dot" style="background:var(--vet)"></span>
+    Upcoming appointments
+  </div>
+  <div id="upcomingAppts" style="display:grid;gap:8px">
+    <div style="font-size:13px;color:var(--muted)">No upcoming appointments scheduled. Add them in the field below.</div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+    <input type="date" id="apptDate" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <input type="time" id="apptStart" title="Start time (leave blank for all-day)" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <span style="font-size:12px;color:var(--muted)">to</span>
+    <input type="time" id="apptEnd" title="End time" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <div id="apptTypeChips" title="Type — pick one or more (e.g. Vet + Farrier)" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+      <button type="button" class="tchip sel" data-type="Vet" onclick="toggleTypeChip(this)">Vet</button>
+      <button type="button" class="tchip" data-type="Farrier" onclick="toggleTypeChip(this)">Farrier</button>
+      <button type="button" class="tchip" data-type="Bodywork" onclick="toggleTypeChip(this)">Bodywork</button>
+      <button type="button" class="tchip" data-type="Imaging" onclick="toggleTypeChip(this)">Imaging</button>
+      <button type="button" class="tchip" data-type="Other" onclick="toggleTypeChip(this)">Other</button>
+    </div>
+    <input type="text" id="apptDesc" placeholder="e.g. Shockwave — Dr. Smith" style="flex:1;min-width:180px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <button id="apptAddBtn" onclick="addAppt()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Add</button>
+    <button id="apptCancelBtn" onclick="cancelApptEdit()" style="display:none;font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer">Cancel</button>
+  </div>
+  <div id="apptHint" style="font-size:11px;color:var(--muted);margin-top:6px">Leave times blank for an all-day entry. Appointments save to the Appointments tab and sync to the shared Horse Appointments calendar.</div>
 </div>
 
-<div id="reminderBanner" class="reminder-banner">
-  <div class="reminder-banner-title">Follow-up reminders</div>
-  <div id="reminderList"></div>
-</div>
-<div class="reminder-add-bar">
-  <button class="reminder-add-btn" onclick="toggleAddReminder()">+ Add reminder</button>
-  <div id="addReminderForm" class="add-reminder-form" style="display:none">
-    <input type="date" id="manualRemDate">
-    <input type="text" id="manualRemNote" placeholder="Reminder note…">
-    <button class="rem-save" onclick="saveManualReminder()">Save</button>
-    <button class="rem-cancel" onclick="toggleAddReminder()">Cancel</button>
+<!-- VET HISTORY - DYNAMIC -->
+<div class="section">
+  <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+    <span style="display:flex;align-items:center;gap:10px">
+      <span class="section-dot" style="background:var(--vet)"></span>
+      Vet visit history
+    </span>
+    <button id="tlRefreshBtn" onclick="loadVetHistory()" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer">Refresh</button>
+  </div>
+  <div id="vetHistoryStatus" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+  <div class="timeline" id="vetHistoryTimeline">
+    <div style="font-size:13px;color:var(--muted);padding:12px 0">Loading visit history...</div>
   </div>
 </div>
-<div class="content">
 
-<!-- RIDDEN -->
-<div class="section active" id="s-ridden">
-  <div class="card">
-    <div class="card-title">Day Overview</div>
-    <div class="field">
-      <label>Day rating</label>
-      <div class="rating-row">
-        <button class="rating-btn good" data-r="good" onclick="setRating(this)">Good</button>
-        <button class="rating-btn ok"   data-r="ok"   onclick="setRating(this)">OK</button>
-        <button class="rating-btn bad"  data-r="bad"  onclick="setRating(this)">Bad</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Day type</label>
-      <input type="text" id="dayType" placeholder="e.g. Lunge + ride, Hand walk, Day off…">
-    </div>
-    <div class="field">
-      <label>Total duration (min)</label>
-      <input type="number" id="totalDur" placeholder="45" inputmode="numeric">
-    </div>
+
+<!-- LEFT TROCHANTER NOTE -->
+<div style="background:var(--sw-bg);border-radius:12px;padding:18px 20px;border:1px solid var(--sw-border);border-left:4px solid var(--sw);margin-bottom:40px">
+  <div style="font-size:13px;font-weight:500;margin-bottom:6px;color:var(--sw)">⚠ Untreated finding — Left 3rd trochanter entheseopathy</div>
+  <div style="font-size:12px;color:#6E3B2C;line-height:1.7">
+    Bone scan (ESMR) showed <strong>focal, very intense IRU</strong> at left mid-femur (3rd trochanter region), with ultrasound confirming entheseous remodeling. This finding has <strong>never been directly treated</strong>. Right-side primary injury has driven compensatory left-side loading. Shockwave has stronger published evidence for enthesopathies than mesotherapy. Raise directly with Dr. Smith at next appointment.
   </div>
-  <div class="card">
-    <div class="card-title">Ridden Work</div>
-    <div class="field">
-      <label>Rode today?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="rode" data-v="Y" onclick="tog(this,()=>show('ridenFields'))">Yes</button>
-        <button class="toggle-btn" data-f="rode" data-v="N" onclick="tog(this,()=>hide('ridenFields'))">No</button>
+</div>
+
+<!-- SHOCKWAVE PRE-REHAB HISTORY -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:var(--sw)"></span>
+    Pre-rehab shockwave history
+  </div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">Jan 30, 2025</div>
+        <div class="tl-title">Shockwave — EVCT / Dr. Smith</div>
+        <div class="tl-note">Pre-ESMR admission.</div>
       </div>
     </div>
-    <div class="field">
-      <label>Time in each gait (min)</label>
-      <div class="dur-row">
-        <div><label>Walk</label><input type="number" id="walkMin" placeholder="0" inputmode="numeric"></div>
-        <div><label>Trot</label><input type="number" id="trotMin" placeholder="0" inputmode="numeric"></div>
-        <div><label>Canter</label><input type="number" id="canterMin" placeholder="0" inputmode="numeric"></div>
-      </div>
-    </div>
-    <div id="ridenFields" class="cond">
-      <div class="field">
-        <label>Saddle or bareback?</label>
-        <select id="saddleType">
-          <option value="">— select —</option>
-          <option>Saddle</option>
-          <option>Bareback</option>
-          <option>Bareback + pad</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Gait achieved</label>
-        <div class="chip-group" id="gaitChips">
-          <button class="chip" onclick="oneChip(this,'gait')">Walk only</button>
-          <button class="chip" onclick="oneChip(this,'gait')">W / T</button>
-          <button class="chip" onclick="oneChip(this,'gait')">W / T / C</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Willingness <span style="color:var(--text-muted);font-weight:300">1–5</span></label>
-        <div class="score-group" id="willGrp">
-          <button class="score-btn" data-v="1" onclick="setScore(this,'will','willHint',WILL)">1</button>
-          <button class="score-btn" data-v="2" onclick="setScore(this,'will','willHint',WILL)">2</button>
-          <button class="score-btn" data-v="3" onclick="setScore(this,'will','willHint',WILL)">3</button>
-          <button class="score-btn" data-v="4" onclick="setScore(this,'will','willHint',WILL)">4</button>
-          <button class="score-btn" data-v="5" onclick="setScore(this,'will','willHint',WILL)">5</button>
-        </div>
-        <div class="score-hint" id="willHint"></div>
-      </div>
-      <div class="field">
-        <label>Crop used?</label>
-        <div class="toggle-group">
-          <button class="toggle-btn" data-f="crop" data-v="Y" onclick="tog(this)">Yes</button>
-          <button class="toggle-btn" data-f="crop" data-v="N" onclick="tog(this)">No</button>
-        </div>
+    <div class="tl-item">
+      <div class="tl-dot sw"></div>
+      <div class="tl-card sw">
+        <div class="tl-date">May 18 / Jun 4 / Jun 18, 2024</div>
+        <div class="tl-title">Shockwave series — 3 sessions</div>
+        <div class="tl-note">Pre-diagnosis shockwave series for pelvic / gluteal region.</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- BEHAVIORAL -->
-<div class="section" id="s-behavioral">
-  <div class="card">
-    <div class="card-title">Tacking Up</div>
-    <div class="field">
-      <label>Cranky during tack up?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="cranky" data-v="Y" onclick="tog(this,()=>show('triggerField'))">Yes</button>
-        <button class="toggle-btn" data-f="cranky" data-v="N" onclick="tog(this,()=>hide('triggerField'))">No</button>
-      </div>
+<!-- UPCOMING SCHEDULE -->
+<div class="section">
+  <div class="section-title">
+    <span class="section-dot" style="background:#C2C8C8"></span>
+    Upcoming schedule
+  </div>
+  <div class="future-grid">
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--laser)">Class C Laser</div>
+      <div class="future-item-date">Weekly</div>
+      <div class="future-item-sub">Every week — log each session in tracker</div>
     </div>
-    <div id="triggerField" class="cond field">
-      <label>Trigger</label>
-      <div class="chip-group" id="triggerChips">
-        <button class="chip" onclick="multiChip(this,'trigger')">Girth</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Back</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Pad / blanket</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Girth + back</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Multiple</button>
-        <button class="chip" onclick="multiChip(this,'trigger')">Other</button>
-      </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--sw)">Shockwave</div>
+      <div class="future-item-date">~Apr 26</div>
+      <div class="future-item-sub">Monthly · 30 days from Mar 26</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--sw)">C6/C7 Shockwave</div>
+      <div class="future-item-date">Schedule soon</div>
+      <div class="future-item-sub">1–2 rounds · new from Apr 1 eval</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">Hock injections</div>
+      <div class="future-item-date">Schedule soon</div>
+      <div class="future-item-sub">Bilateral · last Jul 2024 · Dr. Smith</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">Left stifle injection</div>
+      <div class="future-item-date">Schedule soon</div>
+      <div class="future-item-sub">New from Apr 1 eval · Dr. Smith</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">Adequan series</div>
+      <div class="future-item-date">Schedule soon</div>
+      <div class="future-item-sub">New from Apr 1 eval</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--vet)">RF radiographs</div>
+      <div class="future-item-date">Schedule soon</div>
+      <div class="future-item-sub">Assess angles · heel contraction · Dr. Smith</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">PRP re-eval</div>
+      <div class="future-item-date">May 6</div>
+      <div class="future-item-sub">2 months from Mar 6 · decide on repeat</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--inj)">6-month inj. review</div>
+      <div class="future-item-date">Sep 6</div>
+      <div class="future-item-sub">Right SI, stifle, QF · hocks</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--bw)">Farrier</div>
+      <div class="future-item-date">~Apr 28</div>
+      <div class="future-item-sub">5 weeks from Mar 17</div>
+    </div>
+    <div class="future-item">
+      <div class="future-item-type" style="color:var(--vet)">Left trochanter</div>
+      <div class="future-item-date">Discuss ASAP</div>
+      <div class="future-item-sub">Never treated — raise with Dr. Smith</div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title">Stops / Stalling</div>
-    <div class="field">
-      <label>Stops today</label>
-      <div class="chip-group">
-        <button class="chip" onclick="oneChip(this,'stops')">None</button>
-        <button class="chip" onclick="oneChip(this,'stops')">Few (1–3)</button>
-        <button class="chip" onclick="oneChip(this,'stops')">Many (4+)</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Specific behaviors</label>
-      <div class="chip-group">
-        <button class="chip" data-f="spontaneousHalt" onclick="togChip(this)">Spontaneous halt</button>
-        <button class="chip" data-f="stickyResistant" onclick="togChip(this)">Sticky / resistant</button>
-      </div>
+
+  <div style="margin-top:16px;background:var(--bw-bg);border-radius:12px;padding:16px 18px;border:1px solid var(--bw-border);border-left:4px solid var(--bw)">
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px;color:var(--bw)">New from Apr 1 eval (Dr. Gabby Solum)</div>
+    <div style="font-size:12px;color:#186049;line-height:1.8">
+      <strong>Injections:</strong> Bilateral hocks · Left stifle · Adequan series<br>
+      <strong>Imaging:</strong> RF radiographs (angles, heel contraction) · RF tendon ultrasound (pending)<br>
+      <strong>Shockwave:</strong> C6/C7 (1–2 rounds) · Right quad continuing<br>
+      <strong>New PT:</strong> Tail pull — biceps femoris / gracilis activation · Straddle poles 2x/week<br>
+      <strong>Cleared:</strong> Theraplate · Treadmill (Dr. Gabby writing specific plan)<br>
+      <strong>Pole work:</strong> Vary distances · extended spacing for hind reach · raised poles with flat lead-in<br>
+      <strong>Dental:</strong> Due ~July 2026 (6 months from Jan)
     </div>
   </div>
 </div>
-
-<!-- LUNGE -->
-<div class="section" id="s-lunge">
-  <div class="card">
-    <div class="card-title">Canter Quality — Lunge</div>
-    <div class="field">
-      <label>Canter left score</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="1" onclick="setScore(this,'cL','cLHint',CANT)">1</button>
-        <button class="score-btn" data-v="2" onclick="setScore(this,'cL','cLHint',CANT)">2</button>
-        <button class="score-btn" data-v="3" onclick="setScore(this,'cL','cLHint',CANT)">3</button>
-        <button class="score-btn" data-v="4" onclick="setScore(this,'cL','cLHint',CANT)">4</button>
-        <button class="score-btn" data-v="5" onclick="setScore(this,'cL','cLHint',CANT)">5</button>
-      </div>
-      <div class="score-hint" id="cLHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
-    </div>
-    <div class="div"></div>
-    <div class="field">
-      <label>Canter right score</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="1" onclick="setScore(this,'cR','cRHint',CANT)">1</button>
-        <button class="score-btn" data-v="2" onclick="setScore(this,'cR','cRHint',CANT)">2</button>
-        <button class="score-btn" data-v="3" onclick="setScore(this,'cR','cRHint',CANT)">3</button>
-        <button class="score-btn" data-v="4" onclick="setScore(this,'cR','cRHint',CANT)">4</button>
-        <button class="score-btn" data-v="5" onclick="setScore(this,'cR','cRHint',CANT)">5</button>
-      </div>
-      <div class="score-hint" id="cRHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Lunge Add-ons</div>
-    <div class="field">
-      <label>Equibands?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="equibands" data-v="Y" onclick="tog(this)">Yes</button>
-        <button class="toggle-btn" data-f="equibands" data-v="N" onclick="tog(this)">No</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Lunge before ride?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="Y" onclick="tog(this)">Yes</button>
-        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="N" onclick="tog(this)">No</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- SI -->
-<div class="section" id="s-si">
-  <div class="card">
-    <div class="card-title">SI Palpation</div>
-    <div class="field">
-      <label>SI reactive?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="siReactive" data-v="Y" onclick="tog(this,()=>show('siDetail'))">Yes</button>
-        <button class="toggle-btn" data-f="siReactive" data-v="N" onclick="tog(this,()=>hide('siDetail'))">No</button>
-      </div>
-    </div>
-    <div id="siDetail" class="cond">
-      <div class="field">
-        <label>Side</label>
-        <div class="chip-group">
-          <button class="chip" onclick="oneChip(this,'siSide')">Left</button>
-          <button class="chip" onclick="oneChip(this,'siSide')">Right</button>
-          <button class="chip" onclick="oneChip(this,'siSide')">Both</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Severity</label>
-        <div class="sev-group">
-          <div class="sev-opt" onclick="setSev(this,'mild')"><div class="sev-dot"></div><div><div class="sev-label">Mild</div><div class="sev-hint">Mild flinch</div></div></div>
-          <div class="sev-opt" onclick="setSev(this,'moderate')"><div class="sev-dot"></div><div><div class="sev-label">Moderate</div><div class="sev-hint">Clear reaction</div></div></div>
-          <div class="sev-opt severe" onclick="setSev(this,'severe')"><div class="sev-dot"></div><div><div class="sev-label">Severe</div><div class="sev-hint">Jumps away / kicks</div></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODALITIES -->
-<div class="section" id="s-modalities">
-  <div class="card">
-    <div class="card-title">Modalities</div>
-    <div class="field">
-      <label>Bodywork</label>
-      <div class="chip-group">
-        <button class="chip" onclick="oneChip(this,'bodywork')">None</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">PEMF</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF + Other</button>
-      </div>
-    </div>
-    <div class="div"></div>
-    <div class="field">
-      <label>Other modalities used today</label>
-      <div class="chip-group">
-        <button class="chip" data-f="pt"            onclick="multiChip(this,'mod')">PT exercises</button>
-        <button class="chip" data-f="poles"         onclick="multiChip(this,'mod')">Poles</button>
-        <button class="chip" data-f="straddlepoles" onclick="multiChip(this,'mod')">Straddle Poles</button>
-        <button class="chip" data-f="treadmill"     onclick="multiChip(this,'mod')">Treadmill</button>
-        <button class="chip" data-f="theraplate"    onclick="multiChip(this,'mod')">Theraplate</button>
-        <button class="chip" data-f="balancepad"    onclick="multiChip(this,'mod')">Balance Pad</button>
-        <button class="chip" data-f="bemer"         onclick="multiChip(this,'mod')">Bemer</button>
-        <button class="chip" data-f="laser"         onclick="multiChip(this,'mod')">Laser (C4)</button>
-        <button class="chip" data-f="shockwave"     onclick="multiChip(this,'mod')">Shockwave</button>
-        <button class="chip" data-f="exgas"         onclick="multiChip(this,'mod')">ExGas</button>
-        <button class="chip" data-f="farrier"       onclick="multiChip(this,'mod')">Farrier</button>
-      </div>
-    </div>
-    <div class="field" id="swAreaField" style="display:none">
-      <label>Shockwave — area(s) treated</label>
-      <div class="chip-group" id="swAreaChips">
-        <button class="chip" data-swa="R Quad/Hip"      onclick="multiChip(this,'swa')">R Quad/Hip</button>
-        <button class="chip" data-swa="L Quad/Hip"      onclick="multiChip(this,'swa')">L Quad/Hip</button>
-        <button class="chip" data-swa="SI (bilateral)"  onclick="multiChip(this,'swa')">SI (bilateral)</button>
-        <button class="chip" data-swa="Neck (bilateral)" onclick="multiChip(this,'swa')">Neck (bilateral)</button>
-        <button class="chip" data-swa="Hock L"          onclick="multiChip(this,'swa')">Hock L</button>
-        <button class="chip" data-swa="Hock R"          onclick="multiChip(this,'swa')">Hock R</button>
-        <button class="chip" data-swa="Stifle L"        onclick="multiChip(this,'swa')">Stifle L</button>
-        <button class="chip" data-swa="Stifle R"        onclick="multiChip(this,'swa')">Stifle R</button>
-        <button class="chip" data-swa="Other"           onclick="multiChip(this,'swa')">Other</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MEDIA -->
-<div class="section" id="s-media">
-  <div class="card">
-    <div class="card-title">Photos &amp; Videos</div>
-    <div class="field">
-      <div class="upload-area">
-        <input type="file" id="mediaInput" accept="image/*,video/*" multiple onchange="handleMedia(event)">
-        <div class="upload-icon">📎</div>
-        <div class="upload-label">Tap to add photos or videos</div>
-        <div class="upload-hint">Camera or photo library · any format</div>
-      </div>
-      <div class="media-grid" id="mediaGrid"></div>
-    </div>
-    <div class="field">
-      <label>Caption / context</label>
-      <input type="text" id="mediaCaption" placeholder="e.g. Trot both directions on lunge">
-    </div>
-  </div>
-  <div id="driveNote" class="info-note" style="display:none">
-    <strong>Google Drive upload</strong>
-    Media will be uploaded to your Maestro Videos folder when you save. Files are named with the TX Day automatically.
-  </div>
-  <div id="driveSetupNote" class="info-note">
-    <strong>Connect Google Drive to enable auto-upload</strong>
-    Go to the Settings tab to add your credentials. Until then, media is saved locally only.
-  </div>
-</div>
-
-<!-- NOTES -->
-<div class="section" id="s-notes">
-  <div class="card">
-    <div class="card-title">Notes</div>
-    <div class="field">
-      <label>Behavior notes</label>
-      <textarea id="behaviorNotes" placeholder="Attitude, energy, specific behaviors, anything that stood out…" rows="4"></textarea>
-    </div>
-    <div class="field">
-      <label>PT / bodywork notes</label>
-      <textarea id="ptNotes" placeholder="Findings, reactions, practitioner observations…" rows="3"></textarea>
-    </div>
-  </div>
-</div>
-
-<!-- HISTORY -->
-<div class="section" id="s-history">
-  <div id="histList"></div>
-</div>
-
-<!-- SETTINGS -->
-<div class="section" id="s-settings">
-  <div class="setup-card">
-    <h3>Google Sheets — Spreadsheet ID</h3>
-    <p>Paste your Google Sheets spreadsheet ID below. You'll find it in the sheet URL:<br>
-    <code style="font-size:11px;word-break:break-all">docs.google.com/spreadsheets/d/<strong>[ID IS HERE]</strong>/edit</code></p>
-    <div class="setup-input">
-      <label>Spreadsheet ID</label>
-      <input type="text" id="sheetId" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
-    </div>
-    <div class="setup-input">
-      <label>Apps Script Web App URL</label>
-      <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
-    </div>
-    <div class="setup-input">
-      <label>Appointments Web App URL <span style="font-weight:400;opacity:0.7">(optional — enables calendar sync)</span></label>
-      <input type="text" id="apptScriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
-    </div>
-  </div>
-  <div class="setup-card" style="background:var(--green-bg);border-color:var(--green-border);">
-    <h3 style="color:var(--green)">Google Drive — Folder ID</h3>
-    <p style="color:var(--green)">Paste your Maestro Videos folder ID. Found in the folder URL:<br>
-    <code style="font-size:11px;word-break:break-all">drive.google.com/drive/folders/<strong>[ID IS HERE]</strong></code></p>
-    <div class="setup-input">
-      <label style="color:var(--green)">Drive Folder ID</label>
-      <input type="text" id="driveFolderId" placeholder="1aBcDeFgHiJkLmNoPqRsTuVwXyZ">
-    </div>
-  </div>
-  <button class="save-btn" style="margin-bottom:10px" onclick="saveSettings()">Save Settings</button>
-  <div id="settingsStatus" style="font-size:13px;color:var(--text-muted);text-align:center;padding:4px"></div>
-
-  <div class="card" style="margin-top:14px">
-    <div class="card-title">Export local entries to sheet</div>
-    <p style="font-size:13px;color:var(--text-mid);line-height:1.55;margin-bottom:10px">If you've been logging without a connection, tap below to push all saved local entries to your Google Sheet at once.</p>
-    <button class="save-btn" onclick="exportAllToSheets()">Push all local entries to Sheets</button>
-  </div>
-</div>
-
-
-<!-- VET VISIT -->
-<div class="section" id="s-vet">
-  <div class="card">
-    <div class="card-title">Visit Details</div>
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="vetDate">
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Provider</label>
-        <input type="text" id="vetProvider" placeholder="Dr. Smith">
-      </div>
-      <div class="field">
-        <label>Clinic / Practice</label>
-        <input type="text" id="vetClinic" placeholder="EVCT">
-      </div>
-    </div>
-    <div class="field">
-      <label>Visit type</label>
-      <div class="chip-group">
-        <button class="chip" onclick="togVetVisitType(this)">Lameness eval</button>
-        <button class="chip" onclick="togVetVisitType(this)">Rehab check-in</button>
-        <button class="chip" onclick="togVetVisitType(this)">Injection / treatment</button>
-        <button class="chip" onclick="togVetVisitType(this)">Routine / wellness</button>
-        <button class="chip" onclick="togVetVisitType(this)">Emergency</button>
-        <button class="chip" onclick="togVetVisitType(this)">Other</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Procedures Performed</div>
-    <div class="field">
-      <div class="procedures-grid">
-        <div class="proc-item" onclick="togProc(this,'injection')"><div class="proc-check"></div><div class="proc-label">Injection</div></div>
-        <div class="proc-item" onclick="togProc(this,'shockwave')"><div class="proc-check"></div><div class="proc-label">Shockwave</div></div>
-        <div class="proc-item" onclick="togProc(this,'scope')"><div class="proc-check"></div><div class="proc-label">Scope</div></div>
-        <div class="proc-item" onclick="togProc(this,'bloodwork')"><div class="proc-check"></div><div class="proc-label">Bloodwork</div></div>
-        <div class="proc-item" onclick="togProc(this,'imaging')"><div class="proc-check"></div><div class="proc-label">Imaging</div></div>
-        <div class="proc-item" onclick="togProc(this,'vaccination')"><div class="proc-check"></div><div class="proc-label">Vaccination</div></div>
-        <div class="proc-item" onclick="togProc(this,'dental')"><div class="proc-check"></div><div class="proc-label">Dental</div></div>
-        <div class="proc-item" onclick="togProc(this,'nerve_block')"><div class="proc-check"></div><div class="proc-label">Nerve block</div></div>
-        <div class="proc-item" onclick="togProc(this,'flexion')"><div class="proc-check"></div><div class="proc-label">Flexion tests</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" id="vetLamenessCard">
-    <div class="card-title">Lameness</div>
-    <div class="field">
-      <div class="score-hint" style="margin-bottom:8px">AAEP scale: 0 = sound · 1 = barely perceptible · 2 = mild · 3 = consistently lame · 4 = marked · 5 = non-weight bearing</div>
-      <label>RF grade</label>
-      <div class="score-group" style="margin-bottom:8px">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RF')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RF')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RF')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RF')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RF')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RF')">5</button>
-      </div>
-      <label>LF grade</label>
-      <div class="score-group" style="margin-bottom:8px">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LF')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LF')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LF')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LF')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LF')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LF')">5</button>
-      </div>
-      <label>RH grade</label>
-      <div class="score-group" style="margin-bottom:8px">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RH')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RH')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RH')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RH')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RH')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RH')">5</button>
-      </div>
-      <label>LH grade</label>
-      <div class="score-group">
-        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LH')">0</button>
-        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LH')">1</button>
-        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LH')">2</button>
-        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LH')">3</button>
-        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LH')">4</button>
-        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LH')">5</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Joint / region</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">SI</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pelvis / gluteal</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Stifle</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hock</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Fetlock</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pastern</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hoof / coffin</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Tendon</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Cervical spine</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Back</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Other region (write in)</label>
-      <input type="text" id="vetLameRegionOther" placeholder="e.g. 3rd trochanter, proximal metatarsus…">
-    </div>
-    <div class="field">
-      <label>Response to nerve block</label>
-      <input type="text" id="vetNerveBlock" placeholder="e.g. 70% improvement distal limb block">
-    </div>
-  </div>
-
-  <div class="card" id="vetInjectionCard" style="display:none">
-    <div class="card-title">Injection Details</div>
-    <div class="field">
-      <label>Injection site(s)</label>
-      <input type="text" id="vetInjSite" placeholder="e.g. Right SI, right stifle, right quadratus femoris">
-    </div>
-    <div class="field">
-      <label>Product</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">PRP</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">ProStride</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Triamcinolone</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Methylprednisolone</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Hyaluronic acid</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Other product (write in)</label>
-      <input type="text" id="vetInjProductOther" placeholder="">
-    </div>
-    <div class="field">
-      <label>Post-injection protocol</label>
-      <textarea id="vetInjProtocol" rows="2" placeholder="e.g. Stall rest 3 days, light work day 4, return to work day 5"></textarea>
-    </div>
-  </div>
-
-  <div class="card" id="vetImagingCard" style="display:none">
-    <div class="card-title">Imaging</div>
-    <div class="field">
-      <label>Imaging type</label>
-      <div class="chip-group">
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Radiograph</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Ultrasound</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Nuclear scintigraphy</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">MRI</button>
-        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">CT</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Region imaged</label>
-      <input type="text" id="vetImagingRegion" placeholder="e.g. Pelvis, cervical spine, RH stifle">
-    </div>
-    <div class="field">
-      <label>Imaging file link (Drive)</label>
-      <input type="text" id="vetImagingLink" placeholder="https://drive.google.com/…">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Clinical Notes</div>
-    <div class="field">
-      <label>History / presentation</label>
-      <textarea id="vetHistory" rows="3" placeholder="Reason for visit, owner observations…"></textarea>
-    </div>
-    <div class="field">
-      <label>Findings</label>
-      <textarea id="vetFindings" rows="3" placeholder="Exam findings, diagnostic results…"></textarea>
-    </div>
-    <div class="field">
-      <label>Medications administered</label>
-      <input type="text" id="vetMeds" placeholder="e.g. Banamine 10mL IV, Gastrogard 1 tube PO">
-    </div>
-    <div class="field">
-      <label>Recommendations</label>
-      <textarea id="vetRecs" rows="2" placeholder=""></textarea>
-    </div>
-    <div class="field">
-      <label>Plan</label>
-      <textarea id="vetPlan" rows="2" placeholder=""></textarea>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Follow-Up</div>
-    <div class="field">
-      <label>Follow-up date</label>
-      <input type="date" id="vetFollowupDate">
-    </div>
-    <div class="field">
-      <label>Follow-up notes</label>
-      <input type="text" id="vetFollowupNotes" placeholder="e.g. Recheck in 4 weeks, schedule scope…">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Files</div>
-    <div class="field">
-      <label>Visit summary PDF (upload to Drive)</label>
-      <div class="upload-area" style="margin-bottom:10px">
-        <input type="file" id="vetPdfInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'pdf')">
-        <div class="upload-icon">📄</div>
-        <div class="upload-label">Tap to upload visit summary</div>
-        <div class="upload-hint">PDF or image</div>
-      </div>
-      <input type="text" id="vetPdfLink" placeholder="Or paste Drive link directly">
-    </div>
-    <div class="field" id="vetVaccCard">
-      <label>Vaccination certificate (upload or link)</label>
-      <div class="upload-area" style="margin-bottom:10px">
-        <input type="file" id="vetVaccInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'vacc')">
-        <div class="upload-icon">💉</div>
-        <div class="upload-label">Tap to upload certificate</div>
-        <div class="upload-hint">PDF or image</div>
-      </div>
-      <input type="text" id="vetVaccLink" placeholder="Or paste Drive link directly">
-    </div>
-  </div>
-
-  <div style="padding: 0 0 12px">
-    <button class="save-btn-secondary" onclick="saveVetEntry()">Save Vet Visit</button>
-  </div>
-</div>
-
-<!-- BODYWORK -->
-<div class="section" id="s-bodywork">
-  <div class="card">
-    <div class="card-title">Session Details</div>
-    <div class="field">
-      <label>Date</label>
-      <input type="date" id="bwDate">
-    </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Provider</label>
-        <input type="text" id="bwProvider" placeholder="Aimee M.">
-      </div>
-      <div class="field">
-        <label>Practice</label>
-        <input type="text" id="bwPractice" placeholder="Barrio Performance Therapy">
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Modalities Used</div>
-    <div class="field">
-      <div class="chip-group">
-        <button class="chip" onclick="togBwMod(this)">Massage</button>
-        <button class="chip" onclick="togBwMod(this)">PEMF</button>
-        <button class="chip" onclick="togBwMod(this)">Cold Laser</button>
-        <button class="chip" onclick="togBwMod(this)">KT Tape</button>
-        <button class="chip" onclick="togBwMod(this)">Stretching</button>
-        <button class="chip" onclick="togBwMod(this)">Chiro</button>
-        <button class="chip" onclick="togBwMod(this)">Other</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="ktAreaCard" style="display:none;padding:0 0 4px">
-    <div class="field" style="background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:8px">
-      <label>KT Tape — area(s) applied</label>
-      <input type="text" id="ktAreaInput" placeholder="e.g. Left shoulder, SI right">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Session Notes</div>
-    <div class="field">
-      <label>Areas of concern / symptoms</label>
-      <input type="text" id="bwConcerns" placeholder="e.g. Continuing care, right gluteal reactivity">
-    </div>
-    <div class="field">
-      <label>PEMF reactivity / massage findings</label>
-      <textarea id="bwFindings" rows="3" placeholder="e.g. Right side slightly more fasciculations than left…"></textarea>
-    </div>
-    <div class="field">
-      <label>Observations / assessment / response</label>
-      <textarea id="bwObservations" rows="3" placeholder="How did he respond to the session?"></textarea>
-    </div>
-    <div class="field">
-      <label>Recommendations</label>
-      <input type="text" id="bwRecs" placeholder="e.g. Massage + PEMF every other week">
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Session PDF</div>
-    <div class="field">
-      <div class="upload-area" style="margin-bottom:10px">
-        <input type="file" id="bwPdfInput" accept="application/pdf,image/*" onchange="handleBwFile(event)">
-        <div class="upload-icon">📄</div>
-        <div class="upload-label">Tap to upload session notes PDF</div>
-        <div class="upload-hint">Barrio form or similar</div>
-      </div>
-      <input type="text" id="bwPdfLink" placeholder="Or paste Drive link directly">
-    </div>
-    <div id="bwFilePreview" style="font-size:13px;color:var(--green);margin-top:6px;display:none"></div>
-  </div>
-
-  <div style="padding: 0 0 12px">
-    <button class="save-btn-secondary" style="color:var(--green);background:var(--green-bg);border-color:var(--green-border)" onclick="saveBwEntry()">Save Bodywork Session</button>
-  </div>
-</div>
-
-</div><!-- /content -->
-
-<div class="save-bar">
-  <button class="save-btn" id="saveBtn" onclick="saveEntry()">Save Entry</button>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const TX_START = 246;
-const ORIGIN_DATE = new Date('2025-11-20T12:00:00');
-const WILL  = ['','Barely moving','Very reluctant','Reluctant but workable','OK — some encouragement needed','Willing and forward'];
-const CANT  = ['','Refused / very unwilling','Very reluctant — multiple asks','Reluctant but achieved','Willing with minor resistance','Willing / offered freely'];
-
-let S = {
-  date:'', rating:'', dayType:'', totalDur:'',
-  rode:'', saddleType:'', walkMin:'', trotMin:'', canterMin:'',
-  gait:'', will:'', crop:'',
-  cranky:'', trigger:[],
-  stops:'', spontaneousHalt:'', stickyResistant:'',
-  cL:'', cR:'', equibands:'', lungeBeforeRide:'',
-  siReactive:'', siSide:'', siSeverity:'',
-  bodywork:'', modalities:[], swAreas:[],
-  behaviorNotes:'', ptNotes:'',
-  mediaCaption:'', mediaFiles:[]
-};
-
-let CFG = { sheetId:'', scriptUrl:'', driveFolderId:'' };
-
-function loadCfg() {
-  try { CFG = JSON.parse(localStorage.getItem('m_cfg') || '{}'); } catch {}
-  CFG.sheetId = CFG.sheetId || '';
-  CFG.scriptUrl = CFG.scriptUrl || '';
-  CFG.apptScriptUrl = CFG.apptScriptUrl || '';
-  CFG.driveFolderId = CFG.driveFolderId || '';
-  if (CFG.sheetId) { document.getElementById('sheetId').value = CFG.sheetId; }
-  if (CFG.scriptUrl) { document.getElementById('scriptUrl').value = CFG.scriptUrl; }
-  const apptEl = document.getElementById('apptScriptUrl');
-  if (apptEl && CFG.apptScriptUrl) { apptEl.value = CFG.apptScriptUrl; }
-  if (CFG.driveFolderId) { document.getElementById('driveFolderId').value = CFG.driveFolderId; }
-  updateSyncBadge();
-  updateDriveNote();
+// Baked-in defaults so anyone opening the shared link can VIEW vet data and ADD
+// appointments without touching Settings. Your own Settings still override these.
+// Reads (vet history/alerts) are open; the timeline never writes clinical data —
+// its only write is appointments, which go to the appointments script below.
+const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec';
+const DEFAULT_APPT_URL='https://script.google.com/macros/s/AKfycbyuuFn4u6hqn2dzznnZjprTI0QbT-487_riS3S83uFgjN4X3grlHO94_Jqmc5v_1DqOow/exec';
+function getScriptUrl(){
+  try{ return (JSON.parse(localStorage.getItem('m_cfg')||'{}')).scriptUrl||DEFAULT_SCRIPT_URL; }catch{ return DEFAULT_SCRIPT_URL; }
 }
 
-function saveSettings() {
-  CFG.sheetId = document.getElementById('sheetId').value.trim();
-  CFG.scriptUrl = document.getElementById('scriptUrl').value.trim();
-  const apptEl = document.getElementById('apptScriptUrl');
-  CFG.apptScriptUrl = apptEl ? apptEl.value.trim() : (CFG.apptScriptUrl || '');
-  CFG.driveFolderId = document.getElementById('driveFolderId').value.trim();
-  localStorage.setItem('m_cfg', JSON.stringify(CFG));
-  updateSyncBadge();
-  updateDriveNote();
-  document.getElementById('settingsStatus').textContent = 'Settings saved.';
-  toast('Settings saved');
+function typeColor(procedures, visitType){
+  const p = (procedures||'').toLowerCase();
+  const v = (visitType||'').toLowerCase();
+  if(p.includes('injection') || p.includes('prp')) return 'inj';
+  if(p.includes('shockwave')) return 'sw';
+  if(p.includes('imaging') || p.includes('radiograph') || p.includes('ultrasound') || p.includes('scope')) return 'vet';
+  if(p.includes('laser')) return 'laser';
+  if(v.includes('lameness') || v.includes('rehab')) return 'vet';
+  return 'vet';
 }
 
-function updateSyncBadge() {
-  const el = document.getElementById('syncStatus');
-  if (CFG.scriptUrl) {
-    el.className = 'sync-status connected';
-    el.textContent = 'Sheets connected';
-  } else {
-    el.className = 'sync-status disconnected';
-    el.textContent = 'Not connected';
-  }
+function buildVisitCard(r){
+  const DATE=0,PROV=1,CLINIC=2,VTYPE=3,PROCS=4,LGRADE=5,LLIMB=6,LREGION=7,
+        INJSITE=14,INJPROD=15,INJPROT=16,IMGTYPE=17,IMGREGION=18,IMGLINK=19,
+        FINDINGS=23,RECS=24,PLAN=25,FDATE=26,FNOTES=27,PDFLINK=28;
+
+  const date  = r[DATE]||'';
+  const prov  = r[PROV]||'';
+  const clinic= r[CLINIC]||'';
+  const vtype = r[VTYPE]||'';
+  const procs = r[PROCS]||'';
+  const grade = r[LGRADE]||'';
+  const limb  = r[LLIMB]||'';
+  const region= r[LREGION]||'';
+  const injsite= r[INJSITE]||'';
+  const injprod= r[INJPROD]||'';
+  const findings= r[FINDINGS]||'';
+  const recs  = r[RECS]||'';
+  const plan  = r[PLAN]||'';
+  const fdate = r[FDATE]||'';
+  const pdf   = r[PDFLINK]||'';
+
+  const cls = typeColor(procs, vtype);
+
+  let details = '';
+  if(vtype) details += `<div class="tl-note"><strong>Type:</strong> ${vtype}</div>`;
+  if(procs) details += `<div class="tl-note"><strong>Procedures:</strong> ${procs}</div>`;
+  if(injsite || injprod) details += `<div class="tl-note"><strong>Injections:</strong> ${[injsite,injprod].filter(Boolean).join(' · ')}</div>`;
+  if(grade || limb || region) details += `<div class="tl-note"><strong>Lameness:</strong> ${[grade?'Grade '+grade:'',limb,region].filter(Boolean).join(' · ')}</div>`;
+  if(findings) details += `<div class="tl-note"><strong>Findings:</strong> ${findings}</div>`;
+  if(recs) details += `<div class="tl-note"><strong>Recs:</strong> ${recs}</div>`;
+  if(plan) details += `<div class="tl-note"><strong>Plan:</strong> ${plan}</div>`;
+  if(fdate) details += `<div class="tl-note" style="color:var(--vet)"><strong>Follow-up:</strong> ${fdate}</div>`;
+  if(pdf) details += `<div class="tl-note"><a href="${pdf}" target="_blank" style="color:var(--vet);font-size:11px">View PDF</a></div>`;
+
+  const title = [prov, clinic].filter(Boolean).join(' · ') || 'Vet visit';
+
+  return `<div class="tl-item">
+    <div class="tl-dot ${cls}"></div>
+    <div class="tl-card ${cls}">
+      <div class="tl-date">${date}</div>
+      <div class="tl-title">${title}</div>
+      ${details}
+    </div>
+  </div>`;
 }
 
-function updateDriveNote() {
-  document.getElementById('driveNote').style.display = CFG.driveFolderId ? 'block' : 'none';
-  document.getElementById('driveSetupNote').style.display = CFG.driveFolderId ? 'none' : 'block';
-}
+async function loadVetHistory(){
+  const url = getScriptUrl();
+  const status = document.getElementById('vetHistoryStatus');
+  const timeline = document.getElementById('vetHistoryTimeline');
+  const btn = document.getElementById('tlRefreshBtn');
 
-function txDay(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  return TX_START + Math.round((d - ORIGIN_DATE) / 86400000);
-}
-
-function initDate() {
-  const now = new Date();
-  const s = now.toISOString().slice(0,10);
-  document.getElementById('entryDate').value = s;
-  S.date = s;
-  updateBadge(s);
-}
-
-function onDateChange(v) { S.date = v; updateBadge(v); }
-
-function updateBadge(v) {
-  const tx = txDay(v);
-  const pr = tx - TX_START + 1;
-  document.getElementById('dayBadge').textContent = 'TX ' + tx + ' · D' + pr;
-}
-
-function showSection(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('s-' + id).classList.add('active');
-  if (btn) btn.classList.add('active');
-  else {
-    const t = document.querySelector('[data-s="'+id+'"]');
-    if (t) t.classList.add('active');
-  }
-  if (id === 'history') renderHistory();
-  // Hide main Save Entry bar on tabs that have their own save button
-  const hideSaveBar = ['vet','bodywork','history','settings'].includes(id);
-  document.querySelector('.save-bar').style.display = hideSaveBar ? 'none' : 'block';
-}
-
-function show(id) { document.getElementById(id).classList.add('show'); }
-function hide(id) { document.getElementById(id).classList.remove('show'); }
-
-function tog(btn, cb) {
-  const f = btn.dataset.f, v = btn.dataset.v;
-  btn.parentElement.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('sel-yes','sel-no'));
-  btn.classList.add(v === 'Y' ? 'sel-yes' : 'sel-no');
-  S[f] = v;
-  if (cb) cb();
-}
-
-function setScore(btn, key, hintId, hints) {
-  const v = btn.dataset.v;
-  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  S[key] = v;
-  document.getElementById(hintId).textContent = hints[parseInt(v)] || '';
-}
-
-function togChip(btn) {
-  btn.classList.toggle('sel');
-  const f = btn.dataset.f;
-  if(f) S[f] = btn.classList.contains('sel') ? 'Y' : '';
-}
-
-function oneChip(btn, key) {
-  btn.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
-  btn.classList.add('sel');
-  S[key] = btn.textContent.trim();
-}
-
-function multiChip(btn, group) {
-  btn.classList.toggle('sel');
-  if (group === 'trigger') {
-    S.trigger = [...document.querySelectorAll('#triggerChips .chip.sel')].map(c => c.textContent.trim());
-  } else if (group === 'mod') {
-    S.modalities = [...document.querySelectorAll('[data-f].chip.sel')].map(c => c.dataset.f);
-    const swOn = S.modalities.includes('shockwave');
-    const swField = document.getElementById('swAreaField');
-    if (swField) swField.style.display = swOn ? 'block' : 'none';
-    if (!swOn) {
-      document.querySelectorAll('#swAreaChips .chip.sel').forEach(c => c.classList.remove('sel'));
-      S.swAreas = [];
-    }
-  } else if (group === 'swa') {
-    S.swAreas = [...document.querySelectorAll('#swAreaChips .chip.sel')].map(c => c.dataset.swa);
-  }
-}
-
-function setRating(btn) {
-  document.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  S.rating = btn.dataset.r;
-}
-
-function setSev(el, v) {
-  document.querySelectorAll('.sev-opt').forEach(o => o.classList.remove('sel'));
-  el.classList.add('sel');
-  S.siSeverity = v;
-}
-
-function collectText() {
-  S.dayType       = document.getElementById('dayType').value;
-  S.totalDur      = document.getElementById('totalDur').value;
-  S.saddleType    = document.getElementById('saddleType').value;
-  S.walkMin       = document.getElementById('walkMin').value;
-  S.trotMin       = document.getElementById('trotMin').value;
-  S.canterMin     = document.getElementById('canterMin').value;
-  S.behaviorNotes = document.getElementById('behaviorNotes').value;
-  S.ptNotes       = document.getElementById('ptNotes').value;
-  S.mediaCaption  = document.getElementById('mediaCaption').value;
-}
-
-function handleMedia(e) {
-  Array.from(e.target.files).forEach(f => {
-    const r = new FileReader();
-    r.onload = ev => {
-      S.mediaFiles.push({ name: f.name, type: f.type, data: ev.target.result, driveUrl: '' });
-      renderMediaGrid();
-    };
-    r.readAsDataURL(f);
-  });
-  e.target.value = '';
-}
-
-function renderMediaGrid() {
-  const g = document.getElementById('mediaGrid');
-  g.innerHTML = S.mediaFiles.map((f,i) => {
-    const isVid = f.type.startsWith('video');
-    const status = f.driveUrl
-      ? '<span class="m-badge">&#10003; Drive</span>'
-      : (f.uploading ? '<span class="m-status uploading">uploading…</span>' : '');
-    return `<div class="m-thumb">
-      ${isVid ? `<video src="${f.data}" muted playsinline></video><span class="m-badge">video</span>` : `<img src="${f.data}" alt="">`}
-      ${status}
-      <button class="m-remove" onclick="removeMedia(${i})">×</button>
-    </div>`;
-  }).join('');
-}
-
-function removeMedia(i) { S.mediaFiles.splice(i,1); renderMediaGrid(); }
-
-async function uploadMediaToDrive(mediaFile, txD, dateStr) {
-  if (!CFG.scriptUrl || !CFG.driveFolderId) return null;
-  const ext = mediaFile.name.split('.').pop() || (mediaFile.type.startsWith('video') ? 'mp4' : 'jpg');
-  const fname = `TX${txD}_${dateStr.replace(/-/g,'')}_${mediaFile.name}`;
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({
-      action: 'uploadFile',
-      folderId: CFG.driveFolderId,
-      fileName: fname,
-      mimeType: mediaFile.type,
-      data: mediaFile.data.split(',')[1]
-    }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.url || null;
-  } catch { return null; }
-}
-
-async function pushToSheets(entry) {
-  if (!CFG.scriptUrl) return false;
-  const tx = txDay(entry.date);
-  const pr = tx - TX_START + 1;
-  const driveLinks = entry.mediaFiles.filter(f => f.driveUrl).map(f => f.driveUrl).join(', ');
-  const row = [
-    tx, pr, entry.date,
-    entry.dayType || '',
-    entry.totalDur || '',
-    entry.rode || '',
-    entry.saddleType || '',
-    entry.walkMin || '',
-    entry.trotMin || '',
-    entry.canterMin || '',
-    entry.gait || '',
-    entry.will || '',
-    entry.crop || '',
-    entry.cranky || '',
-    entry.trigger?.join(', ') || '',
-    entry.stops || '',
-    entry.cL || '',
-    entry.cR || '',
-    entry.siReactive || '',
-    entry.siSide || '',
-    entry.siSeverity || '',
-    entry.equibands || '',
-    entry.modalities?.includes('pt') ? 'Y' : '',
-    entry.modalities?.includes('poles') ? 'Y' : '',
-    entry.modalities?.includes('bemer') ? 'Y' : '',
-    entry.bodywork || '',
-    entry.modalities?.includes('laser') ? 'Y' : '',
-    entry.modalities?.includes('shockwave') ? 'Y' : '',
-    entry.modalities?.includes('farrier') ? 'Y' : '',
-    entry.modalities?.includes('exgas') ? 'Y' : '',
-    entry.behaviorNotes || '',
-    [
-      entry.ptNotes || '',
-      entry.modalities?.includes('theraplate') ? 'Theraplate' : '',
-      entry.modalities?.includes('balancepad') ? 'Balance pad' : '',
-      driveLinks ? 'Media: ' + driveLinks : ''
-    ].filter(Boolean).join(' | '),
-    entry.modalities?.includes('straddlepoles') ? 'Y' : '',
-    entry.modalities?.includes('treadmill')     ? 'Y' : '',
-    entry.spontaneousHalt || '',
-    entry.stickyResistant || '',
-    (entry.modalities?.includes('shockwave') && entry.swAreas?.length) ? entry.swAreas.join(', ') : ''
-  ];
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Maestro Post-Rehab Tracking', row, rating: entry.rating || '' }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.success === true;
-  } catch(err) { console.error('Sheets error:', err); return false; }
-}
-
-async function saveEntry() {
-  collectText();
-  if (!S.date) { toast('Please set a date', true); return; }
-  const btn = document.getElementById('saveBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-
-  const tx = txDay(S.date);
-  const entry = JSON.parse(JSON.stringify(S));
-  entry.txDay = tx;
-  entry.savedAt = Date.now();
-
-  // Upload media to Drive first
-  if (CFG.scriptUrl && CFG.driveFolderId && S.mediaFiles.length) {
-    setSyncBadgeText('Uploading media…');
-    for (let i = 0; i < S.mediaFiles.length; i++) {
-      if (S.mediaFiles[i].driveUrl) continue;
-      S.mediaFiles[i].uploading = true;
-      renderMediaGrid();
-      const url = await uploadMediaToDrive(S.mediaFiles[i], tx, S.date);
-      S.mediaFiles[i].uploading = false;
-      S.mediaFiles[i].driveUrl = url || '';
-      entry.mediaFiles[i].driveUrl = url || '';
-      renderMediaGrid();
-    }
-  }
-
-  // Save locally
-  const all = getEntries();
-  const idx = all.findIndex(e => e.date === S.date);
-  if (idx >= 0) all[idx] = entry; else all.unshift(entry);
-  localStorage.setItem('m_entries', JSON.stringify(all));
-
-  // Only push to Sheets if meaningful data was entered
-  // (prevent blank saves from overwriting real data for the same date)
-  const hasMeaningfulData = entry.rode || entry.will || entry.stops || entry.dayType ||
-    entry.cranky || entry.siReactive || entry.behaviorNotes || entry.rating ||
-    entry.cL || entry.cR || entry.modalities?.length;
-
-  if (CFG.scriptUrl && hasMeaningfulData) {
-    setSyncBadgeText('Syncing…');
-    const ok = await pushToSheets(entry);
-    if (ok) {
-      setSyncBadgeText('Sheets connected');
-      toast('Saved + synced to Sheets ✓');
-    } else {
-      toast('Saved locally — Sheets sync failed', true);
-    }
-  } else if (!hasMeaningfulData) {
-    toast('Nothing to sync — fill in some fields first');
-    updateSyncBadge();
-  } else {
-    toast('Saved locally (connect Sheets in Settings)');
-  }
-
-  updateSyncBadge();
-  btn.disabled = false;
-  btn.textContent = 'Save Entry';
-}
-
-function setSyncBadgeText(t) {
-  const el = document.getElementById('syncStatus');
-  el.className = 'sync-status syncing';
-  el.textContent = t;
-}
-
-async function exportAllToSheets() {
-  if (!CFG.scriptUrl) { toast('Add your Script URL in Settings first', true); return; }
-  const all = getEntries();
-  if (!all.length) { toast('No local entries found'); return; }
-  let ok = 0;
-  for (const e of all) {
-    const res = await pushToSheets(e);
-    if (res) ok++;
-  }
-  toast(`Pushed ${ok}/${all.length} entries to Sheets`);
-}
-
-function getEntries() {
-  try { return JSON.parse(localStorage.getItem('m_entries') || '[]'); } catch { return []; }
-}
-
-function renderHistory() {
-  const all = getEntries();
-  const el = document.getElementById('histList');
-  if (!all.length) {
-    el.innerHTML = `<div class="empty-hist">🐴<br><br>No entries yet.<br>Save your first log above.</div>`;
-    return;
-  }
-  el.innerHTML = all.map((e,i) => {
-    const dotCls = e.rating==='good'?'dot-good':e.rating==='ok'?'dot-ok':e.rating==='bad'?'dot-bad':'dot-none';
-    const d = new Date(e.date+'T12:00:00');
-    const dateStr = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-    const meta = [
-      e.rode==='Y' ? 'Rode' : null,
-      e.will ? `W: ${e.will}/5` : null,
-      e.stops ? `Stops: ${e.stops}` : null,
-      e.siReactive==='Y' ? 'SI reactive' : null,
-      e.cL||e.cR ? `Canter L${e.cL||'—'}/R${e.cR||'—'}` : null
-    ].filter(Boolean).map(x=>`<span>${x}</span>`).join('');
-    const noteText = [e.dayType, e.behaviorNotes, e.ptNotes].filter(Boolean).join(' · ');
-    const mediaHTML = (e.mediaFiles||[]).length
-      ? `<div class="hist-media">${e.mediaFiles.map(f=>f.type?.startsWith('video')
-          ?`<video class="hist-media" src="${f.data}" muted></video>`
-          :`<img src="${f.data}">`).join('')}</div>` : '';
-    return `<div class="hist-entry" onclick="this.classList.toggle('open')">
-      <div class="hist-header">
-        <div><div class="hist-date">${dateStr}</div><div class="hist-sub">TX ${e.txDay||''}</div></div>
-        <div class="dot ${dotCls}"></div>
-      </div>
-      <div class="hist-meta">${meta}</div>
-      ${noteText||mediaHTML?`<div class="hist-notes">${noteText?`<div>${noteText}</div>`:''}${mediaHTML}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-function toast(msg, isErr) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isErr?' err':'');
-  clearTimeout(t._to);
-  t._to = setTimeout(()=>t.classList.remove('show'), 2600);
-}
-
-
-// ── VET & BODYWORK STATE ─────────────────────────────────────────────
-const LAME = ['Sound — no lameness perceptible','Barely perceptible, not consistently observable','Perceptible at trot in-hand, consistent','Consistently lame, obvious at trot','Obvious at walk, unable to canter','Non-weight bearing'];
-
-let VET = {
-  date:'', provider:'', clinic:'', visitType:[], procedures:[],
-  lameGrade:'', lameGrades:{RF:'',LF:'',RH:'',LH:''}, lameLimb:[], lameRegion:[], lameRegionOther:'', nerveBlock:'',
-  injSite:'', injProduct:[], injProductOther:'', injProtocol:'',
-  imagingType:[], imagingRegion:'', imagingLink:'',
-  history:'', findings:'', meds:'', recs:'', plan:'',
-  followupDate:'', followupNotes:'',
-  pdfFile:null, pdfLink:'', vaccFile:null, vaccLink:''
-};
-
-let BW = {
-  date:'', provider:'', practice:'', modalities:[], ktArea:'',
-  concerns:'', findings:'', observations:'', recs:'',
-  pdfFile:null, pdfLink:''
-};
-
-// ── CHIP HELPERS (multi-select sets) ────────────────────────────────
-function toggleChipSet(btn, stateKey) {
-  btn.classList.toggle('sel');
-  // rebuild array from all .sel chips in same group parent
-  const selected = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());
-  // figure out which state object owns this key
-  if (stateKey in VET) VET[stateKey] = selected;
-  else if (stateKey in BW) BW[stateKey] = selected;
-}
-
-// ── PROC TOGGLE ──────────────────────────────────────────────────────
-function togProc(el, key) {
-  el.classList.toggle('sel');
-  el.querySelector('.proc-check').textContent = el.classList.contains('sel') ? '✓' : '';
-  const selected = [...document.querySelectorAll('.proc-item.sel')].map(e=>e.querySelector('.proc-label').textContent.trim());
-  VET.procedures = selected;
-  // Show/hide conditional cards
-  document.getElementById('vetLamenessCard').style.display = (selected.includes('Nerve block') || (Array.isArray(VET.visitType) ? VET.visitType.some(t => ['Lameness eval','Rehab check-in'].includes(t)) : ['Lameness eval','Rehab check-in'].includes(VET.visitType))) ? 'block' : 'none';
-  document.getElementById('vetInjectionCard').style.display = selected.includes('Injection') ? 'block' : 'none';
-  document.getElementById('vetImagingCard').style.display = selected.includes('Imaging') ? 'block' : 'none';
-}
-
-// ── VET VISIT TYPE SELECTOR ─────────────────────────────────────────
-function setLimbGrade(btn, limb) {
-  // Deselect siblings in same limb group
-  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('sel'));
-  btn.classList.add('sel');
-  VET.lameGrades[limb] = btn.dataset.v;
-  // Also update combined lameGrade summary and lameLimb
-  const grades = VET.lameGrades;
-  const active = Object.entries(grades).filter(([l,g]) => g && g !== '0').map(([l,g]) => l+'='+g);
-  VET.lameGrade = active.join(', ');
-  VET.lameLimb = Object.entries(grades).filter(([l,g]) => g && g !== '0').map(([l]) => l);
-}
-
-function togVetVisitType(btn) {
-  btn.classList.toggle('sel');
-  VET.visitType = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
-}
-
-// ── COLLECT VET TEXT FIELDS ──────────────────────────────────────────
-function collectVet() {
-  VET.date = document.getElementById('vetDate').value;
-  VET.provider = document.getElementById('vetProvider').value;
-  VET.clinic = document.getElementById('vetClinic').value;
-  VET.lameRegionOther = document.getElementById('vetLameRegionOther').value;
-  VET.nerveBlock = document.getElementById('vetNerveBlock').value;
-  VET.injSite = document.getElementById('vetInjSite').value;
-  VET.injProductOther = document.getElementById('vetInjProductOther').value;
-  VET.injProtocol = document.getElementById('vetInjProtocol').value;
-  VET.imagingRegion = document.getElementById('vetImagingRegion').value;
-  VET.imagingLink = document.getElementById('vetImagingLink').value;
-  VET.history = document.getElementById('vetHistory').value;
-  VET.findings = document.getElementById('vetFindings').value;
-  VET.meds = document.getElementById('vetMeds').value;
-  VET.recs = document.getElementById('vetRecs').value;
-  VET.plan = document.getElementById('vetPlan').value;
-  VET.followupDate = document.getElementById('vetFollowupDate').value;
-  VET.followupNotes = document.getElementById('vetFollowupNotes').value;
-  VET.pdfLink = document.getElementById('vetPdfLink').value;
-  VET.vaccLink = document.getElementById('vetVaccLink').value;
-}
-
-function togBwMod(btn) {
-  btn.classList.toggle('sel');
-  BW.modalities = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c => c.textContent.trim());
-  const ktCard = document.getElementById('ktAreaCard');
-  if(ktCard) ktCard.style.display = BW.modalities.includes('KT Tape') ? 'block' : 'none';
-}
-
-function collectBw() {
-  BW.date = document.getElementById('bwDate').value;
-  BW.provider = document.getElementById('bwProvider').value;
-  BW.practice = document.getElementById('bwPractice').value;
-  BW.ktArea = (document.getElementById('ktAreaInput') || {}).value || '';
-  BW.concerns = document.getElementById('bwConcerns').value;
-  BW.findings = document.getElementById('bwFindings').value;
-  BW.observations = document.getElementById('bwObservations').value;
-  BW.recs = document.getElementById('bwRecs').value;
-  BW.pdfLink = document.getElementById('bwPdfLink').value;
-}
-
-// ── FILE HANDLERS ────────────────────────────────────────────────────
-function handleVetFile(e, type) {
-  const f = e.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    if (type === 'pdf') VET.pdfFile = { name: f.name, type: f.type, data: ev.target.result };
-    else VET.vaccFile = { name: f.name, type: f.type, data: ev.target.result };
-    toast('File ready — will upload to Drive on save');
-  };
-  r.readAsDataURL(f);
-}
-
-function handleBwFile(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    BW.pdfFile = { name: f.name, type: f.type, data: ev.target.result };
-    const prev = document.getElementById('bwFilePreview');
-    prev.style.display = 'block';
-    prev.textContent = '✓ ' + f.name + ' ready to upload';
-    toast('File ready — will upload to Drive on save');
-  };
-  r.readAsDataURL(f);
-}
-
-// ── UPLOAD FILE TO DRIVE ─────────────────────────────────────────────
-async function uploadFileToDrive(fileObj, prefix) {
-  if (!CFG.scriptUrl || !CFG.driveFolderId || !fileObj) return null;
-  const fname = prefix + '_' + fileObj.name;
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({
-      action: 'uploadFile',
-      folderId: CFG.driveFolderId,
-      fileName: fname,
-      mimeType: fileObj.type,
-      data: fileObj.data.split(',')[1]
-    }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.url || null;
-  } catch { return null; }
-}
-
-// ── PUSH VET ROW TO SHEETS ───────────────────────────────────────────
-async function pushVetToSheets(v) {
-  if (!CFG.scriptUrl) return false;
-  const arr = (x) => Array.isArray(x) ? x : [];
-  const row = [
-    v.date || '', v.provider || '', v.clinic || '', arr(v.visitType).join(', '), arr(v.procedures).join(', '),
-    v.lameGrade || '', arr(v.lameLimb).join(', '), [...arr(v.lameRegion), v.lameRegionOther || ''].filter(Boolean).join(', '), v.nerveBlock || '',
-    arr(v.procedures).includes('Scope') ? 'Y' : '', arr(v.procedures).includes('Bloodwork') ? 'Y' : '', '', '', '',
-    v.injSite || '', [...arr(v.injProduct), v.injProductOther || ''].filter(Boolean).join(', '), v.injProtocol || '',
-    arr(v.imagingType).join(', '), v.imagingRegion || '', v.imagingLink || '',
-    v.meds || '', '',
-    v.history || '', v.findings || '', v.recs || '', v.plan || '',
-    v.followupDate || '', v.followupNotes || '',
-    v.pdfLink || '', v.vaccLink || ''
-  ];
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Vet Records', row, dateCol: 0 }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.success === true;
-  } catch { return false; }
-}
-
-// ── PUSH BODYWORK ROW TO SHEETS ──────────────────────────────────────
-async function pushBwToSheets(b) {
-  if (!CFG.scriptUrl) return false;
-  const mods = b.modalities || [];
-  const ktInput = document.getElementById('ktAreaInput');
-  const ktVal = (ktInput && ktInput.value) ? ktInput.value.trim() : (b.ktArea || '');
-  const ktStr = ktVal ? 'KT tape: ' + ktVal : '';
-  const findingsWithKt = [b.findings, ktStr].filter(Boolean).join(' | ');
-  const row = [
-    b.date, b.provider, b.practice,
-    mods.includes('Massage') ? 'Y' : '', mods.includes('PEMF') ? 'Y' : '',
-    mods.includes('Cold Laser') ? 'Y' : '', mods.includes('KT Tape') ? 'Y' : '',
-    mods.includes('Stretching') ? 'Y' : '', mods.filter(m=>!['Massage','PEMF','Cold Laser','KT Tape','Stretching'].includes(m)).join(', '),
-    b.concerns, findingsWithKt, b.observations, b.recs, b.pdfLink
-  ];
-  try {
-    const params = new URLSearchParams();
-    params.append('payload', JSON.stringify({ action: 'appendRow', sheetName: 'Bodywork Sessions', row, dateCol: 0 }));
-    const resp = await fetch(CFG.scriptUrl, { method: 'POST', body: params });
-    const json = await resp.json();
-    return json.success === true;
-  } catch { return false; }
-}
-
-// ── SAVE VET ENTRY ───────────────────────────────────────────────────
-async function saveVetEntry() {
-  collectVet();
-  if (!VET.date) { toast('Please set a visit date', true); return; }
-
-  const btn = document.querySelector('#s-vet .save-btn-secondary');
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-
-  // Upload files to Drive
-  try {
-    if (VET.pdfFile && CFG.driveFolderId) {
-      const url = await uploadFileToDrive(VET.pdfFile, 'vet_' + VET.date);
-      if (url) { VET.pdfLink = url; document.getElementById('vetPdfLink').value = url; }
-    }
-    if (VET.vaccFile && CFG.driveFolderId) {
-      const url = await uploadFileToDrive(VET.vaccFile, 'vacc_' + VET.date);
-      if (url) { VET.vaccLink = url; document.getElementById('vetVaccLink').value = url; }
-    }
-  } catch(uploadErr) {
-    console.error('File upload error:', uploadErr);
-  }
-
-  // Save locally — vet entries are separate from daily log, always append
-  try {
-    const all = getVetEntries();
-    all.unshift({ ...VET, savedAt: Date.now() });
-    localStorage.setItem('m_vet', JSON.stringify(all));
-  } catch(localErr) {
-    console.error('Local save error:', localErr);
-    toast('Local save failed: ' + localErr.message, true);
-    if (btn) { btn.disabled = false; btn.textContent = 'Save Vet Visit'; }
+  if(!url){
+    status.textContent = 'No Apps Script URL configured — open the Tracker app and set up your connection in Settings.';
+    timeline.innerHTML = '';
     return;
   }
 
-  // Push to Sheets
-  if (CFG.scriptUrl) {
-    try {
-      const ok = await pushVetToSheets(VET);
-      if (ok) {
-        toast('Vet visit saved + synced ✓');
-      } else {
-        toast('Saved locally — Sheets sync failed', true);
-      }
-    } catch(sheetErr) {
-      console.error('Sheets push error:', sheetErr);
-      toast('Saved locally — Sheets error: ' + sheetErr.message, true);
-    }
-  } else {
-    toast('Vet visit saved locally (no Sheets connection)');
-  }
+  if(btn) btn.disabled = true;
+  status.textContent = 'Loading...';
 
-  if (btn) { btn.disabled = false; btn.textContent = 'Save Vet Visit'; }
-  checkReminders();
+  try{
+    const resp = await fetch(url + '?action=read&sheet=vet');
+    const json = await resp.json();
+    if(!json.success) throw new Error(json.error||'Unknown error');
+
+    const rows = json.data.rows || [];
+    if(!rows.length){
+      timeline.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0">No vet visits logged yet.</div>';
+      status.textContent = 'No visits found.';
+      return;
+    }
+
+    // Sort reverse chronological
+    function parseAnyDate(v){
+      if(!v) return new Date(0);
+      const s = String(v).trim();
+      // ISO format: 2026-05-01
+      if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s+'T12:00:00');
+      // Human: Apr 16, 2026 or April 16, 2026 or 4/16/2026
+      return new Date(s);
+    }
+    const sorted = [...rows].sort((a,b)=>{
+      const da = parseAnyDate(a[0]), db = parseAnyDate(b[0]);
+      return db - da;
+    });
+
+    console.log('[VetTimeline] Total rows:', rows.length);
+    timeline.innerHTML = sorted.map(r => buildVisitCard(r)).join('');
+    status.textContent = `${sorted.length} visits · Updated ${new Date().toLocaleTimeString()}`;
+    buildDynamicAlerts(rows);
+  }catch(err){
+    status.textContent = 'Failed to load: ' + err.message;
+    timeline.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px 0">Could not reach Apps Script endpoint.</div>';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Refresh'; }
+  }
 }
 
-// ── SAVE BODYWORK ENTRY ──────────────────────────────────────────────
-async function saveBwEntry() {
-  collectBw();
-  if (!BW.date) { toast('Please set a session date', true); return; }
+function buildDynamicAlerts(rows){
+  const today=new Date();
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const daysUntil=d=>Math.round((d-today)/(86400000));
 
-  // Upload PDF to Drive
-  if (BW.pdfFile && CFG.driveFolderId) {
-    const url = await uploadFileToDrive(BW.pdfFile, 'bodywork_' + BW.date);
-    if (url) { BW.pdfLink = url; document.getElementById('bwPdfLink').value = url; }
-  }
+  // Find last occurrence of each type
+  let lastSW=null, lastFarrier=null, lastLaser=null, lastInj=null;
 
-  // Save locally
-  const all = getBwEntries();
-  all.unshift({ ...BW, savedAt: Date.now() });
-  localStorage.setItem('m_bw', JSON.stringify(all));
+  rows.forEach(r=>{
+    const d=new Date(r[0]);
+    if(isNaN(d)) return;
+    // A future-dated row can't be a completed treatment — never let one count
+    // as the last one done (it would suppress a genuinely overdue alert).
+    if(d>today) return;
+    const procs=String(r[4]||'').toLowerCase();
+    const vtype=String(r[3]||'').toLowerCase();
+    const injSite=String(r[14]||'').toLowerCase();
 
-  if (CFG.scriptUrl) {
-    const ok = await pushBwToSheets(BW);
-    toast(ok ? 'Bodywork session saved + synced ✓' : 'Saved locally — Sheets sync failed', !ok);
-  } else {
-    toast('Bodywork session saved locally');
-  }
-
-  // Reset KT area after save
-  BW.ktArea = '';
-  const ktInput = document.getElementById('ktAreaInput');
-  if(ktInput) ktInput.value = '';
-  const ktCard = document.getElementById('ktAreaCard');
-  if(ktCard) ktCard.style.display = 'none';
-}
-
-function getVetEntries() { try { return JSON.parse(localStorage.getItem('m_vet')||'[]'); } catch { return []; } }
-function getBwEntries()  { try { return JSON.parse(localStorage.getItem('m_bw') ||'[]'); } catch { return []; } }
-
-// ── FOLLOW-UP REMINDERS ──────────────────────────────────────────────
-function getManualReminders() { try { return JSON.parse(localStorage.getItem('m_reminders')||'[]'); } catch { return []; } }
-
-function checkReminders() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const in7 = new Date(today); in7.setDate(in7.getDate()+7);
-  const items = [];
-
-  // Vet follow-ups (within 7 days)
-  getVetEntries().forEach((e, idx) => {
-    if (!e.followupDate) return;
-    const d = new Date(e.followupDate + 'T12:00:00');
-    if (d <= in7) {
-      const overdue = d < today;
-      const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      const note = (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : '');
-      items.push({ text: label + ' — ' + note, note, overdue, sort: d.getTime(), type: 'vet', entryIdx: idx, followupDate: e.followupDate });
-    }
+    if(procs.includes('shockwave') && (!lastSW || d>lastSW)) lastSW=d;
+    if(procs.includes('laser') && (!lastLaser || d>lastLaser)) lastLaser=d;
+    if(vtype.includes('farrier') || procs.includes('farrier')){if(!lastFarrier || d>lastFarrier) lastFarrier=d;}
+    if(procs.includes('injection')){if(!lastInj || d>lastInj) lastInj=d;}
   });
 
-  // Manual reminders (always shown until deleted)
-  getManualReminders().forEach((r) => {
-    const d = new Date(r.date + 'T12:00:00');
-    const overdue = d < today;
-    const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    items.push({ text: label + ' — ' + r.note, note: r.note, overdue, sort: d.getTime(), type: 'manual', id: r.id });
-  });
-
-  // Hide any laser reminders
-  const visible = items.filter(i => !/laser/i.test(i.note));
-  visible.sort((a,b) => a.sort - b.sort);
-
-  const banner = document.getElementById('reminderBanner');
-  const list   = document.getElementById('reminderList');
-  if (visible.length) {
-    list.innerHTML = visible.map((i) => {
-      const handler = i.type === 'manual'
-        ? `deleteManualReminder('${i.id}')`
-        : `dismissReminder('${i.entryIdx}','${i.followupDate}')`;
-      return `<div class="reminder-item${i.overdue?' reminder-overdue':''}" style="display:flex;justify-content:space-between;align-items:center">${i.overdue?'⚠ OVERDUE: ':''}${i.text}<button onclick="${handler}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:8px" title="Dismiss">✕</button></div>`;
-    }).join('');
-    banner.classList.add('show');
+  // Also check daily sheet for farrier/shockwave/laser
+  // We'll fetch daily sheet too
+  const url=getScriptUrl();
+  if(url){
+    fetch(url+'?action=read&sheet=daily').then(r=>r.json()).then(json=>{
+      if(!json.success) return;
+      json.data.rows.forEach(r=>{
+        const d=new Date(r[2]); // date column in daily
+        if(isNaN(d)) return;
+        if(d>today) return; // ignore pre-populated future rows
+        if(r[27]==='Y' && (!lastSW || d>lastSW)) lastSW=d;  // shockwave col
+        if(r[26]==='Y' && (!lastLaser || d>lastLaser)) lastLaser=d; // laser col
+        if(r[28]==='Y' && (!lastFarrier || d>lastFarrier)) lastFarrier=d; // farrier col
+      });
+      renderAlerts();
+    }).catch(()=>renderAlerts());
   } else {
-    banner.classList.remove('show');
+    renderAlerts();
   }
-}
 
-function toggleAddReminder() {
-  const form = document.getElementById('addReminderForm');
-  const open = form.style.display !== 'none';
-  form.style.display = open ? 'none' : 'flex';
-  if (!open) {
-    document.getElementById('manualRemDate').value = new Date().toISOString().slice(0,10);
-    document.getElementById('manualRemNote').value = '';
-    document.getElementById('manualRemNote').focus();
+  function badgeFor(days){
+    if(days<0) return '<span class="badge due">Overdue by '+Math.abs(days)+' days</span>';
+    if(days<=7) return '<span class="badge due">Due this week</span>';
+    if(days<=21) return '<span class="badge soon">Due in ~'+Math.round(days/7)+' weeks</span>';
+    return '<span class="badge on-track">'+Math.round(days/7)+' weeks away</span>';
   }
-}
 
-function saveManualReminder() {
-  const date = document.getElementById('manualRemDate').value;
-  const note = document.getElementById('manualRemNote').value.trim();
-  if (!date || !note) { toast('Add a date and a note', true); return; }
-  const list = getManualReminders();
-  list.push({ id: 'r' + Date.now(), date, note });
-  localStorage.setItem('m_reminders', JSON.stringify(list));
-  toggleAddReminder();
-  checkReminders();
-  toast('Reminder added');
-}
+  function renderAlerts(){
+    const cards=[];
 
-function deleteManualReminder(id) {
-  const list = getManualReminders().filter(r => r.id !== id);
-  localStorage.setItem('m_reminders', JSON.stringify(list));
-  checkReminders();
-}
-
-function dismissReminder(entryIdx, followupDate) {
-  const entries = getVetEntries();
-  const i = parseInt(entryIdx);
-  if (entries[i] && entries[i].followupDate === followupDate) {
-    entries[i].followupDate = '';
-    entries[i].followupNotes = '';
-    localStorage.setItem('m_vet', JSON.stringify(entries));
-    checkReminders();
-  }
-}
-
-// Set default dates for vet/bw forms
-function initVetBwDates() {
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('vetDate').value = today;
-  document.getElementById('bwDate').value = today;
-}
-
-// Show lameness card whenever visit type is lameness eval
-document.addEventListener('click', function(e) {
-  if (e.target.classList.contains('chip') && e.target.closest('#s-vet')) {
-    const txt = e.target.textContent.trim();
-    if (['Lameness eval','Rehab check-in'].includes(txt)) {
-      setTimeout(() => { document.getElementById('vetLamenessCard').style.display = 'block'; }, 50);
+    // Shockwave — monthly cadence
+    if(lastSW){
+      const next=new Date(lastSW); next.setDate(next.getDate()+30);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card"><div class="alert-title">Next shockwave</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">30 days from '+fmt(lastSW)+' · monthly cadence</div>'+badgeFor(days)+'</div>');
     }
+
+    // Farrier — 6 week cadence
+    if(lastFarrier){
+      const next=new Date(lastFarrier); next.setDate(next.getDate()+35);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card"><div class="alert-title">Next farrier</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">5 weeks from '+fmt(lastFarrier)+'</div>'+badgeFor(days)+'</div>');
+    }
+
+
+
+    // 6-month injection review — from last injection
+    if(lastInj){
+      const next=new Date(lastInj); next.setMonth(next.getMonth()+6);
+      const days=daysUntil(next);
+      cards.push('<div class="alert-card"><div class="alert-title">6-month injection review</div><div class="alert-main">'+fmt(next)+'</div><div class="alert-sub">6 months from last injection '+fmt(lastInj)+'</div>'+badgeFor(days)+'</div>');
+    }
+
+    const el=document.getElementById('dynamicAlerts');
+    if(el) el.innerHTML=cards.length?cards.join(''):'<div style="font-size:13px;color:var(--muted)">No alerts — no vet data found.</div>';
   }
+}
+
+// ── MANUAL REMINDERS (user-added, stored locally) ────────────────────
+function getManualAlerts(){ try{ return JSON.parse(localStorage.getItem('m_manual_alerts')||'[]'); }catch{ return []; } }
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderManualAlerts(){
+  const el=document.getElementById('manualAlerts');
+  if(!el) return;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const list=getManualAlerts().slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  el.innerHTML=list.map(r=>{
+    const d=new Date(r.date+'T12:00:00');
+    const days=Math.round((d-today)/86400000);
+    let badge;
+    if(days<0) badge='<span class="badge due">Overdue by '+Math.abs(days)+' days</span>';
+    else if(days<=7) badge='<span class="badge due">Due this week</span>';
+    else if(days<=21) badge='<span class="badge soon">Due in ~'+Math.round(days/7)+' weeks</span>';
+    else badge='<span class="badge on-track">'+Math.round(days/7)+' weeks away</span>';
+    return '<div class="alert-card" style="position:relative"><button onclick="deleteManualAlert(\''+r.id+'\')" title="Delete reminder" style="position:absolute;top:7px;right:9px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1">✕</button><div class="alert-title">Reminder</div><div class="alert-main">'+escapeHtml(r.note)+'</div><div class="alert-sub">'+fmt(d)+'</div>'+badge+'</div>';
+  }).join('');
+}
+
+function toggleRemForm(){
+  const form=document.getElementById('remForm');
+  const open=form.style.display!=='none';
+  form.style.display=open?'none':'flex';
+  document.getElementById('remAddToggle').style.display=open?'inline-block':'none';
+  if(!open){
+    document.getElementById('remDate').value=new Date().toISOString().slice(0,10);
+    document.getElementById('remNote').value='';
+    document.getElementById('remNote').focus();
+  }
+}
+
+function addManualAlert(){
+  const date=document.getElementById('remDate').value;
+  const note=document.getElementById('remNote').value.trim();
+  if(!date || !note){ alert('Add a date and a note for the reminder.'); return; }
+  const list=getManualAlerts();
+  list.push({ id:'m'+Date.now(), date, note });
+  localStorage.setItem('m_manual_alerts', JSON.stringify(list));
+  toggleRemForm();
+  renderManualAlerts();
+}
+
+function deleteManualAlert(id){
+  const list=getManualAlerts().filter(r=>r.id!==id);
+  localStorage.setItem('m_manual_alerts', JSON.stringify(list));
+  renderManualAlerts();
+}
+
+// ── UPCOMING APPOINTMENTS (dedicated Appointments tab, localStorage fallback) ──
+// Appointments live in their own "Appointments" tab, written and mirrored to
+// the shared Horse Appointments calendar by maestro-appointments-backend.gs.
+// Both read (GET ?action=upcoming) and write (POST append) go to that script's
+// URL. Kept fully separate from Vet Records, so nothing here can affect the
+// vet history list or the overdue-alert math.
+function getApptCfg(){
+  let c={}; try{ c=JSON.parse(localStorage.getItem('m_cfg')||'{}'); }catch{}
+  return { writeUrl:c.apptScriptUrl||DEFAULT_APPT_URL };
+}
+
+// localStorage fallback (used only when no appointments script URL is set)
+function getApptsLocal(){ try{return JSON.parse(localStorage.getItem('m_appts')||'[]');}catch{return [];} }
+function saveApptsLocal(list){ localStorage.setItem('m_appts',JSON.stringify(list)); }
+
+async function addAppt(){
+  const dateEl=document.getElementById('apptDate');
+  const startEl=document.getElementById('apptStart');
+  const endEl=document.getElementById('apptEnd');
+  const descEl=document.getElementById('apptDesc');
+  const btn=document.getElementById('apptAddBtn');
+  const hint=document.getElementById('apptHint');
+  if(!dateEl.value||!descEl.value) return;
+  // Type can be more than one (e.g. Vet + Farrier on a combined visit)
+  const types=[...document.querySelectorAll('#apptTypeChips .tchip.sel')].map(el=>el.dataset.type);
+  const appt={date:dateEl.value,start:startEl.value||'',end:endEl.value||'',
+              type:types.join(', ')||'Vet',desc:descEl.value.trim()};
+  const {writeUrl}=getApptCfg();
+
+  // ── Edit mode: save changes to an existing appointment ──
+  // Carries the original date+desc so the backend replaces the right row/event
+  // even when the date or description changed.
+  if(_editKey){
+    if(!writeUrl) return;
+    if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+    try{
+      const params=new URLSearchParams();
+      params.append('action','edit');
+      params.append('oldDate',_editKey.date);
+      params.append('oldDesc',_editKey.desc);
+      params.append('date',appt.date);
+      params.append('start',appt.start);
+      params.append('end',appt.end);
+      params.append('type',appt.type);
+      params.append('provider','');
+      params.append('desc',appt.desc);
+      const resp=await fetch(writeUrl,{method:'POST',body:params});
+      const json=await resp.json();
+      if(!json.ok) throw new Error(json.error||'edit failed');
+      if(hint) hint.textContent='Changes saved · calendar updated.';
+      cancelApptEdit();
+    }catch(err){
+      if(hint) hint.textContent='Could not save changes: '+err.message;
+    }finally{ if(btn){ btn.disabled=false; if(_editKey) btn.textContent='Save changes'; } }
+    loadAppts();
+    return;
+  }
+
+  // ── Add mode ──
+  if(writeUrl){
+    if(btn){ btn.disabled=true; btn.textContent='Saving…'; }
+    try{
+      const params=new URLSearchParams();
+      params.append('action','append');
+      params.append('date',appt.date);
+      params.append('start',appt.start);
+      params.append('end',appt.end);
+      params.append('type',appt.type);
+      params.append('provider','');
+      params.append('desc',appt.desc);
+      const resp=await fetch(writeUrl,{method:'POST',body:params});
+      const json=await resp.json();
+      if(!json.ok) throw new Error(json.error||'write failed');
+      if(hint) hint.textContent=(json.calendar==='timed'||json.calendar==='all-day')
+        ? 'Saved to sheet · added to Horse Appointments calendar.'
+        : 'Saved to sheet. Calendar sync pending — run the one-time authorization (see deploy notes).';
+    }catch(err){
+      if(hint) hint.textContent='Could not reach the appointments script — saved locally instead. '+err.message;
+      const list=getApptsLocal(); list.push(appt);
+      list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))); saveApptsLocal(list);
+    }finally{ if(btn){ btn.disabled=false; btn.textContent='Add'; } }
+  }else{
+    const list=getApptsLocal(); list.push(appt);
+    list.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||''))); saveApptsLocal(list);
+  }
+  dateEl.value=''; startEl.value=''; endEl.value=''; descEl.value='';
+  document.querySelectorAll('#apptTypeChips .tchip').forEach(c=>c.classList.toggle('sel',c.dataset.type==='Vet'));
+  loadAppts();
+}
+
+function toggleTypeChip(el){ el.classList.toggle('sel'); }
+
+// ── Edit an existing appointment (populates the form, then Save changes) ──
+let _editKey=null;
+function editApptSheet(i){
+  const a=_renderedAppts[i]; if(!a) return;
+  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.value=v||'';};
+  set('apptDate',a.date); set('apptStart',a.start); set('apptEnd',a.end); set('apptDesc',a.desc);
+  const types=String(a.type||'Vet').split(',').map(s=>s.trim());
+  document.querySelectorAll('#apptTypeChips .tchip').forEach(c=>c.classList.toggle('sel',types.includes(c.dataset.type)));
+  _editKey={date:a.date,desc:a.desc};
+  const btn=document.getElementById('apptAddBtn'); if(btn) btn.textContent='Save changes';
+  const cxl=document.getElementById('apptCancelBtn'); if(cxl) cxl.style.display='';
+  const hint=document.getElementById('apptHint'); if(hint) hint.textContent='Editing "'+a.desc+'" — change the fields, then Save changes (or Cancel).';
+  const de=document.getElementById('apptDate'); if(de&&de.scrollIntoView) de.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function cancelApptEdit(){
+  _editKey=null;
+  ['apptDate','apptStart','apptEnd','apptDesc'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  document.querySelectorAll('#apptTypeChips .tchip').forEach(c=>c.classList.toggle('sel',c.dataset.type==='Vet'));
+  const btn=document.getElementById('apptAddBtn'); if(btn) btn.textContent='Add';
+  const cxl=document.getElementById('apptCancelBtn'); if(cxl) cxl.style.display='none';
+  const hint=document.getElementById('apptHint'); if(hint) hint.textContent='Leave times blank for an all-day entry. Appointments save to the Appointments tab and sync to the shared Horse Appointments calendar.';
+}
+
+// Compact time-range label, e.g. "1:00–4:00 PM" or "9:30 AM–1:00 PM" (matches Winter's format)
+function fmtTimeRange(start,end){
+  if(!start) return '';
+  const to12=(t)=>{
+    const [h,m]=t.split(':').map(Number);
+    const mer=h>=12?'PM':'AM';
+    const h12=h%12===0?12:h%12;
+    return {label:h12+':'+String(m).padStart(2,'0'),mer};
+  };
+  const s=to12(start);
+  if(!end) return s.label+' '+s.mer;
+  const e=to12(end);
+  return s.mer===e.mer ? s.label+'–'+e.label+' '+e.mer : s.label+' '+s.mer+'–'+e.label+' '+e.mer;
+}
+
+// Build a Google Calendar "add event" link (title prefixed "Maestro —" to match the shared Horse Appointments calendar)
+function gcalLink(a){
+  const pad=(n)=>String(n).padStart(2,'0');
+  const ymd=a.date.replace(/-/g,'');
+  let dates;
+  if(a.start){
+    const st=a.start.replace(':','')+'00';
+    const en=(a.end||a.start).replace(':','')+'00';
+    dates=ymd+'T'+st+'/'+ymd+'T'+en;
+  }else{
+    const d=new Date(a.date+'T12:00:00'); d.setDate(d.getDate()+1);
+    const nxt=''+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());
+    dates=ymd+'/'+nxt;
+  }
+  const title='Maestro — '+a.desc;
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+dates;
+}
+
+function removeApptLocal(i){
+  const list=getApptsLocal();
+  list.splice(i,1);
+  saveApptsLocal(list);
+  loadAppts();
+}
+
+// Delete a sheet-backed appointment — removes it from the Appointments tab AND the calendar.
+async function removeApptSheet(i){
+  const a=_renderedAppts[i];
+  if(!a) return;
+  if(!confirm('Delete "'+a.desc+'" on '+a.date+'?\nThis removes it from the sheet and the calendar.')) return;
+  const {writeUrl}=getApptCfg();
+  if(!writeUrl){ renderApptList(getApptsLocal(),'local'); return; }
+  try{
+    const params=new URLSearchParams();
+    params.append('action','delete');
+    params.append('date',a.date);
+    params.append('desc',a.desc);
+    const resp=await fetch(writeUrl,{method:'POST',body:params});
+    const json=await resp.json();
+    if(!json.ok) throw new Error(json.error||'delete failed');
+  }catch(err){ alert('Could not delete: '+err.message); }
+  loadAppts();
+}
+
+// Load upcoming appointments — from the Appointments tab when configured, else localStorage.
+async function loadAppts(){
+  const {writeUrl}=getApptCfg();
+  if(writeUrl){
+    try{
+      const resp=await fetch(writeUrl+'?action=upcoming');
+      const json=await resp.json();
+      if(!json.ok) throw new Error(json.error||'read failed');
+      const list=(json.appointments||[])
+        .sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')));
+      renderApptList(list,'sheet');
+      return;
+    }catch(err){ /* fall through to local */ }
+  }
+  renderApptList(getApptsLocal(),'local');
+}
+
+let _renderedAppts=[];
+function renderApptList(list,mode){
+  _renderedAppts=list;
+  const el=document.getElementById('upcomingAppts');
+  if(!el) return;
+  if(!list.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--muted)">No upcoming appointments scheduled.</div>';
+    return;
+  }
+  const today=new Date();
+  el.innerHTML=list.map((a,i)=>{
+    const d=new Date(a.date+'T12:00:00');
+    const days=Math.round((d-today)/86400000);
+    const past=days<0;
+    const fmt=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+    const time=fmtTimeRange(a.start,a.end);
+    // No manual "add to calendar" link — the appointments script auto-syncs each
+    // add to the Horse Appointments calendar. A manual link here caused duplicates.
+    const cal='';
+    const right = mode==='local'
+      ? '<button onclick="removeApptLocal('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Remove">✕</button>'
+      : '<button onclick="editApptSheet('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px" title="Edit this appointment">✎</button>'
+        +'<button onclick="removeApptSheet('+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px" title="Delete — removes from the sheet and the calendar">✕</button>';
+    return '<div style="background:var(--card);border:1px solid var(--border);border-left:3px solid '+(past?'var(--muted)':'var(--vet)')+';border-radius:var(--radius);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px'+(past?';opacity:0.5':'')+'">'
+      +'<div><div style="font-size:13px;font-weight:500">'+a.desc+(a.type&&a.type!=='Vet'?' <span style="font-size:10px;color:var(--muted)">· '+a.type+'</span>':'')+'</div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+fmt+(time?' · '+time:'')+(days===0?' — today':days===1?' — tomorrow':days>0?' — in '+days+' days':' — '+Math.abs(days)+' days ago')+'</div></div>'
+      +'<div style="display:flex;align-items:center;gap:6px">'+cal+right
+      +'</div></div>';
+  }).join('');
+}
+
+window.addEventListener('load', ()=>{
+  loadVetHistory();
+  loadAppts();
+  renderManualAlerts();
 });
-
-loadCfg();
-initDate();
-initVetBwDates();
-checkReminders();
-
 </script>
 </body>
 </html>
