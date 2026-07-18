@@ -195,6 +195,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .reminder-item:last-child { border-bottom: none; }
 .reminder-overdue { color: var(--red); }
 
+/* ADD REMINDER */
+.reminder-add-bar { margin: 8px 14px 0; text-align: right; }
+.reminder-add-btn { font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--accent); background: none; border: none; cursor: pointer; padding: 4px 2px; }
+.add-reminder-form { display: flex; gap: 8px; margin-top: 8px; text-align: left; align-items: center; flex-wrap: wrap; }
+.add-reminder-form input[type="date"] { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; outline: none; -webkit-appearance: none; }
+.add-reminder-form input[type="text"] { flex: 1; min-width: 140px; }
+.add-reminder-form .rem-save { font-family: var(--font); font-size: 14px; font-weight: 500; color: #fff; background: var(--accent); border: none; border-radius: var(--radius-sm); padding: 9px 16px; cursor: pointer; }
+.add-reminder-form .rem-cancel { font-family: var(--font); font-size: 14px; color: var(--text-mid); background: none; border: none; cursor: pointer; padding: 9px 6px; }
+
 /* VET / BODYWORK SPECIFIC */
 .procedures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .proc-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s; }
@@ -290,6 +299,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 <div id="reminderBanner" class="reminder-banner">
   <div class="reminder-banner-title">Follow-up reminders</div>
   <div id="reminderList"></div>
+</div>
+<div class="reminder-add-bar">
+  <button class="reminder-add-btn" onclick="toggleAddReminder()">+ Add reminder</button>
+  <div id="addReminderForm" class="add-reminder-form" style="display:none">
+    <input type="date" id="manualRemDate">
+    <input type="text" id="manualRemNote" placeholder="Reminder note…">
+    <button class="rem-save" onclick="saveManualReminder()">Save</button>
+    <button class="rem-cancel" onclick="toggleAddReminder()">Cancel</button>
+  </div>
 </div>
 <div class="content">
 
@@ -1632,29 +1650,79 @@ function getVetEntries() { try { return JSON.parse(localStorage.getItem('m_vet')
 function getBwEntries()  { try { return JSON.parse(localStorage.getItem('m_bw') ||'[]'); } catch { return []; } }
 
 // ── FOLLOW-UP REMINDERS ──────────────────────────────────────────────
+function getManualReminders() { try { return JSON.parse(localStorage.getItem('m_reminders')||'[]'); } catch { return []; } }
+
 function checkReminders() {
   const today = new Date(); today.setHours(0,0,0,0);
   const in7 = new Date(today); in7.setDate(in7.getDate()+7);
   const items = [];
 
+  // Vet follow-ups (within 7 days)
   getVetEntries().forEach((e, idx) => {
     if (!e.followupDate) return;
     const d = new Date(e.followupDate + 'T12:00:00');
     if (d <= in7) {
       const overdue = d < today;
       const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      items.push({ text: label + ' — ' + (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : ''), overdue, entryIdx: idx, followupDate: e.followupDate });
+      const note = (e.followupNotes || 'Vet follow-up') + (e.provider ? ' (' + e.provider + ')' : '');
+      items.push({ text: label + ' — ' + note, note, overdue, sort: d.getTime(), type: 'vet', entryIdx: idx, followupDate: e.followupDate });
     }
   });
 
+  // Manual reminders (always shown until deleted)
+  getManualReminders().forEach((r) => {
+    const d = new Date(r.date + 'T12:00:00');
+    const overdue = d < today;
+    const label = d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    items.push({ text: label + ' — ' + r.note, note: r.note, overdue, sort: d.getTime(), type: 'manual', id: r.id });
+  });
+
+  // Hide any laser reminders
+  const visible = items.filter(i => !/laser/i.test(i.note));
+  visible.sort((a,b) => a.sort - b.sort);
+
   const banner = document.getElementById('reminderBanner');
   const list   = document.getElementById('reminderList');
-  if (items.length) {
-    list.innerHTML = items.map((i,idx) => `<div class="reminder-item${i.overdue?' reminder-overdue':''}" style="display:flex;justify-content:space-between;align-items:center">${i.overdue?'⚠ OVERDUE: ':''}${i.text}<button onclick="dismissReminder('${i.entryIdx}','${i.followupDate}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:8px" title="Dismiss">✕</button></div>`).join('');
+  if (visible.length) {
+    list.innerHTML = visible.map((i) => {
+      const handler = i.type === 'manual'
+        ? `deleteManualReminder('${i.id}')`
+        : `dismissReminder('${i.entryIdx}','${i.followupDate}')`;
+      return `<div class="reminder-item${i.overdue?' reminder-overdue':''}" style="display:flex;justify-content:space-between;align-items:center">${i.overdue?'⚠ OVERDUE: ':''}${i.text}<button onclick="${handler}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:8px" title="Dismiss">✕</button></div>`;
+    }).join('');
     banner.classList.add('show');
   } else {
     banner.classList.remove('show');
   }
+}
+
+function toggleAddReminder() {
+  const form = document.getElementById('addReminderForm');
+  const open = form.style.display !== 'none';
+  form.style.display = open ? 'none' : 'flex';
+  if (!open) {
+    document.getElementById('manualRemDate').value = new Date().toISOString().slice(0,10);
+    document.getElementById('manualRemNote').value = '';
+    document.getElementById('manualRemNote').focus();
+  }
+}
+
+function saveManualReminder() {
+  const date = document.getElementById('manualRemDate').value;
+  const note = document.getElementById('manualRemNote').value.trim();
+  if (!date || !note) { toast('Add a date and a note', true); return; }
+  const list = getManualReminders();
+  list.push({ id: 'r' + Date.now(), date, note });
+  localStorage.setItem('m_reminders', JSON.stringify(list));
+  toggleAddReminder();
+  checkReminders();
+  toast('Reminder added');
+}
+
+function deleteManualReminder(id) {
+  const list = getManualReminders().filter(r => r.id !== id);
+  localStorage.setItem('m_reminders', JSON.stringify(list));
+  checkReminders();
 }
 
 function dismissReminder(entryIdx, followupDate) {
