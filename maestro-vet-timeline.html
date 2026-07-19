@@ -176,6 +176,18 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   <div style="font-size:13px;color:var(--muted)">Loading alerts...</div>
 </div>
 
+<!-- MANUAL REMINDERS -->
+<div class="alerts" id="manualAlerts" style="margin-top:10px"></div>
+<div style="display:flex;gap:8px;margin-bottom:30px;margin-top:2px;flex-wrap:wrap;align-items:center">
+  <button id="remAddToggle" onclick="toggleRemForm()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px dashed var(--border);background:var(--card);color:var(--muted);cursor:pointer">+ Add reminder</button>
+  <div id="remForm" style="display:none;gap:8px;flex-wrap:wrap;align-items:center">
+    <input type="date" id="remDate" style="font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <input type="text" id="remNote" placeholder="e.g. Order joint supplement" onkeydown="if(event.key==='Enter')addManualAlert()" style="min-width:200px;font-family:'Plus Jakarta Sans';font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)">
+    <button onclick="addManualAlert()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--text);color:white;cursor:pointer">Save</button>
+    <button onclick="toggleRemForm()" style="font-family:'Plus Jakarta Sans';font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer">Cancel</button>
+  </div>
+</div>
+
 <!-- UPCOMING APPOINTMENTS -->
 <div style="margin-bottom:24px">
   <div class="section-title" style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
@@ -514,13 +526,6 @@ function buildDynamicAlerts(rows){
       cards.push('<div class="alert-card"><div class="alert-title">Next shockwave</div><div class="alert-main">~'+fmt(next)+'</div><div class="alert-sub">30 days from '+fmt(lastSW)+' · monthly cadence</div>'+badgeFor(days)+'</div>');
     }
 
-    // Laser — weekly cadence
-    if(lastLaser){
-      const next=new Date(lastLaser); next.setDate(next.getDate()+7);
-      const days=daysUntil(next);
-      cards.push('<div class="alert-card laser"><div class="alert-title">Laser — weekly</div><div class="alert-main">Next due ~'+fmt(next)+'</div><div class="alert-sub">Weekly Class C · last '+fmt(lastLaser)+'</div>'+badgeFor(days)+'</div>');
-    }
-
     // Farrier — 6 week cadence
     if(lastFarrier){
       const next=new Date(lastFarrier); next.setDate(next.getDate()+35);
@@ -540,6 +545,58 @@ function buildDynamicAlerts(rows){
     const el=document.getElementById('dynamicAlerts');
     if(el) el.innerHTML=cards.length?cards.join(''):'<div style="font-size:13px;color:var(--muted)">No alerts — no vet data found.</div>';
   }
+}
+
+// ── MANUAL REMINDERS (user-added, stored locally) ────────────────────
+function getManualAlerts(){ try{ return JSON.parse(localStorage.getItem('m_manual_alerts')||'[]'); }catch{ return []; } }
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderManualAlerts(){
+  const el=document.getElementById('manualAlerts');
+  if(!el) return;
+  const today=new Date(); today.setHours(0,0,0,0);
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const list=getManualAlerts().slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+  el.innerHTML=list.map(r=>{
+    const d=new Date(r.date+'T12:00:00');
+    const days=Math.round((d-today)/86400000);
+    let badge;
+    if(days<0) badge='<span class="badge due">Overdue by '+Math.abs(days)+' days</span>';
+    else if(days<=7) badge='<span class="badge due">Due this week</span>';
+    else if(days<=21) badge='<span class="badge soon">Due in ~'+Math.round(days/7)+' weeks</span>';
+    else badge='<span class="badge on-track">'+Math.round(days/7)+' weeks away</span>';
+    return '<div class="alert-card" style="position:relative"><button onclick="deleteManualAlert(\''+r.id+'\')" title="Delete reminder" style="position:absolute;top:7px;right:9px;background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;line-height:1">✕</button><div class="alert-title">Reminder</div><div class="alert-main">'+escapeHtml(r.note)+'</div><div class="alert-sub">'+fmt(d)+'</div>'+badge+'</div>';
+  }).join('');
+}
+
+function toggleRemForm(){
+  const form=document.getElementById('remForm');
+  const open=form.style.display!=='none';
+  form.style.display=open?'none':'flex';
+  document.getElementById('remAddToggle').style.display=open?'inline-block':'none';
+  if(!open){
+    document.getElementById('remDate').value=new Date().toISOString().slice(0,10);
+    document.getElementById('remNote').value='';
+    document.getElementById('remNote').focus();
+  }
+}
+
+function addManualAlert(){
+  const date=document.getElementById('remDate').value;
+  const note=document.getElementById('remNote').value.trim();
+  if(!date || !note){ alert('Add a date and a note for the reminder.'); return; }
+  const list=getManualAlerts();
+  list.push({ id:'m'+Date.now(), date, note });
+  localStorage.setItem('m_manual_alerts', JSON.stringify(list));
+  toggleRemForm();
+  renderManualAlerts();
+}
+
+function deleteManualAlert(id){
+  const list=getManualAlerts().filter(r=>r.id!==id);
+  localStorage.setItem('m_manual_alerts', JSON.stringify(list));
+  renderManualAlerts();
 }
 
 // ── UPCOMING APPOINTMENTS (dedicated Appointments tab, localStorage fallback) ──
@@ -767,6 +824,7 @@ function renderApptList(list,mode){
 window.addEventListener('load', ()=>{
   loadVetHistory();
   loadAppts();
+  renderManualAlerts();
 });
 </script>
 </body>
