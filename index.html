@@ -1175,7 +1175,7 @@ async function pushToSheets(entry) {
     tx, pr, entry.date,
     entry.dayType || '',
     entry.totalDur || '',
-    entry.rode || '',
+    entry.rode || 'N',
     entry.saddleType || '',
     entry.walkMin || '',
     entry.trotMin || '',
@@ -1183,7 +1183,7 @@ async function pushToSheets(entry) {
     entry.gait || '',
     entry.will || '',
     entry.crop || '',
-    entry.cranky || '',
+    entry.rode === 'Y' ? (entry.cranky || 'N') : '',
     entry.trigger?.join(', ') || '',
     entry.stops || '',
     entry.cL || '',
@@ -1209,8 +1209,8 @@ async function pushToSheets(entry) {
     ].filter(Boolean).join(' | '),
     entry.modalities?.includes('straddlepoles') ? 'Y' : '',
     entry.modalities?.includes('treadmill')     ? 'Y' : '',
-    entry.spontaneousHalt || '',
-    entry.stickyResistant || '',
+    entry.rode === 'Y' ? (entry.spontaneousHalt || 'N') : '',
+    entry.rode === 'Y' ? (entry.stickyResistant || 'N') : '',
     (entry.modalities?.includes('shockwave') && entry.swAreas?.length) ? entry.swAreas.join(', ') : ''
   ];
   try {
