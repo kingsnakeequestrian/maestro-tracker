@@ -54,6 +54,10 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 .cmp-table td.cmp-now{color:var(--text);font-weight:500}
 .cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
 .cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
+.gtag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:10px;line-height:1.4}
+.gtag.rh{background:#EAF2F9;color:#0A527F}
+.gtag.sl{background:#EAF6F1;color:#0E8A57}
+.gempty{font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:16px 18px;line-height:1.6}
 </style>
 
 <style id="maestro-nav-style">
@@ -186,6 +190,14 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
 </div>
 
+<p class="section-label">Objective gait analysis</p>
+
+<div class="card" id="gaitCard" style="border-left:3px solid #005F9D">
+  <div class="card-title">Gait analysis — RealHorse &amp; Sleip</div>
+  <div class="card-sub">Objective motion data from each analysis. Asymmetry values are lower-is-better; RealHorse overall symmetry is higher-is-better. Sourced from PDFs in the Gait Analysis Drive folder.</div>
+  <div id="gaitContent" style="font-size:13px;color:var(--muted)">Loading…</div>
+</div>
+
 <p class="section-label">Rest &amp; willingness</p>
 
 <div class="card">
@@ -200,6 +212,56 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 const LASER_START='2026-03-15';
 let view='weekly', CH={};
 let W=[], M=[], GAPS=[];
+
+// ── GAIT ANALYSIS (RealHorse / Sleip) ─────────────────────────────────
+// Objective gait/lameness analyses. Maestro → Gait Analysis Drive folder.
+// PDFs are graphical (values live in the layout, not clean text), so these
+// are logged by reading each export rather than auto-parsed from PDF text.
+// Workflow: drop the RealHorse/Sleip PDF in the Drive folder → ask Paul to
+// log it → append an object below → dashboard renders it.
+//
+// Schema — one object per session (worst-limb summary):
+//   d        ISO date 'YYYY-MM-DD'
+//   tool     'realhorse' | 'sleip'
+//   ctx      context label, e.g. 'lunge','straight','ridden'
+//   band     overall asymmetry band word: 'Normal'|'Mild'|'Mild–Mod'|'Moderate'|'Mod–Severe'|'Severe'
+//   flags    array of asymmetry descriptors the tool calls out:
+//              [{sev:'Mild', limb:'L fore'|'R fore'|'L hind'|'R hind', phase:'push-off'|'impact'}]
+//   RealHorse fields:
+//     backAng     back movement angle, degrees
+//     strideLen   stride length, cm
+//     strideCount stride count avg.
+//     poLimb/poVal worst push-off limb + deficit value (LOWER = better)
+//     imLimb/imVal worst impact (landing) limb + deficit value
+//   Sleip fields:
+//     head/headSide  head asymmetry magnitude + side (LOWER = better)
+//     pelvis/pelvSide pelvis asymmetry magnitude + side
+//     withers        withers / vertical symmetry index
+//     pushoff/impact push-off / impact asymmetry magnitude
+//   note     free text
+// Any field not reported by that tool = null.
+const GAIT=[
+  {d:'2026-05-12',tool:'realhorse',ctx:'lunge · baseline',band:'Mild',
+    flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'L fore',phase:'impact'}],
+    backAng:5.2,strideLen:202,strideCount:76,poLimb:'L fore',poVal:14,imLimb:'L fore',imVal:23,
+    head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
+    note:'Baseline. Front & withers normal, hind mild.'},
+  {d:'2026-05-14',tool:'realhorse',ctx:'lunge',band:'Mild',
+    flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
+    backAng:3.6,strideLen:208,strideCount:130,poLimb:'L hind',poVal:5,imLimb:'L fore',imVal:14,
+    head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
+    note:'Broad improvement vs baseline (14–18%pt). R hind impact 8, 10%pt regression.'},
+  {d:'2026-05-17',tool:'realhorse',ctx:'lunge',band:'Mild–Mod',
+    flags:[{sev:'Mild',limb:'R fore',phase:'push-off'},{sev:'Mild',limb:'R fore',phase:'impact'},{sev:'Mild',limb:'L hind',phase:'impact'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
+    backAng:4.2,strideLen:201,strideCount:104,poLimb:'R fore',poVal:9,imLimb:'L fore',imVal:14,
+    head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
+    note:'Hind band moderate on relative-deficit chart. R hind impact 11, 17%pt regression.'},
+  {d:'2026-05-22',tool:'realhorse',ctx:'lunge',band:'Mild',
+    flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
+    backAng:4.6,strideLen:192,strideCount:160,poLimb:'L hind',poVal:3,imLimb:'L fore',imVal:15,
+    head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
+    note:'R hind impact 13 — rising 4→8→11→13 across the four sessions. Watch item.'}
+];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
 const DEFAULT_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec';
@@ -1334,6 +1396,99 @@ function buildShockwaveByArea(valid){
   el.innerHTML=html;
 }
 
+// ── GAIT ANALYSIS ─────────────────────────────────────────────────────
+function gDate(iso){const p=iso.split('-');return (+p[1])+'/'+(+p[2])+'/'+String(p[0]).slice(2);}
+function bandColor(b){b=(b||'').toLowerCase();
+  if(b.indexOf('severe')>-1) return '#C0492B';
+  if(b.indexOf('mod')>-1) return '#B77A15';
+  if(b.indexOf('mild')>-1) return '#B77A15';
+  if(b.indexOf('normal')>-1) return '#00BB77';
+  return 'var(--text)';}
+// "Mild — L fore (push-off + impact) · R hind (push-off)"
+function flagText(flags){
+  if(!flags||!flags.length) return '';
+  const by={};
+  flags.forEach(f=>{(by[f.limb]=by[f.limb]||[]).push(f.phase);});
+  return Object.keys(by).map(limb=>{
+    const ph=[...new Set(by[limb])].map(p=>p==='impact'?'landing':p).join(' + ');
+    return limb+' ('+ph+')';
+  }).join(' · ');
+}
+function buildGait(){
+  const el=document.getElementById('gaitContent');
+  if(!el) return;
+  const rows=(GAIT||[]).slice().filter(r=>r&&r.d).sort((a,b)=>a.d.localeCompare(b.d));
+  if(!rows.length){
+    el.innerHTML='<div class="gempty">No analyses logged yet. Drop a RealHorse or Sleip PDF into the <strong>Maestro → Gait Analysis</strong> Drive folder, then ask Paul to log it. Back angle, stride, per-limb push-off &amp; landing asymmetry (RealHorse) and head/pelvis asymmetry (Sleip) will trend here as readings accumulate.</div>';
+    return;
+  }
+  const latest={};
+  rows.forEach(r=>{latest[r.tool]=r;});
+  const fmt=(v,u)=>v==null?'—':(v+(u||''));
+  const toolName=t=>t==='sleip'?'Sleip':'RealHorse';
+  let tiles='';
+  Object.keys(latest).forEach(t=>{
+    const r=latest[t];
+    tiles+=`<div style="margin:8px 0 6px"><span class="gtag ${t==='sleip'?'sl':'rh'}">${toolName(t)}</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(r.d)}${r.ctx?' · '+r.ctx:''}</span></div>`;
+    tiles+='<div class="sg" style="margin-bottom:6px">';
+    // Asymmetry band tile (with descriptor line beneath the grid)
+    if(r.band) tiles+=`<div class="sc"><div class="sv" style="color:${bandColor(r.band)}">${r.band}</div><div class="sl">Asymmetry</div></div>`;
+    if(r.backAng!=null) tiles+=`<div class="sc"><div class="sv">${r.backAng}°</div><div class="sl">Back angle</div></div>`;
+    if(r.strideLen!=null) tiles+=`<div class="sc"><div class="sv">${r.strideLen}</div><div class="sl">Stride (cm)</div></div>`;
+    if(r.strideCount!=null) tiles+=`<div class="sc"><div class="sv">${r.strideCount}</div><div class="sl">Stride count</div></div>`;
+    if(r.poLimb) tiles+=`<div class="sc"><div class="sv">${r.poVal} <span style="font-size:12px;color:var(--muted)">${r.poLimb}</span></div><div class="sl">Worst push-off</div></div>`;
+    if(r.imLimb) tiles+=`<div class="sc"><div class="sv">${r.imVal} <span style="font-size:12px;color:var(--muted)">${r.imLimb}</span></div><div class="sl">Worst landing</div></div>`;
+    if(r.head!=null) tiles+=`<div class="sc"><div class="sv">${r.head}${r.headSide?' <span style="font-size:12px;color:var(--muted)">'+r.headSide+'</span>':''}</div><div class="sl">Head asym</div></div>`;
+    if(r.pelvis!=null) tiles+=`<div class="sc"><div class="sv">${r.pelvis}${r.pelvSide?' <span style="font-size:12px;color:var(--muted)">'+r.pelvSide+'</span>':''}</div><div class="sl">Pelvis asym</div></div>`;
+    if(r.withers!=null) tiles+=`<div class="sc"><div class="sv">${r.withers}</div><div class="sl">Withers/vert</div></div>`;
+    tiles+='</div>';
+    const ft=flagText(r.flags);
+    if(ft) tiles+=`<div style="font-size:12px;color:var(--muted);margin:0 0 14px"><span style="color:${bandColor(r.band)};font-weight:500">${r.band||'Asym'}</span> — ${ft}</div>`;
+  });
+  // Detail table
+  let tbl='<table class="cmp-table" style="margin-top:6px"><thead><tr>'+
+    '<th>Date</th><th>Tool</th><th>Asymmetry (limb · phase)</th><th>Back°</th><th>Stride</th><th>Push-off</th><th>Landing</th></tr></thead><tbody>';
+  rows.slice().reverse().forEach(r=>{
+    const ft=flagText(r.flags);
+    const asymCell=r.band?`<span style="color:${bandColor(r.band)};font-weight:500">${r.band}</span>${ft?' · '+ft:''}`:'—';
+    const po=r.poLimb?`${r.poVal} ${r.poLimb}`:(r.pushoff!=null?r.pushoff:'—');
+    const im=r.imLimb?`${r.imVal} ${r.imLimb}`:(r.impact!=null?r.impact:'—');
+    tbl+=`<tr><td>${gDate(r.d)}</td>`+
+      `<td><span class="gtag ${r.tool==='sleip'?'sl':'rh'}">${toolName(r.tool)}</span></td>`+
+      `<td style="text-align:left">${asymCell}</td>`+
+      `<td>${fmt(r.backAng)}</td><td>${fmt(r.strideLen)}</td>`+
+      `<td>${po}</td><td>${im}</td></tr>`;
+  });
+  tbl+='</tbody></table>';
+  const backAny=rows.some(r=>r.backAng!=null);
+  const strideAny=rows.some(r=>r.strideLen!=null);
+  const sleipAny=rows.some(r=>['head','pelvis','withers'].some(k=>r[k]!=null));
+  el.innerHTML=tiles+
+    (backAny?'<div class="card-sub" style="margin-top:8px">Back movement angle over time (°)</div><div class="cw h200"><canvas id="cGaitBack"></canvas></div>':'')+
+    (strideAny?'<div class="card-sub" style="margin-top:14px">Stride length over time (cm)</div><div class="cw h200"><canvas id="cGaitStride"></canvas></div>':'')+
+    (sleipAny?'<div class="card-sub" style="margin-top:14px">Head / pelvis asymmetry (Sleip) — lower is better</div><div class="cw h200"><canvas id="cGaitSleip"></canvas></div>':'')+
+    tbl;
+  const labels=rows.map(r=>gDate(r.d));
+  const lineOpts=extra=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:Object.assign({},extra)});
+  if(backAny){
+    CH.gaitBack=new Chart(document.getElementById('cGaitBack'),{type:'line',
+      data:{labels,datasets:[{label:'Back°',data:rows.map(r=>r.backAng),borderColor:'#005F9D',backgroundColor:'#005F9D',tension:.25,spanGaps:true,pointRadius:4,fill:false}]},
+      options:lineOpts({y:{beginAtZero:true,suggestedMax:6}})});
+  }
+  if(strideAny){
+    CH.gaitStride=new Chart(document.getElementById('cGaitStride'),{type:'line',
+      data:{labels,datasets:[{label:'Stride cm',data:rows.map(r=>r.strideLen),borderColor:'#0E8A57',backgroundColor:'#0E8A57',tension:.25,spanGaps:true,pointRadius:4,fill:false}]},
+      options:lineOpts({y:{suggestedMin:180,suggestedMax:215}})});
+  }
+  if(sleipAny){
+    const ss=[['head','Head','#C0492B'],['pelvis','Pelvis','#005F9D'],['withers','Withers','#8E6FB8']]
+      .filter(([k])=>rows.some(r=>r[k]!=null)).map(([k,lab,c])=>({label:lab,data:rows.map(r=>r[k]==null?null:r[k]),borderColor:c,backgroundColor:c,tension:.25,spanGaps:true,pointRadius:3}));
+    CH.gaitSleip=new Chart(document.getElementById('cGaitSleip'),{type:'line',
+      data:{labels,datasets:ss},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},scales:{y:{beginAtZero:true}}}});
+  }
+}
+
 function buildAll(){
   kill();
   const data=D(), labels=data.map(d=>L(d));
@@ -1352,6 +1507,7 @@ function buildAll(){
   buildInterventionAnalysis(D.valid||[]);
   buildShockwaveDecay(D.valid||[]);
   buildShockwaveByArea(D.valid||[]);
+  buildGait();
 }
 
 function setView(v,btn){
