@@ -171,12 +171,10 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="cw" style="height:350px"><canvas id="cGaitMonth"></canvas></div>
 </div>
 
-<div class="card" id="interventionCard">
-  <div class="card-title">Intervention analysis — shockwave</div>
-  <div class="card-sub" id="interventionSub">Comparing ride quality 14 days before vs 14 days after each shockwave session</div>
-  <div id="interventionSummary" style="margin-bottom:16px"></div>
-  <div class="cw" style="height:300px"><canvas id="cIntervention"></canvas></div>
-  <div id="interventionDetail" style="margin-top:12px"></div>
+<div class="card" id="swAreaCard">
+  <div class="card-title">Shockwave eras — willingness floor by treatment stage</div>
+  <div class="card-sub">Every ridden day grouped by which sites were on the protocol at the time. Bad day = willingness 3/5 or lower; also showing share at 4+ and at 5/5. The neck era's win is the floor, not the average.</div>
+  <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
 </div>
 
 <div class="card" id="swDecayCard">
@@ -186,11 +184,16 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div id="decayNote" style="margin-top:12px"></div>
 </div>
 
-<div class="card" id="swAreaCard">
-  <div class="card-title">Shockwave response by treated area</div>
-  <div class="card-sub">Willingness change (14 days before → after) grouped by which region was shocked. Tests whether adding a region — the neck especially — moves the needle.</div>
-  <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
-</div>
+<details id="archiveIntervention" style="margin:0 0 18px">
+  <summary style="cursor:pointer;font-size:12px;color:var(--muted);padding:8px 4px">Archived · before/after delta analysis (superseded by the era view above)</summary>
+  <div class="card" id="interventionCard" style="margin-top:8px">
+    <div class="card-title">Intervention analysis — shockwave</div>
+    <div class="card-sub" id="interventionSub">Ride quality 14 days before vs after each shockwave. Kept for reference — this before/after average can't see the variance or the floor, so it under-reads the neck era. Use the era card above.</div>
+    <div id="interventionSummary" style="margin-bottom:16px"></div>
+    <div class="cw" style="height:300px"><canvas id="cIntervention"></canvas></div>
+    <div id="interventionDetail" style="margin-top:12px"></div>
+  </div>
+</details>
 
 <p class="section-label">Rest &amp; willingness</p>
 
@@ -1303,100 +1306,78 @@ function buildShockwaveByArea(valid){
   const el=document.getElementById('swAreaContent');
   if(!el) return;
   if(!valid.length){ el.textContent='No data.'; return; }
-  const WILL_I=11, SW_I=27, AREA_I=36, RODE_I=5;
-  const DAY=86400000;
+  const WILL_I=11, RODE_I=5;
+  // Treatment-era cut dates = the shockwave session that first added each site
+  const SI0=new Date(2026,1,24), NECK0=new Date(2026,4,7);
+  const eraDefs=[
+    {name:'Quad only', test:d=>d<SI0},
+    {name:'+ SI', test:d=>d>=SI0&&d<NECK0},
+    {name:'+ Neck (C6/7)', test:d=>d>=NECK0}
+  ];
+  const rides=valid
+    .filter(({d,r})=>r[RODE_I]==='Y'&&r[WILL_I]!=null&&!isNaN(parseFloat(r[WILL_I])))
+    .map(({d,r})=>({d, w:parseFloat(r[WILL_I])}));
+  if(!rides.length){ el.innerHTML='<div style="color:var(--muted)">No ridden willingness scores logged yet.</div>'; return; }
 
-  function deltaFor(swDate){
-    const before14=new Date(swDate.getTime()-14*DAY);
-    const after14=new Date(swDate.getTime()+14*DAY);
-    const pre=valid.filter(({d,r})=>d>=before14&&d<swDate&&r[RODE_I]==='Y').map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
-    const post=valid.filter(({d,r})=>d>swDate&&d<=after14&&r[RODE_I]==='Y').map(({r})=>parseFloat(r[WILL_I])).filter(v=>!isNaN(v));
-    if(!pre.length||!post.length) return null;
-    const a=pre.reduce((s,v)=>s+v,0)/pre.length, b=post.reduce((s,v)=>s+v,0)/post.length;
-    return {pre:a,post:b,delta:b-a};
+  function stat(arr){
+    const n=arr.length; if(!n) return null;
+    const ws=arr.map(x=>x.w);
+    const mean=ws.reduce((s,v)=>s+v,0)/n;
+    const sd=Math.sqrt(ws.reduce((s,v)=>s+(v-mean)**2,0)/n);
+    const ds=arr.map(x=>x.d).sort((a,b)=>a-b);
+    return {n,mean,sd,
+      badPct:Math.round(100*ws.filter(v=>v<=3).length/n),
+      p4:Math.round(100*ws.filter(v=>v>=4).length/n),
+      p5:Math.round(100*ws.filter(v=>v>=5).length/n),
+      d0:ds[0],d1:ds[n-1]};
   }
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const pos=v=>Math.max(0,Math.min(100,(v-1)/4*100));
+  const badCol=p=>p>=40?'#C0492B':p>=20?'#B77A15':'#00BB77';
 
-  // Collect shockwave sessions with regions + delta
-  const sessions=[];
-  valid.forEach(({d,r})=>{
-    if(r[SW_I]!=='Y') return;
-    const regs=swRegions(r[AREA_I]);
-    sessions.push({date:d, regions:regs, logged:regs.length>0, dd:deltaFor(d)});
-  });
+  const eras=eraDefs.map(e=>({name:e.name, s:stat(rides.filter(x=>e.test(x.d)))})).filter(e=>e.s);
 
-  if(!sessions.length){ el.innerHTML='<div style="color:var(--muted)">No shockwave sessions logged.</div>'; return; }
+  let html=`<div style="display:flex;gap:16px;margin-bottom:12px;font-size:11px;color:var(--muted);flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:10px;background:rgba(0,187,119,0.30);border-radius:2px"></span>willingness range (mean ±1 SD)</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:10px;background:rgba(192,73,43,0.11);border-radius:2px"></span>bad-day zone (≤3)</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--text)"></span>era mean</span>
+  </div>`;
 
-  const logged=sessions.filter(s=>s.logged);
-  const notLogged=sessions.length-logged.length;
-
-  if(!logged.length){
-    el.innerHTML=`<div style="padding:12px 14px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC;line-height:1.6">
-      <strong>No areas logged yet.</strong> ${sessions.length} shockwave session${sessions.length!==1?'s':''} on record, none with a treated-area tag.
-      Start selecting areas on the entry form when you log shockwave and this breakdown will populate — quad-only vs +SI vs +neck.</div>`;
-    return;
-  }
-
-  // Per-region aggregation
-  const REGIONS=['Quad/Hip','SI','Neck (C6/7)','Hock','Stifle','Other'];
-  const rows=REGIONS.map(reg=>{
-    const inReg=logged.filter(s=>s.regions.includes(reg));
-    const withDelta=inReg.filter(s=>s.dd);
-    const avg=withDelta.length?withDelta.reduce((s,x)=>s+x.dd.delta,0)/withDelta.length:null;
-    return {reg,sessions:inReg.length,scored:withDelta.length,avg};
-  }).filter(r=>r.sessions>0);
-
-  const arrow=v=>v===null?'<span style="color:var(--muted)">—</span>':(v>0.05?'<span style="color:#00BB77">▲ +'+v.toFixed(1)+'</span>':v<-0.05?'<span style="color:#C0492B">▼ '+v.toFixed(1)+'</span>':'<span style="color:var(--muted)">± '+Math.abs(v).toFixed(1)+'</span>');
-
-  // Neck vs no-neck (the C6/7 question)
-  const neck=logged.filter(s=>s.regions.includes('Neck (C6/7)')&&s.dd);
-  const noNeck=logged.filter(s=>!s.regions.includes('Neck (C6/7)')&&s.dd);
-  const neckAvg=neck.length?neck.reduce((s,x)=>s+x.dd.delta,0)/neck.length:null;
-  const noNeckAvg=noNeck.length?noNeck.reduce((s,x)=>s+x.dd.delta,0)/noNeck.length:null;
-
-  let html=`<table style="width:100%;border-collapse:collapse;font-size:13px">
-    <thead><tr style="border-bottom:1px solid var(--border)">
-      <th style="text-align:left;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Region treated</th>
-      <th style="text-align:right;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Sessions</th>
-      <th style="text-align:right;padding:5px 8px;font-size:11px;color:var(--muted);font-weight:500">Avg willingness Δ</th>
-    </tr></thead><tbody>`;
-  rows.forEach(r=>{
-    html+=`<tr style="border-top:1px solid var(--border)">
-      <td style="padding:6px 8px;font-weight:500;color:var(--text)">${r.reg}</td>
-      <td style="padding:6px 8px;text-align:right;color:var(--muted)">${r.sessions}${r.scored<r.sessions?' <span style="font-size:10px">('+r.scored+' scored)</span>':''}</td>
-      <td style="padding:6px 8px;text-align:right">${arrow(r.avg)}</td>
-    </tr>`;
-  });
-  html+='</tbody></table>';
-
-  // Neck comparison block
-  if(neck.length||noNeck.length){
-    html+=`<div style="display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:14px">
-      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:center">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sessions including neck</div>
-        <div style="font-size:22px;font-weight:500">${neckAvg!==null?arrow(neckAvg):'—'}</div>
-        <div style="font-size:11px;color:var(--muted)">${neck.length} scored session${neck.length!==1?'s':''}</div>
+  eras.forEach((e,i)=>{
+    const s=e.s;
+    const lo=pos(s.mean-s.sd), hi=pos(s.mean+s.sd), mp=pos(s.mean);
+    const last=i===eras.length-1;
+    const cell=(val,lab,col)=>`<div style="text-align:center;min-width:42px">
+        <div style="font-size:20px;font-weight:500;color:${col};line-height:1">${val}%</div>
+        <div style="font-size:10px;color:var(--muted)">${lab}</div>
+      </div>`;
+    html+=`<div style="display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border)${last?';border-bottom:1px solid var(--border)':''}">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)">${e.name}</div>
+        <div style="font-size:10px;color:var(--muted)">${fmt(s.d0)}–${fmt(s.d1)} · n=${s.n}</div>
       </div>
-      <div style="background:var(--bg);border-radius:8px;padding:12px 14px;text-align:center">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Sessions without neck</div>
-        <div style="font-size:22px;font-weight:500">${noNeckAvg!==null?arrow(noNeckAvg):'—'}</div>
-        <div style="font-size:11px;color:var(--muted)">${noNeck.length} scored session${noNeck.length!==1?'s':''}</div>
+      <div style="position:relative;height:26px;border-radius:8px;background:var(--bg)">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:50%;background:rgba(192,73,43,0.11);border-radius:8px 0 0 8px"></div>
+        <div style="position:absolute;top:4px;bottom:4px;left:${lo.toFixed(1)}%;width:${Math.max(0,hi-lo).toFixed(1)}%;background:rgba(0,187,119,0.30);border-radius:4px"></div>
+        <div style="position:absolute;top:0;bottom:0;left:${mp.toFixed(1)}%;width:2px;background:var(--text)"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        ${cell(s.badPct,'≤3',badCol(s.badPct))}
+        ${cell(s.p4,'4+','var(--text)')}
+        ${cell(s.p5,'5/5','var(--text)')}
       </div>
     </div>`;
-  }
+  });
 
-  // Interpretation / caveat
-  let note='';
-  const scoredTotal=logged.filter(s=>s.dd).length;
-  if(scoredTotal<3){
-    note=`<strong>Early data.</strong> Only ${scoredTotal} logged session${scoredTotal!==1?'s':''} with before/after ride data. Keep tagging areas — the neck-vs-no-neck comparison is where the C6/7 answer will show up.`;
-  } else if(neck.length&&noNeck.length&&neckAvg!==null&&noNeckAvg!==null){
-    const diff=neckAvg-noNeckAvg;
-    if(diff>0.3) note=`<strong>Adding the neck tracks with a larger willingness gain</strong> (+${diff.toFixed(1)} vs sessions without it). Consistent with C6/7 being a real pain contributor — worth raising as evidence for direct cervical treatment.`;
-    else if(diff<-0.3) note=`<strong>Neck sessions show a smaller gain</strong> than sessions without it (${diff.toFixed(1)}). Doesn't rule the neck out — could reflect confounding (which sessions got neck added, and why) — but it's not yet supporting a willingness benefit.`;
-    else note=`<strong>No clear separation yet</strong> between neck and non-neck sessions (${diff>=0?'+':''}${diff.toFixed(1)}). More sessions needed to detect a difference this size.`;
-  }
-  note+=`<br><span style="color:#888;font-size:11px">Sessions treat multiple regions at once, so per-region deltas overlap and aren't cleanly attributable. 14-day window; confounders (injections, farrier, workload) not controlled.${notLogged?' '+notLogged+' shockwave session'+(notLogged!==1?'s':'')+' had no area logged and are excluded here.':''}</span>`;
-  html+=`<div style="font-size:12px;line-height:1.7;color:#0A4266;margin-top:14px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">${note}</div>`;
+  html+=`<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--muted)">
+    <span>Mean willingness&nbsp; <span style="color:var(--text);font-weight:500">${eras.map(e=>e.s.mean.toFixed(1)).join(' → ')}</span></span>
+    <span>Spread (SD)&nbsp; <span style="color:var(--text);font-weight:500">${eras.map(e=>e.s.sd.toFixed(2)).join(' → ')}</span></span>
+  </div>`;
+
+  html+=`<div style="font-size:12px;line-height:1.7;color:#0A4266;margin-top:14px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">
+    <strong>The floor is the story, not the average.</strong> Bad days (≤3) fall while 4-or-better climbs, yet the mean barely moves. Note the neck era gives fewer outright 5s than the SI era but far fewer bad days — he clusters tightly at 4–5 instead of swinging between 5 and 1. The gain is the collapse in variance, which a before/after average can't see.
+    <br><span style="color:#888;font-size:11px">Sites are cumulative — each era adds to the last, none removed — so this is association, not clean attribution. Small n per era; workload, conditioning and injections not controlled. Era cuts: SI shockwave 2/24/26, neck (C6/7) 5/7/26.</span>
+  </div>`;
 
   el.innerHTML=html;
 }
@@ -1515,6 +1496,8 @@ function buildAll(){
   buildShockwaveDecay(D.valid||[]);
   buildShockwaveByArea(D.valid||[]);
   buildGait();
+  const ai=document.getElementById('archiveIntervention');
+  if(ai&&!ai.dataset.bound){ ai.dataset.bound='1'; ai.addEventListener('toggle',()=>{ if(ai.open&&CH.intervention) CH.intervention.resize(); }); }
 }
 
 function setView(v,btn){
