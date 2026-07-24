@@ -239,33 +239,39 @@ let W=[], M=[], GAPS=[];
 //     withers        withers / vertical symmetry index
 //     pushoff/impact push-off / impact asymmetry magnitude
 //   note     free text
+//   pdf      link to the source export PDF (Drive view URL)
 // Any field not reported by that tool = null.
 const GAIT=[
   {d:'2026-05-12',tool:'realhorse',ctx:'lunge · baseline',band:'Mild',
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'L fore',phase:'impact'}],
     backAng:5.2,strideLen:202,strideCount:76,poLimb:'L fore',poVal:14,imLimb:'L fore',imVal:23,
     head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
-    note:'Baseline. Front & withers normal, hind mild.'},
+    note:'Baseline. Front & withers normal, hind mild.',
+    pdf:'https://drive.google.com/file/d/1MH29PJdtisjuNq_fBjzJ5VSRG0MjSn5i/view'},
   {d:'2026-05-14',tool:'realhorse',ctx:'lunge',band:'Mild',
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
     backAng:3.6,strideLen:208,strideCount:130,poLimb:'L hind',poVal:5,imLimb:'L fore',imVal:14,
     head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
-    note:'Broad improvement vs baseline (14–18%pt). R hind impact 8, 10%pt regression.'},
+    note:'Broad improvement vs baseline (14–18%pt). R hind impact 8, 10%pt regression.',
+    pdf:'https://drive.google.com/file/d/1rmMyIwWSBvdqA7uDJU9UzCTu3cnyAS-O/view'},
   {d:'2026-05-17',tool:'realhorse',ctx:'lunge',band:'Mild–Mod',
     flags:[{sev:'Mild',limb:'R fore',phase:'push-off'},{sev:'Mild',limb:'R fore',phase:'impact'},{sev:'Mild',limb:'L hind',phase:'impact'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
     backAng:4.2,strideLen:201,strideCount:104,poLimb:'R fore',poVal:9,imLimb:'L fore',imVal:14,
     head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
-    note:'Hind band moderate on relative-deficit chart. R hind impact 11, 17%pt regression.'},
+    note:'Hind band moderate on relative-deficit chart. R hind impact 11, 17%pt regression.',
+    pdf:'https://drive.google.com/file/d/1BfgOPt34lBiNdroB8lNzjkOIjKAyFtuc/view'},
   {d:'2026-05-22',tool:'realhorse',ctx:'lunge',band:'Mild',
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
     backAng:4.6,strideLen:192,strideCount:160,poLimb:'L hind',poVal:3,imLimb:'L fore',imVal:15,
     head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
-    note:'R hind impact 13 — rising 4→8→11→13 across the four sessions. Watch item.'},
+    note:'R hind impact 13 — rising 4→8→11→13 across the four sessions. Watch item.',
+    pdf:'https://drive.google.com/file/d/1bImY7VsBTRWLN9hA4X9DFzVM0Mce1gnP/view'},
   {d:'2026-07-24',tool:'sleip',ctx:'straight trot',band:'Mild',
     flags:[{sev:'Mild',limb:'R hind',phase:'push-off'},{sev:'Very mild',limb:'L fore',phase:'push-off'},{sev:'Very mild',limb:'L hind',phase:'impact'}],
     backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
     head:0.5,headSide:'L',pelvis:1.0,pelvSide:'R',withers:null,pushoff:null,impact:null,
-    note:'Straight trot. Head push-off 0.5 / impact 0.1; pelvis push-off 1.0 / impact 0.4. Stride freq 1.15/s (head 29 / pelvis 21 strides). RH push-off is the standout — lines up with the right-hind landing rise on RealHorse.'}
+    note:'Straight trot. Head push-off 0.5 / impact 0.1; pelvis push-off 1.0 / impact 0.4. Stride freq 1.15/s (head 29 / pelvis 21 strides). RH push-off is the standout — lines up with the right-hind landing rise on RealHorse.',
+    pdf:'https://drive.google.com/file/d/1XSEnMPZ1xQdYOcCEtQ8ugd2zLporryai/view'}
 ];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
@@ -1436,7 +1442,7 @@ function buildGait(){
   let tiles='';
   Object.keys(latest).forEach(t=>{
     const r=latest[t];
-    tiles+=`<div style="margin:8px 0 6px"><span class="gtag ${t==='sleip'?'sl':'rh'}">${toolName(t)}</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(r.d)}${r.ctx?' · '+r.ctx:''}</span></div>`;
+    tiles+=`<div style="margin:8px 0 6px"><span class="gtag ${t==='sleip'?'sl':'rh'}">${toolName(t)}</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(r.d)}${r.ctx?' · '+r.ctx:''}</span>${r.pdf?` · <a href="${r.pdf}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">PDF ↗</a>`:''}</div>`;
     tiles+='<div class="sg" style="margin-bottom:6px">';
     // Asymmetry band tile (with descriptor line beneath the grid)
     if(r.band) tiles+=`<div class="sc"><div class="sv" style="color:${bandColor(r.band)}">${r.band}</div><div class="sl">Asymmetry</div></div>`;
@@ -1454,17 +1460,18 @@ function buildGait(){
   });
   // Detail table
   let tbl='<table class="cmp-table" style="margin-top:6px"><thead><tr>'+
-    '<th>Date</th><th>Tool</th><th>Asymmetry (limb · phase)</th><th>Back°</th><th>Stride</th><th>Push-off</th><th>Landing</th></tr></thead><tbody>';
+    '<th>Date</th><th>Tool</th><th>Asymmetry (limb · phase)</th><th>Back°</th><th>Stride</th><th>Push-off</th><th>Landing</th><th>Source</th></tr></thead><tbody>';
   rows.slice().reverse().forEach(r=>{
     const ft=flagText(r.flags);
     const asymCell=r.band?`<span style="color:${bandColor(r.band)};font-weight:500">${r.band}</span>${ft?' · '+ft:''}`:'—';
     const po=r.poLimb?`${r.poVal} ${r.poLimb}`:(r.pushoff!=null?r.pushoff:'—');
     const im=r.imLimb?`${r.imVal} ${r.imLimb}`:(r.impact!=null?r.impact:'—');
+    const src=r.pdf?`<a href="${r.pdf}" target="_blank" rel="noopener" style="color:#0A6E96;text-decoration:none">PDF ↗</a>`:'—';
     tbl+=`<tr><td>${gDate(r.d)}</td>`+
       `<td><span class="gtag ${r.tool==='sleip'?'sl':'rh'}">${toolName(r.tool)}</span></td>`+
       `<td style="text-align:left">${asymCell}</td>`+
       `<td>${fmt(r.backAng)}</td><td>${fmt(r.strideLen)}</td>`+
-      `<td>${po}</td><td>${im}</td></tr>`;
+      `<td>${po}</td><td>${im}</td><td>${src}</td></tr>`;
   });
   tbl+='</tbody></table>';
   const backAny=rows.some(r=>r.backAng!=null);
