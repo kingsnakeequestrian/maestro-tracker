@@ -260,7 +260,12 @@ const GAIT=[
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
     backAng:4.6,strideLen:192,strideCount:160,poLimb:'L hind',poVal:3,imLimb:'L fore',imVal:15,
     head:null,headSide:null,pelvis:null,pelvSide:null,withers:null,pushoff:null,impact:null,
-    note:'R hind impact 13 — rising 4→8→11→13 across the four sessions. Watch item.'}
+    note:'R hind impact 13 — rising 4→8→11→13 across the four sessions. Watch item.'},
+  {d:'2026-07-24',tool:'sleip',ctx:'straight trot',band:'Mild',
+    flags:[{sev:'Mild',limb:'R hind',phase:'push-off'},{sev:'Very mild',limb:'L fore',phase:'push-off'},{sev:'Very mild',limb:'L hind',phase:'impact'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:0.5,headSide:'L',pelvis:1.0,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'Straight trot. Head push-off 0.5 / impact 0.1; pelvis push-off 1.0 / impact 0.4. Stride freq 1.15/s (head 29 / pelvis 21 strides). RH push-off is the standout — lines up with the right-hind landing rise on RealHorse.'}
 ];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
@@ -1404,14 +1409,16 @@ function bandColor(b){b=(b||'').toLowerCase();
   if(b.indexOf('mild')>-1) return '#B77A15';
   if(b.indexOf('normal')>-1) return '#00BB77';
   return 'var(--text)';}
-// "Mild — L fore (push-off + impact) · R hind (push-off)"
+// "R hind mild (push-off) · L fore very mild (push-off) · L hind very mild (landing)"
 function flagText(flags){
   if(!flags||!flags.length) return '';
   const by={};
-  flags.forEach(f=>{(by[f.limb]=by[f.limb]||[]).push(f.phase);});
+  flags.forEach(f=>{ if(!by[f.limb]) by[f.limb]={sev:f.sev,ph:[]}; by[f.limb].ph.push(f.phase); });
   return Object.keys(by).map(limb=>{
-    const ph=[...new Set(by[limb])].map(p=>p==='impact'?'landing':p).join(' + ');
-    return limb+' ('+ph+')';
+    const o=by[limb];
+    const ph=[...new Set(o.ph)].map(p=>p==='impact'?'landing':p).join(' + ');
+    const sev=(o.sev||'').toLowerCase();
+    return limb+(sev?' '+sev:'')+' ('+ph+')';
   }).join(' · ');
 }
 function buildGait(){
