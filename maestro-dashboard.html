@@ -114,6 +114,14 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div id="rehabGoalsContent" style="font-size:13px;color:var(--muted)">Loading...</div>
 </div>
 
+<p class="section-label">Objective gait analysis</p>
+
+<div class="card" id="gaitCard" style="border-left:3px solid #005F9D;margin-bottom:24px">
+  <div class="card-title">Gait analysis — RealHorse &amp; Sleip</div>
+  <div class="card-sub">Objective motion data from each analysis. Asymmetry values are lower-is-better; RealHorse overall symmetry is higher-is-better. Sourced from PDFs in the Gait Analysis Drive folder.</div>
+  <div id="gaitContent" style="font-size:13px;color:var(--muted)">Loading…</div>
+</div>
+
 <div class="toggle-row" style="justify-content:space-between;align-items:center">
   <div style="display:flex;gap:8px">
     <button class="tbtn on" onclick="setView('weekly',this)">Weekly</button>
@@ -158,12 +166,6 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 </div>
 
 <div class="card">
-  <div class="card-title">Stops by month</div>
-  <div class="card-sub">Percentage of rides by stop frequency per month</div>
-  <div class="cw" style="height:350px"><canvas id="cStopsMonth"></canvas></div>
-</div>
-
-<div class="card">
   <div class="card-title">Gait level by month</div>
   <div class="card-sub">Percentage of rides at each gait level per month</div>
   <div class="cw" style="height:350px"><canvas id="cGaitMonth"></canvas></div>
@@ -188,14 +190,6 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
   <div class="card-title">Shockwave response by treated area</div>
   <div class="card-sub">Willingness change (14 days before → after) grouped by which region was shocked. Tests whether adding a region — the neck especially — moves the needle.</div>
   <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
-</div>
-
-<p class="section-label">Objective gait analysis</p>
-
-<div class="card" id="gaitCard" style="border-left:3px solid #005F9D">
-  <div class="card-title">Gait analysis — RealHorse &amp; Sleip</div>
-  <div class="card-sub">Objective motion data from each analysis. Asymmetry values are lower-is-better; RealHorse overall symmetry is higher-is-better. Sourced from PDFs in the Gait Analysis Drive folder.</div>
-  <div id="gaitContent" style="font-size:13px;color:var(--muted)">Loading…</div>
 </div>
 
 <p class="section-label">Rest &amp; willingness</p>
@@ -1516,7 +1510,6 @@ function buildAll(){
   buildWillDist(D.valid||[]);
   buildStopsDist(D.valid||[]);
   buildWillMonth(D.valid||[]);
-  buildStopsMonth(D.valid||[]);
   buildGaitMonth(D.valid||[]);
   buildInterventionAnalysis(D.valid||[]);
   buildShockwaveDecay(D.valid||[]);
