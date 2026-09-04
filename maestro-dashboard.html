@@ -173,7 +173,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 
 <div class="card" id="swAreaCard">
   <div class="card-title">Shockwave eras — willingness floor by treatment stage</div>
-  <div class="card-sub">Every ridden day grouped by which sites were on the protocol at the time. Bad day = willingness 3/5 or lower; also showing share at 4+ and at 5/5. The neck era's win is the floor, not the average.</div>
+  <div class="card-sub">Every ridden day grouped by which sites were on the protocol at the time. Bad day = willingness 3/5 or lower; also showing share at 4+ and at 5/5. Filter by ride type to compare like-for-like. The neck era's win is the floor, not the average.</div>
   <div id="swAreaContent" style="font-size:13px;color:var(--muted)">Loading…</div>
 </div>
 
@@ -207,7 +207,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────
 const LASER_START='2026-03-15';
-let view='weekly', CH={};
+let view='weekly', CH={}, swAreaTier='all';
 let W=[], M=[], GAPS=[];
 
 // ── GAIT ANALYSIS (RealHorse / Sleip) ─────────────────────────────────
@@ -237,8 +237,29 @@ let W=[], M=[], GAPS=[];
 //     pushoff/impact push-off / impact asymmetry magnitude
 //   note     free text
 //   pdf      link to the source export PDF (Drive view URL)
+//   legacy   true for pre-2026 Sleip (app v3) — DIFFERENT asymmetry scaling;
+//            magnitudes not comparable to 2026, so excluded from the trend line
+//            (bands/flags/limbs still shown in the table). Sleip flags this itself.
 // Any field not reported by that tool = null.
 const GAIT=[
+  {d:'2024-03-25',tool:'sleip',ctx:'straight · diagnostic blocks',band:'Moderate',legacy:true,
+    flags:[{sev:'Moderate',limb:'R fore',phase:'impact'},{sev:'Very mild',limb:'R hind',phase:'push-off'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:0.1,headSide:'R',pelvis:1.3,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'Lameness workup WITH diagnostic analgesia: abaxial sesamoid, low 4-point, RH proximal suspensory ligament infiltration. RF moderate impact, RH very mild push-off. Pelvis push-off 1.3 R. Older Sleip scaling — magnitude not comparable to 2026.',
+    pdf:null},
+  {d:'2024-04-02',tool:'sleip',ctx:'straight + lunge',band:'Mild',legacy:true,
+    flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:0.7,headSide:'L',pelvis:0.7,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'Three passes (11:22/11:30/11:32). LF mild push-off, RH mild push-off. Head push-off 0.7 L, pelvis push-off 0.7 R. Older Sleip scaling — magnitude not comparable to 2026.',
+    pdf:null},
+  {d:'2024-04-09',tool:'sleip',ctx:'straight',band:'Mild',legacy:true,
+    flags:[{sev:'Mild',limb:'R hind',phase:'push-off'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:0.2,headSide:'L',pelvis:0.5,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'RH mild push-off. Head push-off 0.2 L, pelvis push-off 0.5 R. Older Sleip scaling — magnitude not comparable to 2026.',
+    pdf:null},
   {d:'2026-05-12',tool:'realhorse',ctx:'lunge · baseline',band:'Mild',
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'L fore',phase:'impact'}],
     backAng:5.2,strideLen:202,strideCount:76,poLimb:'L fore',poVal:14,imLimb:'L fore',imVal:23,
@@ -268,7 +289,13 @@ const GAIT=[
     backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
     head:0.5,headSide:'L',pelvis:1.0,pelvSide:'R',withers:null,pushoff:null,impact:null,
     note:'Straight trot. Head push-off 0.5 / impact 0.1; pelvis push-off 1.0 / impact 0.4. Stride freq 1.15/s (head 29 / pelvis 21 strides). RH push-off is the standout — lines up with the right-hind landing rise on RealHorse.',
-    pdf:'https://drive.google.com/file/d/1XSEnMPZ1xQdYOcCEtQ8ugd2zLporryai/view'}
+    pdf:'https://drive.google.com/file/d/1XSEnMPZ1xQdYOcCEtQ8ugd2zLporryai/view'},
+  {d:'2026-08-30',tool:'sleip',ctx:'straight + lunge',band:'Moderate',
+    flags:[{sev:'Moderate',limb:'R hind',phase:'push-off'},{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Very mild',limb:'R fore',phase:'impact'},{sev:'Very mild',limb:'L hind',phase:'impact'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:0.5,headSide:'L',pelvis:1.3,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'Straight + lunge. Head push-off 0.5 / impact 0.3; pelvis push-off 1.3 / impact 0.3. Stride freq 1.15–1.18/s. RH push-off escalated Mild→Moderate vs 7/24 (pelvis push-off 1.0→1.3). Right hind worsening — the persistent signal across both tools.',
+    pdf:'https://drive.google.com/file/d/1uaY640JwxXLfPkmIeyFK5gpB-kPvbOfg/view'}
 ];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
@@ -1306,7 +1333,7 @@ function buildShockwaveByArea(valid){
   const el=document.getElementById('swAreaContent');
   if(!el) return;
   if(!valid.length){ el.textContent='No data.'; return; }
-  const WILL_I=11, RODE_I=5;
+  const WILL_I=11, RODE_I=5, GAIT_I=10;
   // Treatment-era cut dates = the shockwave session that first added each site
   const SI0=new Date(2026,1,24), NECK0=new Date(2026,4,7);
   const eraDefs=[
@@ -1314,11 +1341,16 @@ function buildShockwaveByArea(valid){
     {name:'+ SI', test:d=>d>=SI0&&d<NECK0},
     {name:'+ Neck (C6/7)', test:d=>d>=NECK0}
   ];
+  const tierOf=g=>{const s=String(g||'').toUpperCase().replace(/[^A-Z]/g,'');
+    return s.includes('C')?'WTC':s.includes('T')?'WT':s.includes('W')?'Walk':'?';};
   const rides=valid
     .filter(({d,r})=>r[RODE_I]==='Y'&&r[WILL_I]!=null&&!isNaN(parseFloat(r[WILL_I])))
-    .map(({d,r})=>({d, w:parseFloat(r[WILL_I])}));
+    .map(({d,r})=>({d, w:parseFloat(r[WILL_I]), tier:tierOf(r[GAIT_I])}));
   if(!rides.length){ el.innerHTML='<div style="color:var(--muted)">No ridden willingness scores logged yet.</div>'; return; }
 
+  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  const pos=v=>Math.max(0,Math.min(100,(v-1)/4*100));
+  const badCol=p=>p>=40?'#C0492B':p>=20?'#B77A15':'#00BB77';
   function stat(arr){
     const n=arr.length; if(!n) return null;
     const ws=arr.map(x=>x.w);
@@ -1331,63 +1363,83 @@ function buildShockwaveByArea(valid){
       p5:Math.round(100*ws.filter(v=>v>=5).length/n),
       d0:ds[0],d1:ds[n-1]};
   }
-  const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  const pos=v=>Math.max(0,Math.min(100,(v-1)/4*100));
-  const badCol=p=>p>=40?'#C0492B':p>=20?'#B77A15':'#00BB77';
+  const tabs=[['all','All rides'],['Walk','Walk only'],['WT','W/T'],['WTC','W/T/C']];
 
-  const eras=eraDefs.map(e=>({name:e.name, s:stat(rides.filter(x=>e.test(x.d)))})).filter(e=>e.s);
-
-  let html=`<div style="display:flex;gap:16px;margin-bottom:12px;font-size:11px;color:var(--muted);flex-wrap:wrap">
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:10px;background:rgba(0,187,119,0.30);border-radius:2px"></span>willingness range (mean ±1 SD)</span>
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:10px;background:rgba(192,73,43,0.11);border-radius:2px"></span>bad-day zone (≤3)</span>
-    <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--text)"></span>era mean</span>
-  </div>`;
-
-  eras.forEach((e,i)=>{
-    const s=e.s;
-    const lo=pos(s.mean-s.sd), hi=pos(s.mean+s.sd), mp=pos(s.mean);
-    const last=i===eras.length-1;
+  function render(){
+    const active=swAreaTier||'all';
+    const pool=active==='all'?rides:rides.filter(x=>x.tier===active);
     const cell=(val,lab,col)=>`<div style="text-align:center;min-width:42px">
         <div style="font-size:20px;font-weight:500;color:${col};line-height:1">${val}%</div>
         <div style="font-size:10px;color:var(--muted)">${lab}</div>
       </div>`;
-    html+=`<div style="display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--border)${last?';border-bottom:1px solid var(--border)':''}">
-      <div>
-        <div style="font-size:13px;font-weight:500;color:var(--text)">${e.name}</div>
-        <div style="font-size:10px;color:var(--muted)">${fmt(s.d0)}–${fmt(s.d1)} · n=${s.n}</div>
-      </div>
-      <div style="position:relative;height:26px;border-radius:8px;background:var(--bg)">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:50%;background:rgba(192,73,43,0.11);border-radius:8px 0 0 8px"></div>
-        <div style="position:absolute;top:4px;bottom:4px;left:${lo.toFixed(1)}%;width:${Math.max(0,hi-lo).toFixed(1)}%;background:rgba(0,187,119,0.30);border-radius:4px"></div>
-        <div style="position:absolute;top:0;bottom:0;left:${mp.toFixed(1)}%;width:2px;background:var(--text)"></div>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        ${cell(s.badPct,'≤3',badCol(s.badPct))}
-        ${cell(s.p4,'4+','var(--text)')}
-        ${cell(s.p5,'5/5','var(--text)')}
-      </div>
+
+    let html=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">`+
+      tabs.map(([k,lab])=>`<button data-tier="${k}" style="font-size:11px;padding:5px 11px;border-radius:999px;border:1px solid ${active===k?'#00BB77':'var(--border)'};background:${active===k?'rgba(0,187,119,0.12)':'transparent'};color:${active===k?'#0F6E56':'var(--muted)'};cursor:pointer;font-weight:500">${lab}</button>`).join('')+
+      `</div>`;
+
+    html+=`<div style="display:flex;gap:16px;margin-bottom:12px;font-size:11px;color:var(--muted);flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:10px;background:rgba(0,187,119,0.30);border-radius:2px"></span>willingness range (mean ±1 SD)</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:10px;background:rgba(192,73,43,0.11);border-radius:2px"></span>bad-day zone (≤3)</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:14px;height:2px;background:var(--text)"></span>era mean</span>
     </div>`;
-  });
 
-  html+=`<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--muted)">
-    <span>Mean willingness&nbsp; <span style="color:var(--text);font-weight:500">${eras.map(e=>e.s.mean.toFixed(1)).join(' → ')}</span></span>
-    <span>Spread (SD)&nbsp; <span style="color:var(--text);font-weight:500">${eras.map(e=>e.s.sd.toFixed(2)).join(' → ')}</span></span>
-  </div>`;
+    const eras=eraDefs.map(e=>({name:e.name, s:stat(pool.filter(x=>e.test(x.d)))}));
+    eras.forEach((e,i)=>{
+      const last=i===eras.length-1;
+      const border=`border-top:1px solid var(--border)${last?';border-bottom:1px solid var(--border)':''}`;
+      if(!e.s){
+        html+=`<div style="display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:12px;padding:12px 0;${border}">
+          <div><div style="font-size:13px;font-weight:500;color:var(--text)">${e.name}</div><div style="font-size:10px;color:var(--muted)">n=0</div></div>
+          <div style="font-size:12px;color:var(--muted)">— no rides at this ride type —</div><div></div>
+        </div>`;
+        return;
+      }
+      const s=e.s, lo=pos(s.mean-s.sd), hi=pos(s.mean+s.sd), mp=pos(s.mean);
+      html+=`<div style="display:grid;grid-template-columns:130px 1fr auto;align-items:center;gap:12px;padding:12px 0;${border}">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">${e.name}</div>
+          <div style="font-size:10px;color:var(--muted)">${fmt(s.d0)}–${fmt(s.d1)} · n=${s.n}</div>
+        </div>
+        <div style="position:relative;height:26px;border-radius:8px;background:var(--bg)">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:50%;background:rgba(192,73,43,0.11);border-radius:8px 0 0 8px"></div>
+          <div style="position:absolute;top:4px;bottom:4px;left:${lo.toFixed(1)}%;width:${Math.max(0,hi-lo).toFixed(1)}%;background:rgba(0,187,119,0.30);border-radius:4px"></div>
+          <div style="position:absolute;top:0;bottom:0;left:${mp.toFixed(1)}%;width:2px;background:var(--text)"></div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          ${cell(s.badPct,'≤3',badCol(s.badPct))}
+          ${cell(s.p4,'4+','var(--text)')}
+          ${cell(s.p5,'5/5','var(--text)')}
+        </div>
+      </div>`;
+    });
 
-  html+=`<div style="font-size:12px;line-height:1.7;color:#0A4266;margin-top:14px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">
-    <strong>The floor is the story, not the average.</strong> Bad days (≤3) fall while 4-or-better climbs, yet the mean barely moves. Note the neck era gives fewer outright 5s than the SI era but far fewer bad days — he clusters tightly at 4–5 instead of swinging between 5 and 1. The gain is the collapse in variance, which a before/after average can't see.
-    <br><span style="color:#888;font-size:11px">Sites are cumulative — each era adds to the last, none removed — so this is association, not clean attribution. Small n per era; workload, conditioning and injections not controlled. Era cuts: SI shockwave 2/24/26, neck (C6/7) 5/7/26.</span>
-  </div>`;
+    const withS=eras.filter(e=>e.s);
+    html+=`<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--muted)">
+      <span>Mean willingness&nbsp; <span style="color:var(--text);font-weight:500">${withS.map(e=>e.s.mean.toFixed(1)).join(' → ')||'—'}</span></span>
+      <span>Spread (SD)&nbsp; <span style="color:var(--text);font-weight:500">${withS.map(e=>e.s.sd.toFixed(2)).join(' → ')||'—'}</span></span>
+    </div>`;
 
-  el.innerHTML=html;
+    const capExtra = active==='all'
+      ? `Use the ride-type filter to compare like-for-like: the gains hold within each ask, and the neck era added canter back while still going to zero bad days.`
+      : `Filtered to ${tabs.find(t=>t[0]===active)[1]} only — cells get small, read directionally.`;
+    html+=`<div style="font-size:12px;line-height:1.7;color:#0A4266;margin-top:14px;padding:12px 16px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC">
+      <strong>The floor is the story, not the average.</strong> Bad days (≤3) fall while 4-or-better climbs, yet the mean barely moves — the gain is the collapse in variance and crash days. ${capExtra}
+      <br><span style="color:#888;font-size:11px">Sites are cumulative — each era adds to the last, none removed — so this is association, not clean attribution. Small n per era (smaller once filtered); workload, conditioning and injections not controlled. Era cuts: SI shockwave 2/24/26, neck (C6/7) 5/7/26.</span>
+    </div>`;
+
+    el.innerHTML=html;
+    el.querySelectorAll('button[data-tier]').forEach(b=>b.addEventListener('click',()=>{ swAreaTier=b.dataset.tier; render(); }));
+  }
+
+  render();
 }
 
 // ── GAIT ANALYSIS ─────────────────────────────────────────────────────
 function gDate(iso){const p=iso.split('-');return (+p[1])+'/'+(+p[2])+'/'+String(p[0]).slice(2);}
 function bandColor(b){b=(b||'').toLowerCase();
   if(b.indexOf('severe')>-1) return '#C0492B';
-  if(b.indexOf('mod')>-1) return '#B77A15';
-  if(b.indexOf('mild')>-1) return '#B77A15';
+  if(b.indexOf('mild')>-1) return '#B77A15';   // mild / very mild / mild–mod → amber
+  if(b.indexOf('mod')>-1) return '#C0492B';     // moderate (no mild) → terracotta
   if(b.indexOf('normal')>-1) return '#00BB77';
   return 'var(--text)';}
 // "R hind mild (push-off) · L fore very mild (push-off) · L hind very mild (landing)"
@@ -1438,7 +1490,8 @@ function buildGait(){
     '<th>Date</th><th>Tool</th><th>Asymmetry (limb · phase)</th><th>Back°</th><th>Stride</th><th>Push-off</th><th>Landing</th><th>Source</th></tr></thead><tbody>';
   rows.slice().reverse().forEach(r=>{
     const ft=flagText(r.flags);
-    const asymCell=r.band?`<span style="color:${bandColor(r.band)};font-weight:500">${r.band}</span>${ft?' · '+ft:''}`:'—';
+    const lg=r.legacy?' <span style="font-size:10px;color:var(--muted)">(2024 scale)</span>':'';
+    const asymCell=r.band?`<span style="color:${bandColor(r.band)};font-weight:500">${r.band}</span>${ft?' · '+ft:''}${lg}`:'—';
     const po=r.poLimb?`${r.poVal} ${r.poLimb}`:(r.pushoff!=null?r.pushoff:'—');
     const im=r.imLimb?`${r.imVal} ${r.imLimb}`:(r.impact!=null?r.impact:'—');
     const src=r.pdf?`<a href="${r.pdf}" target="_blank" rel="noopener" style="color:#0A6E96;text-decoration:none">PDF ↗</a>`:'—';
@@ -1449,31 +1502,33 @@ function buildGait(){
       `<td>${po}</td><td>${im}</td><td>${src}</td></tr>`;
   });
   tbl+='</tbody></table>';
-  const backAny=rows.some(r=>r.backAng!=null);
-  const strideAny=rows.some(r=>r.strideLen!=null);
-  const sleipAny=rows.some(r=>['head','pelvis','withers'].some(k=>r[k]!=null));
-  el.innerHTML=tiles+
-    (backAny?'<div class="card-sub" style="margin-top:8px">Back movement angle over time (°)</div><div class="cw h200"><canvas id="cGaitBack"></canvas></div>':'')+
-    (strideAny?'<div class="card-sub" style="margin-top:14px">Stride length over time (cm)</div><div class="cw h200"><canvas id="cGaitStride"></canvas></div>':'')+
-    (sleipAny?'<div class="card-sub" style="margin-top:14px">Head / pelvis asymmetry (Sleip) — lower is better</div><div class="cw h200"><canvas id="cGaitSleip"></canvas></div>':'')+
-    tbl;
-  const labels=rows.map(r=>gDate(r.d));
+  // Charts use tool-filtered row subsets so each axis only spans its own dates,
+  // and legacy (2024, older Sleip scaling) points are excluded from the magnitude line.
+  const backRows=rows.filter(r=>r.backAng!=null);
+  const strideRows=rows.filter(r=>r.strideLen!=null);
+  const sleipRows=rows.filter(r=>!r.legacy&&['head','pelvis','withers'].some(k=>r[k]!=null));
+  const hasLegacySleip=rows.some(r=>r.legacy&&r.tool==='sleip');
   const lineOpts=extra=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:Object.assign({},extra)});
-  if(backAny){
+  el.innerHTML=tiles+
+    (backRows.length?'<div class="card-sub" style="margin-top:8px">Back movement angle over time (°)</div><div class="cw h200"><canvas id="cGaitBack"></canvas></div>':'')+
+    (strideRows.length?'<div class="card-sub" style="margin-top:14px">Stride length over time (cm)</div><div class="cw h200"><canvas id="cGaitStride"></canvas></div>':'')+
+    (sleipRows.length?`<div class="card-sub" style="margin-top:14px">Head / pelvis asymmetry (Sleip${hasLegacySleip?', 2026 scaling':''}) — lower is better${hasLegacySleip?'. 2024 recordings use Sleip’s older scaling and are shown in the table only.':''}</div><div class="cw h200"><canvas id="cGaitSleip"></canvas></div>`:'')+
+    tbl;
+  if(backRows.length){
     CH.gaitBack=new Chart(document.getElementById('cGaitBack'),{type:'line',
-      data:{labels,datasets:[{label:'Back°',data:rows.map(r=>r.backAng),borderColor:'#005F9D',backgroundColor:'#005F9D',tension:.25,spanGaps:true,pointRadius:4,fill:false}]},
+      data:{labels:backRows.map(r=>gDate(r.d)),datasets:[{label:'Back°',data:backRows.map(r=>r.backAng),borderColor:'#005F9D',backgroundColor:'#005F9D',tension:.25,spanGaps:true,pointRadius:4,fill:false}]},
       options:lineOpts({y:{beginAtZero:true,suggestedMax:6}})});
   }
-  if(strideAny){
+  if(strideRows.length){
     CH.gaitStride=new Chart(document.getElementById('cGaitStride'),{type:'line',
-      data:{labels,datasets:[{label:'Stride cm',data:rows.map(r=>r.strideLen),borderColor:'#0E8A57',backgroundColor:'#0E8A57',tension:.25,spanGaps:true,pointRadius:4,fill:false}]},
+      data:{labels:strideRows.map(r=>gDate(r.d)),datasets:[{label:'Stride cm',data:strideRows.map(r=>r.strideLen),borderColor:'#0E8A57',backgroundColor:'#0E8A57',tension:.25,spanGaps:true,pointRadius:4,fill:false}]},
       options:lineOpts({y:{suggestedMin:180,suggestedMax:215}})});
   }
-  if(sleipAny){
+  if(sleipRows.length){
     const ss=[['head','Head','#C0492B'],['pelvis','Pelvis','#005F9D'],['withers','Withers','#8E6FB8']]
-      .filter(([k])=>rows.some(r=>r[k]!=null)).map(([k,lab,c])=>({label:lab,data:rows.map(r=>r[k]==null?null:r[k]),borderColor:c,backgroundColor:c,tension:.25,spanGaps:true,pointRadius:3}));
+      .filter(([k])=>sleipRows.some(r=>r[k]!=null)).map(([k,lab,c])=>({label:lab,data:sleipRows.map(r=>r[k]==null?null:r[k]),borderColor:c,backgroundColor:c,tension:.25,spanGaps:true,pointRadius:3}));
     CH.gaitSleip=new Chart(document.getElementById('cGaitSleip'),{type:'line',
-      data:{labels,datasets:ss},
+      data:{labels:sleipRows.map(r=>gDate(r.d)),datasets:ss},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}}},scales:{y:{beginAtZero:true}}}});
   }
 }
