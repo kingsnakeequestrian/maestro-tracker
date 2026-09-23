@@ -1381,6 +1381,8 @@ function toggleChipSet(btn, stateKey) {
   btn.classList.toggle('sel');
   // rebuild array from all .sel chips in same group parent
   const selected = [...btn.parentElement.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());
+  // chips pass 'vetLameRegion' etc.; the VET fields are lameRegion / injProduct / imagingType
+  if (!(stateKey in VET) && !(stateKey in BW)) stateKey = stateKey.replace(/^vet(.)/, (m, c) => c.toLowerCase());
   // figure out which state object owns this key
   if (stateKey in VET) VET[stateKey] = selected;
   else if (stateKey in BW) BW[stateKey] = selected;

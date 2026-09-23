@@ -260,6 +260,8 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .proc-item.sel{background:#E1EEF4;border-color:#6FB0CC}
 .proc-item.sel .proc-label{color:#0A527F}
 .reminder-banner.show{display:block}
+.limb-wrap{display:none;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.limb-lbl{font-size:12px;color:var(--text-mid);min-width:62px}
 </style>
 
 <style id="horse-switch-style">
@@ -293,11 +295,16 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 <div class="nav-tabs" id="navTabs">
   <button class="nav-tab active" data-s="log" onclick="showSection('log',this)">Log</button>
+  <button class="nav-tab" data-s="vet" onclick="showSection('vet',this)">Vet visit</button>
   <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
   <button class="nav-tab" data-s="plan" onclick="showSection('plan',this)">Rehab plan</button>
   <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
 </div>
 
+<div id="reminderBanner" class="reminder-banner">
+  <div class="reminder-banner-title">Follow-up reminders</div>
+  <div id="reminderList"></div>
+</div>
 <div id="loadedNote" class="reminder-banner" style="background:var(--blue-bg);border-color:var(--blue-border)">
   <div class="reminder-banner-title" style="color:var(--blue);margin:0" id="loadedText"></div>
 </div>
@@ -350,35 +357,24 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   </div>
 
   <div class="card">
-    <div class="card-title">Ice &amp; Voltaren</div>
-    <div class="field">
-      <div class="proc-item" id="iceBox" onclick="togCheck('ice')"><div class="proc-check" id="iceChk"></div><div class="proc-label">Iced</div></div>
-      <div class="chip-group limb-row" id="iceLimbs" style="margin-top:8px"></div>
+    <div class="card-title">Modalities</div>
+    <div class="procedures-grid">
+      <div class="proc-item" id="bemerBox" onclick="togCheck('bemer')"><div class="proc-check" id="bemerChk"></div><div class="proc-label">Bemer</div></div>
+      <div class="proc-item" id="laserBox" onclick="togCheck('laser')"><div class="proc-check" id="laserChk"></div><div class="proc-label">Laser</div></div>
+      <div class="proc-item" id="magnaBox" onclick="togCheck('magna')"><div class="proc-check" id="magnaChk"></div><div class="proc-label">Magnawave</div></div>
+      <div class="proc-item" id="massageBox" onclick="togCheck('massage')"><div class="proc-check" id="massageChk"></div><div class="proc-label">Massage</div></div>
+      <div class="proc-item" id="balpadBox" onclick="togCheck('balpad')"><div class="proc-check" id="balpadChk"></div><div class="proc-label">Balance pad</div></div>
+      <div class="proc-item" id="iceBox" onclick="togCheck('ice')"><div class="proc-check" id="iceChk"></div><div class="proc-label">Ice</div></div>
+      <div class="proc-item" id="voltBox" onclick="togCheck('volt')"><div class="proc-check" id="voltChk"></div><div class="proc-label">Voltaren</div></div>
     </div>
-    <div class="div"></div>
-    <div class="field">
-      <div class="proc-item" id="voltBox" onclick="togCheck('volt')"><div class="proc-check" id="voltChk"></div><div class="proc-label">Voltaren applied</div></div>
-      <div class="chip-group limb-row" id="voltLimbs" style="margin-top:8px"></div>
-    </div>
-    <div class="score-hint" style="margin-top:8px">Both feed the gait card — a Sleip capture on a treated day reads lower, so it gets flagged.</div>
+    <div class="limb-wrap" id="iceWrap"><span class="limb-lbl">Ice</span><div class="chip-group limb-row" id="iceLimbs"></div></div>
+    <div class="limb-wrap" id="voltWrap"><span class="limb-lbl">Voltaren</span><div class="chip-group limb-row" id="voltLimbs"></div></div>
+    <div class="score-hint" id="magnaHint" style="margin-top:8px;display:none">Log areas treated and fasciculations on <a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" style="color:inherit">Bodywork → Log a session</a>.</div>
+    <div class="score-hint" style="margin-top:8px">Ice/Voltaren feed the gait card — a Sleip capture on a treated day gets flagged.</div>
   </div>
 
   <div class="card">
-    <div class="card-title">Other modalities</div>
-    <div class="field">
-      <label>Bemer</label>
-      <div class="toggle-group" data-f="bemer">
-        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
-        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Laser</label>
-      <div class="toggle-group" data-f="laser">
-        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
-        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
-      </div>
-    </div>
+    <div class="card-title">Soundness</div>
     <div class="field">
       <label>Lameness seen today?</label>
       <div class="toggle-group" data-f="lameness">
@@ -395,6 +391,240 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
   <div class="info-note" style="margin-bottom:10px"><strong>Vet, farrier, bodywork</strong>Add appointments on the <a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" style="color:inherit">Appts/History</a> tab — they go to Winter's Appointments tab and the Horse Appointments calendar.</div>
 </div>
+
+<!-- VET VISIT (mirrors Maestro's form, adapted for Winter) -->
+<div class="section" id="s-vet">
+  <div class="card">
+    <div class="card-title">Visit Details</div>
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="vetDate">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Provider</label>
+        <input type="text" id="vetProvider" placeholder="Dr. Smith">
+      </div>
+      <div class="field">
+        <label>Clinic / Practice</label>
+        <input type="text" id="vetClinic" placeholder="EVCT">
+      </div>
+    </div>
+    <div class="field">
+      <label>Visit type</label>
+      <div class="chip-group">
+        <button class="chip" onclick="togVetVisitType(this)">Lameness eval</button>
+        <button class="chip" onclick="togVetVisitType(this)">Rehab check-in</button>
+        <button class="chip" onclick="togVetVisitType(this)">Injection / treatment</button>
+        <button class="chip" onclick="togVetVisitType(this)">Routine / wellness</button>
+        <button class="chip" onclick="togVetVisitType(this)">Emergency</button>
+        <button class="chip" onclick="togVetVisitType(this)">Other</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Procedures Performed</div>
+    <div class="field">
+      <div class="procedures-grid">
+        <div class="proc-item" onclick="togProc(this,'injection')"><div class="proc-check"></div><div class="proc-label">Injection</div></div>
+        <div class="proc-item" onclick="togProc(this,'shockwave')"><div class="proc-check"></div><div class="proc-label">Shockwave</div></div>
+        <div class="proc-item" onclick="togProc(this,'irap')"><div class="proc-check"></div><div class="proc-label">IRAP</div></div>
+        <div class="proc-item" onclick="togProc(this,'scope')"><div class="proc-check"></div><div class="proc-label">Scope</div></div>
+        <div class="proc-item" onclick="togProc(this,'bloodwork')"><div class="proc-check"></div><div class="proc-label">Bloodwork</div></div>
+        <div class="proc-item" onclick="togProc(this,'imaging')"><div class="proc-check"></div><div class="proc-label">Imaging</div></div>
+        <div class="proc-item" onclick="togProc(this,'vaccination')"><div class="proc-check"></div><div class="proc-label">Vaccination</div></div>
+        <div class="proc-item" onclick="togProc(this,'dental')"><div class="proc-check"></div><div class="proc-label">Dental</div></div>
+        <div class="proc-item" onclick="togProc(this,'nerve_block')"><div class="proc-check"></div><div class="proc-label">Nerve block</div></div>
+        <div class="proc-item" onclick="togProc(this,'flexion')"><div class="proc-check"></div><div class="proc-label">Flexion tests</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="vetLamenessCard">
+    <div class="card-title">Lameness</div>
+    <div class="field">
+      <div class="score-hint" style="margin-bottom:8px">AAEP scale: 0 = sound · 1 = barely perceptible · 2 = mild · 3 = consistently lame · 4 = marked · 5 = non-weight bearing</div>
+      <label>RF grade</label>
+      <div class="score-group" style="margin-bottom:8px">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RF')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RF')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RF')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RF')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RF')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RF')">5</button>
+      </div>
+      <label>LF grade</label>
+      <div class="score-group" style="margin-bottom:8px">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LF')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LF')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LF')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LF')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LF')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LF')">5</button>
+      </div>
+      <label>RH grade</label>
+      <div class="score-group" style="margin-bottom:8px">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'RH')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'RH')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'RH')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'RH')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'RH')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'RH')">5</button>
+      </div>
+      <label>LH grade</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="0" onclick="setLimbGrade(this,'LH')">0</button>
+        <button class="score-btn" data-v="1" onclick="setLimbGrade(this,'LH')">1</button>
+        <button class="score-btn" data-v="2" onclick="setLimbGrade(this,'LH')">2</button>
+        <button class="score-btn" data-v="3" onclick="setLimbGrade(this,'LH')">3</button>
+        <button class="score-btn" data-v="4" onclick="setLimbGrade(this,'LH')">4</button>
+        <button class="score-btn" data-v="5" onclick="setLimbGrade(this,'LH')">5</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Joint / region</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hoof / coffin</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Navicular</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Fetlock</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Suspensory</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Pastern</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Tendon</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Carpus</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Hock</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Stifle</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Cervical spine</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">Back</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetLameRegion')">SI</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Other region (write in)</label>
+      <input type="text" id="vetLameRegionOther" placeholder="e.g. lateral palmar process, medial suspensory branch…">
+    </div>
+    <div class="field">
+      <label>Response to nerve block</label>
+      <input type="text" id="vetNerveBlock" placeholder="e.g. RF palmar digital — 70% improvement, LF nod unmasked">
+    </div>
+  </div>
+
+  <div class="card" id="vetInjectionCard" style="display:none">
+    <div class="card-title">Injection Details</div>
+    <div class="field">
+      <label>Injection site(s)</label>
+      <input type="text" id="vetInjSite" placeholder="e.g. RF fetlock">
+    </div>
+    <div class="field">
+      <label>Product</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">IRAP</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">PRP</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">ProStride</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Triamcinolone</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Methylprednisolone</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetInjProduct')">Hyaluronic acid</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Other product (write in)</label>
+      <input type="text" id="vetInjProductOther" placeholder="">
+    </div>
+    <div class="field">
+      <label>Post-injection protocol</label>
+      <textarea id="vetInjProtocol" rows="2" placeholder="e.g. Stall rest 3 days, light work day 4, return to work day 5"></textarea>
+    </div>
+  </div>
+
+  <div class="card" id="vetImagingCard" style="display:none">
+    <div class="card-title">Imaging</div>
+    <div class="field">
+      <label>Imaging type</label>
+      <div class="chip-group">
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Radiograph</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Ultrasound</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">Nuclear scintigraphy</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">MRI</button>
+        <button class="chip" onclick="toggleChipSet(this,'vetImagingType')">CT</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Region imaged</label>
+      <input type="text" id="vetImagingRegion" placeholder="e.g. RF foot, RF fetlock, cervical spine">
+    </div>
+    <div class="field">
+      <label>Imaging file link (Drive)</label>
+      <input type="text" id="vetImagingLink" placeholder="https://drive.google.com/…">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Clinical Notes</div>
+    <div class="field">
+      <label>History / presentation</label>
+      <textarea id="vetHistory" rows="3" placeholder="Reason for visit, owner observations…"></textarea>
+    </div>
+    <div class="field">
+      <label>Findings</label>
+      <textarea id="vetFindings" rows="3" placeholder="Exam findings, diagnostic results…"></textarea>
+    </div>
+    <div class="field">
+      <label>Medications administered</label>
+      <input type="text" id="vetMeds" placeholder="e.g. Dormosedan, Equioxx">
+    </div>
+    <div class="field">
+      <label>Recommendations</label>
+      <textarea id="vetRecs" rows="2" placeholder=""></textarea>
+    </div>
+    <div class="field">
+      <label>Plan</label>
+      <textarea id="vetPlan" rows="2" placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Follow-Up</div>
+    <div class="field">
+      <label>Follow-up date</label>
+      <input type="date" id="vetFollowupDate">
+    </div>
+    <div class="field">
+      <label>Follow-up notes</label>
+      <input type="text" id="vetFollowupNotes" placeholder="e.g. Recheck in 4 weeks, RF block…">
+    </div>
+    <div class="proc-item sel" id="vetFuCal" onclick="this.classList.toggle('sel');this.querySelector('.proc-check').textContent=this.classList.contains('sel')?'✓':''"><div class="proc-check">✓</div><div class="proc-label">Add follow-up to Appointments + calendar</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Files</div>
+    <div class="field">
+      <label>Visit summary PDF (upload to Drive)</label>
+      <div class="upload-area" style="margin-bottom:10px">
+        <input type="file" id="vetPdfInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'pdf')">
+        <div class="upload-icon">📄</div>
+        <div class="upload-label">Tap to upload visit summary</div>
+        <div class="upload-hint">PDF or image</div>
+      </div>
+      <input type="text" id="vetPdfLink" placeholder="Or paste Drive link directly">
+    </div>
+    <div class="field" id="vetVaccCard">
+      <label>Vaccination certificate (upload or link)</label>
+      <div class="upload-area" style="margin-bottom:10px">
+        <input type="file" id="vetVaccInput" accept="application/pdf,image/*" onchange="handleVetFile(event,'vacc')">
+        <div class="upload-icon">💉</div>
+        <div class="upload-label">Tap to upload certificate</div>
+        <div class="upload-hint">PDF or image</div>
+      </div>
+      <input type="text" id="vetVaccLink" placeholder="Or paste Drive link directly">
+    </div>
+  </div>
+
+  <div style="padding: 0 0 12px">
+    <button class="save-btn-secondary" id="vetSaveBtn" onclick="saveVetEntry()">Save vet visit</button>
+    <div class="score-hint" style="text-align:center">Saves to the Vet Records tab in Winter Tracking (Live). Files go to Winter → Imaging and Vet Reports.</div>
+  </div>
+</div>
+
 
 <!-- HISTORY -->
 <div class="section" id="s-history">
@@ -521,12 +751,15 @@ function buildLimbs(which){
   const el=document.getElementById(which+'Limbs');
   el.innerHTML=LIMBS.map(l=>`<button type="button" class="chip" data-l="${l}" onclick="togLimb('${which}','${l}')">${l}</button>`).join('');
 }
+const LIMBED={ice:1,volt:1};
 function togCheck(which,forceOn,silent){
   const on=forceOn!==undefined?forceOn:!(F[which]==='Y');
   F[which]=on?'Y':'N';
   document.getElementById(which+'Box').classList.toggle('sel',on);
   document.getElementById(which+'Chk').textContent=on?'✓':'';
-  document.getElementById(which+'Limbs').style.display=on?'':'none';
+  if(which==='magna'||which==='massage'){const h=document.getElementById('magnaHint');h.style.display=(F.magna==='Y'||F.massage==='Y')?'':'none';}
+  if(!LIMBED[which]){if(!silent)TOUCHED[which]=1;return;}
+  document.getElementById(which+'Wrap').style.display=on?'flex':'none';
   const key=which+'Limbs';
   if(on && !F[key] && !silent){F[key]='RF';}          // default RF
   if(!on){F[key]='';}
@@ -548,14 +781,14 @@ function resetForm(){
   F={};TOUCHED={};
   document.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
   ['walk','trot','canter','ptNotes','notes'].forEach(id=>document.getElementById(id).value='');
-  togCheck('ice',false,true); togCheck('volt',false,true); total();
+  ['bemer','laser','magna','massage','balpad','ice','volt'].forEach(k=>togCheck(k,false,true)); total();
   document.getElementById('loadedNote').classList.remove('show');
 }
 
 // ── SHEET ────────────────────────────────────────────────────────────
 // Headers are matched by name, so the page keeps working whatever order the columns are in.
 const HMAP={ride:'ride',walk:'walk (min)',trot:'trot (min)',canter:'canter (min)',total:'total (min)',equibands:'equibands',
-  pt:'pt exercises',ptNotes:'pt notes',bemer:'bemer',laser:'laser',ice:'ice',iceLimbs:'ice limbs',volt:'voltaren',voltLimbs:'voltaren limbs',lameness:'lameness',notes:'notes'};
+  pt:'pt exercises',ptNotes:'pt notes',bemer:'bemer',laser:'laser',magna:'magnawave',massage:'massage',balpad:'balance pad',ice:'ice',iceLimbs:'ice limbs',volt:'voltaren',voltLimbs:'voltaren limbs',lameness:'lameness',notes:'notes'};
 function rowObj(headers,r){const o={};headers.forEach((h,i)=>{o[String(h).trim().toLowerCase()]=r[i];});return o;}
 function sheetRows(){
   if(!ROWS)return [];
@@ -575,12 +808,12 @@ function prefill(date){
   const o=sheetRows().find(x=>x.date===date);
   if(!o||!hasData(o))return;
   const v=k=>{const x=o[HMAP[k]];return x===null||x===undefined?'':String(x);};
-  ['ride','pt','equibands','bemer','laser','lameness'].forEach(k=>{if(v(k))setTogVal(k,v(k).toUpperCase().charAt(0));});
+  ['ride','pt','equibands','lameness'].forEach(k=>{if(v(k))setTogVal(k,v(k).toUpperCase().charAt(0));});
   ['walk','trot','canter'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
   ['ptNotes','notes'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
   total();
   F.iceLimbs=v('iceLimbs'); F.voltLimbs=v('voltLimbs');
-  togCheck('ice',v('ice').toUpperCase()==='Y',true); togCheck('volt',v('volt').toUpperCase()==='Y',true);
+  ['bemer','laser','magna','massage','balpad','ice','volt'].forEach(k=>togCheck(k,v(k).toUpperCase()==='Y',true));
   document.getElementById('loadedText').textContent='Editing the entry already saved for this day — only what you change gets written.';
   document.getElementById('loadedNote').classList.add('show');
 }
@@ -596,7 +829,7 @@ function qSet(q){try{localStorage.setItem('w_queue',JSON.stringify(q));}catch(e)
 async function post(p){
   const body=new URLSearchParams(); Object.keys(p).forEach(k=>body.set(k,p[k]));
   const r=await fetch(CFG.scriptUrl,{method:'POST',body}); const j=await r.json();
-  if(!j.success)throw new Error(j.error||'write failed'); return j;
+  if(!(j.success||j.ok))throw new Error(j.error||'write failed'); return j;
 }
 async function saveEntry(){
   const p=payload();
@@ -637,7 +870,7 @@ function renderHistory(){
       yn(o.equibands)?'Bands':null,
       yn(o.ice)?'Ice '+(o['ice limbs']||''):null,
       yn(o.voltaren)?'Voltaren '+(o['voltaren limbs']||''):null,
-      yn(o.bemer)?'Bemer':null, yn(o.laser)?'Laser':null,
+      yn(o.bemer)?'Bemer':null, yn(o.laser)?'Laser':null, yn(o.magnawave)?'Magnawave':null, yn(o.massage)?'Massage':null, yn(o['balance pad'])?'Balance pad':null,
       yn(o.lameness)?'<span style="color:var(--red)">Lameness</span>':null
     ].filter(Boolean).map(x=>`<span>${x}</span>`).join('');
     const notes=[o['pt notes'],o.notes].filter(Boolean).map(esc).join(' · ');
@@ -650,9 +883,93 @@ function renderHistory(){
 function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(m,err){const t=document.getElementById('toast');t.textContent=m;t.className='toast show'+(err?' err':'');clearTimeout(t._to);t._to=setTimeout(()=>t.className='toast',2600);}
 
+
+// ── VET VISIT (same fields as Maestro's form) ────────────────────────
+let VET={};
+function vetReset(){
+  VET={date:'',provider:'',clinic:'',visitType:[],procedures:[],lameGrade:'',lameGrades:{RF:'',LF:'',RH:'',LH:''},lameLimb:[],lameRegion:[],lameRegionOther:'',nerveBlock:'',
+    injSite:'',injProduct:[],injProductOther:'',injProtocol:'',imagingType:[],imagingRegion:'',imagingLink:'',history:'',findings:'',meds:'',recs:'',plan:'',
+    followupDate:'',followupNotes:'',pdfFile:null,pdfLink:'',vaccFile:null,vaccLink:''};
+  const s=document.getElementById('s-vet');if(!s)return;
+  s.querySelectorAll('input[type=text],input[type=date],textarea').forEach(e=>e.value='');
+  s.querySelectorAll('.chip.sel,.score-btn.sel').forEach(e=>e.classList.remove('sel'));
+  s.querySelectorAll('.procedures-grid .proc-item.sel').forEach(e=>{e.classList.remove('sel');e.querySelector('.proc-check').textContent='';});
+  ['vetLamenessCard','vetInjectionCard','vetImagingCard'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=id==='vetLamenessCard'?'':'none';});
+  document.getElementById('vetDate').value=iso(new Date());
+}
+function toggleChipSet(btn,key){btn.classList.toggle('sel');key=key.replace(/^vet(.)/,(m,c)=>c.toLowerCase());VET[key]=[...btn.parentElement.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());}
+function togVetVisitType(btn){btn.classList.toggle('sel');VET.visitType=[...btn.parentElement.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());vetCards();}
+function togProc(el){el.classList.toggle('sel');el.querySelector('.proc-check').textContent=el.classList.contains('sel')?'✓':'';
+  VET.procedures=[...document.querySelectorAll('#s-vet .procedures-grid .proc-item.sel')].map(e=>e.querySelector('.proc-label').textContent.trim());vetCards();}
+function vetCards(){
+  const p=VET.procedures||[],t=VET.visitType||[];
+  document.getElementById('vetLamenessCard').style.display=(p.includes('Nerve block')||p.includes('Flexion tests')||t.some(x=>['Lameness eval','Rehab check-in'].includes(x))||!t.length)?'':'none';
+  document.getElementById('vetInjectionCard').style.display=(p.includes('Injection')||p.includes('IRAP'))?'block':'none';
+  document.getElementById('vetImagingCard').style.display=p.includes('Imaging')?'block':'none';
+}
+function setLimbGrade(btn,limb){
+  btn.parentElement.querySelectorAll('.score-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');
+  VET.lameGrades[limb]=btn.dataset.v;
+  const act=Object.entries(VET.lameGrades).filter(([l,g])=>g!=='');
+  VET.lameGrade=act.map(([l,g])=>l+'='+g).join(', ');VET.lameLimb=act.filter(([l,g])=>g!=='0').map(([l])=>l);
+}
+function handleVetFile(e,type){const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=ev=>{VET[type==='pdf'?'pdfFile':'vaccFile']={name:f.name,type:f.type,data:ev.target.result};toast('File ready — uploads on save');};r.readAsDataURL(f);}
+function collectVet(){
+  const v=id=>(document.getElementById(id)||{}).value||'';
+  Object.assign(VET,{date:v('vetDate'),provider:v('vetProvider'),clinic:v('vetClinic'),lameRegionOther:v('vetLameRegionOther'),nerveBlock:v('vetNerveBlock'),
+    injSite:v('vetInjSite'),injProductOther:v('vetInjProductOther'),injProtocol:v('vetInjProtocol'),imagingRegion:v('vetImagingRegion'),imagingLink:v('vetImagingLink'),
+    history:v('vetHistory'),findings:v('vetFindings'),meds:v('vetMeds'),recs:v('vetRecs'),plan:v('vetPlan'),followupDate:v('vetFollowupDate'),followupNotes:v('vetFollowupNotes'),
+    pdfLink:v('vetPdfLink'),vaccLink:v('vetVaccLink')});
+}
+async function uploadVetFile(file,prefix){
+  const body=new URLSearchParams();body.set('action','uploadFile');body.set('name',prefix+'_'+file.name);body.set('mimeType',file.type||'application/pdf');
+  body.set('data',String(file.data).split(',')[1]||'');
+  const r=await fetch(CFG.scriptUrl,{method:'POST',body});const j=await r.json();if(!j.ok)throw new Error(j.error||'upload failed');return j.url;
+}
+function vetPayload(v){
+  const a=x=>Array.isArray(x)?x:[];
+  return {action:'vet',date:v.date,provider:v.provider,clinic:v.clinic,visitType:a(v.visitType).join(', '),procedures:a(v.procedures).join(', '),
+    lameGrade:v.lameGrade,lameLimb:a(v.lameLimb).join(', '),lameRegion:[...a(v.lameRegion),v.lameRegionOther].filter(Boolean).join(', '),nerveBlock:v.nerveBlock,
+    injSite:v.injSite,injProduct:[...a(v.injProduct),v.injProductOther].filter(Boolean).join(', '),injProtocol:v.injProtocol,
+    imagingType:a(v.imagingType).join(', '),imagingRegion:v.imagingRegion,imagingLink:v.imagingLink,meds:v.meds,history:v.history,findings:v.findings,
+    recs:v.recs,plan:v.plan,followupDate:v.followupDate,followupNotes:v.followupNotes,pdfLink:v.pdfLink,vaccLink:v.vaccLink,
+    followupToCal:(document.getElementById('vetFuCal')||{classList:{contains:()=>false}}).classList.contains('sel')?'Y':''};
+}
+function getVetEntries(){try{return JSON.parse(localStorage.getItem('w_vet')||'[]');}catch(e){return [];}}
+async function saveVetEntry(){
+  collectVet();
+  if(!VET.date){toast('Set a visit date',true);return;}
+  const btn=document.getElementById('vetSaveBtn');btn.disabled=true;btn.textContent='Saving…';
+  try{
+    if(CFG.scriptUrl){
+      if(VET.pdfFile&&!VET.pdfLink){VET.pdfLink=await uploadVetFile(VET.pdfFile,'Winter_vet_'+VET.date);}
+      if(VET.vaccFile&&!VET.vaccLink){VET.vaccLink=await uploadVetFile(VET.vaccFile,'Winter_vacc_'+VET.date);}
+    }
+  }catch(e){toast('File upload failed — visit still saving',true);}
+  const p=vetPayload(VET);
+  try{const all=getVetEntries();all.unshift({date:VET.date,provider:VET.provider,followupDate:VET.followupDate,followupNotes:VET.followupNotes});localStorage.setItem('w_vet',JSON.stringify(all.slice(0,50)));}catch(e){}
+  try{
+    if(!CFG.scriptUrl)throw new Error('no url');
+    const body=new URLSearchParams();Object.keys(p).forEach(k=>body.set(k,p[k]||''));
+    const r=await fetch(CFG.scriptUrl,{method:'POST',body});const j=await r.json();if(!j.ok)throw new Error(j.error||'failed');
+    toast('Vet visit saved ✓'+(j.followup?' · follow-up on calendar':''));vetReset();
+  }catch(e){const q=qGet();q.push(p);qSet(q);toast(CFG.scriptUrl?'No signal — queued, will send later':'Saved on this device — add the Script URL in ⚙',true);}
+  finally{btn.disabled=false;btn.textContent='Save vet visit';checkReminders();}
+}
+function checkReminders(){
+  const t=new Date();t.setHours(0,0,0,0);const in7=new Date(t);in7.setDate(in7.getDate()+7);
+  const items=[];getVetEntries().forEach((e,i)=>{if(!e.followupDate)return;const d=new Date(e.followupDate+'T12:00:00');
+    if(d<=in7)items.push({i,over:d<t,txt:d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' — '+(e.followupNotes||'Vet follow-up')+(e.provider?' ('+e.provider+')':''),fd:e.followupDate});});
+  const b=document.getElementById('reminderBanner'),l=document.getElementById('reminderList');
+  l.innerHTML=items.map(x=>`<div class="reminder-item${x.over?' reminder-overdue':''}" style="display:flex;justify-content:space-between;align-items:center">${x.over?'Overdue: ':''}${esc(x.txt)}<button onclick="dismissReminder(${x.i},'${x.fd}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:2px 6px" title="Dismiss">✕</button></div>`).join('');
+  b.classList.toggle('show',items.length>0);
+}
+function dismissReminder(i,fd){const e=getVetEntries();if(e[i]&&e[i].followupDate===fd){e[i].followupDate='';localStorage.setItem('w_vet',JSON.stringify(e));checkReminders();}}
+
 // ── INIT ─────────────────────────────────────────────────────────────
 buildLimbs('ice'); buildLimbs('volt');
-loadCfg(); initDate(); loadSheet(); flushQueue(false);
+loadCfg(); initDate(); vetReset(); checkReminders(); loadSheet(); flushQueue(false);
 </script>
 </body>
 </html>

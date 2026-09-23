@@ -98,6 +98,11 @@
   .ent-reg-detail { display:none; gap:8px; flex-wrap:wrap; align-items:center; margin-top:9px; padding-top:9px;
                     border-top:1px dashed #DFDCD3; }
   .ent-reg.on .ent-reg-detail { display:flex; }
+  .ent-min { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); }
+  .ent-min input { width:62px; font-family:inherit; font-size:12px; padding:6px 8px; border:1px solid var(--border); border-radius:7px; background:#fff; color:var(--text); }
+  .ent-lbl { font-size:11px; color:var(--muted); margin-left:6px; }
+  .ent-fx { display:none; gap:8px; flex-wrap:wrap; align-items:center; flex-basis:100%; }
+  .seg2.lvl button.on[data-lvl="0"] { background:#7E7C74; color:#fff; }
   .ent-mus { flex:1; min-width:180px; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; padding:6px 9px;
              border:1px solid var(--border); border-radius:7px; background:#fff; color:var(--text); }
   .ent-mus:focus { outline:none; border-color:#00A56A; }
@@ -205,7 +210,7 @@
       </div>
     </div>
 
-    <div class="ent-sub">Fasciculations — tick each region you saw a response in</div>
+    <div class="ent-sub">Areas treated — tick each area you worked, then minutes and whether it fasciculated</div>
     <div class="ent-regions" id="entRegions"></div>
 
     <div class="ent-field" style="margin-top:16px">
@@ -457,8 +462,13 @@ function renderRegionTimeline(){
     var mus=(s.f||[]).filter(function(x){return x.r===SELREG;}).map(function(x){return esc(x.m)+' ('+x.side+' '+x.lvl+')';}).join(', ');
     return '<div class="rt-row"><span class="rt-date">'+esc(s.d)+'</span>'
       +'<span class="rt-pill" style="background:'+sideClr[sd]+'">'+sd+'</span>'
-      +'<span style="color:#5F5E5A">'+esc(s.tx||'PEMF')+' '+esc(s.p)+(isSelf(s)?' · mine':'')+'</span>'
+      +'<span style="color:#5F5E5A">'+esc(s.tx||'PEMF')+(s.p?' '+esc(s.p):'')+(isSelf(s)?' · mine':'')+'</span>'
       +(mus?'<span class="rt-muscles">'+mus+'</span>':'')+'</div>';
+  }).join('');
+  var quiet=VIS().filter(function(s){return (s.t||[]).some(function(o){return o.r===SELREG;})&&(s.a||[]).indexOf(SELREG)<0;});
+  if(quiet.length)rows+='<div style="font-size:11px;color:#8A8578;margin:10px 0 4px">Treated, no fasciculation</div>'+quiet.slice().reverse().map(function(s){
+    var o=(s.t||[]).find(function(x){return x.r===SELREG;})||{};
+    return '<div class="rt-row"><span class="rt-date">'+esc(s.d)+'</span><span class="rt-pill" style="background:#C9C4B8">—</span><span style="color:#5F5E5A">'+esc(s.tx||'PEMF')+(o.min?' · '+o.min+' min':'')+(isSelf(s)?' · mine':'')+'</span></div>';
   }).join('');
   var lc=hist.filter(function(s){return (s.s&&s.s[SELREG])==='L';}).length;
   var rc=hist.filter(function(s){return (s.s&&s.s[SELREG])==='R';}).length;
@@ -567,7 +577,8 @@ function renderSessionNotes(){
       +'<span class="note-date">'+s.d+' · '+esc(mod)+' '+s.p+(mine?' <span class="mine-badge">mine</span>':'')+'</span>'
       +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span></div>'
       +(mine&&doseTxt(s)?'<div class="mine-dose" style="margin-bottom:6px">'+esc(doseTxt(s))+'</div>':'')
-      +'<div class="note-obs">Areas: '+areas+'</div>'
+      +(s.t&&s.t.length?'<div class="note-obs">Treated: '+esc(treatedTxt(s))+'</div>':'')
+      +'<div class="note-obs">'+(s.t&&s.t.length?'Fasciculated: ':'Areas: ')+(areas||'none')+'</div>'
       +(s.obs?'<div class="note-obs">“'+esc(s.obs)+'”</div>':'')
       +fmtFindings(s)
       +'<textarea class="note-edit" placeholder="Add your notes from this session..." onchange="saveSessionNote(\''+s.d+'\',this.value)">'+saved+'</textarea>'
@@ -634,10 +645,15 @@ function syncSelfToggle(){var t=document.getElementById('selfToggle');if(t)t.che
 // ── LOG A SESSION (self-entered Magnawave) ───────────────────────────
 // Writes into the same bodywork-data.json as Barrio's scans, tagged src:'self',
 // so every chart, the heat map and the region history pick it up unchanged.
-var ENT={};            // regionKey -> {side, lvl}
+var ENT={};            // regionKey -> {min, lvl (0 = no fasciculation), side}
 var ENT_TONE='mixed';
-var LVLS=[[1,'minor'],[2,'moderate'],[3,'severe']];
+var LVLS=[[0,'none'],[1,'minor'],[2,'moderate'],[3,'severe']];
 
+function treatedTxt(s){
+  if(!s.t||!s.t.length)return '';
+  var hit={};(s.a||[]).forEach(function(k){hit[k]=1;});
+  return s.t.map(function(o){return prettyArea(o.r)+(o.min?' '+o.min+'m':'')+(hit[o.r]?'':' (no fasc.)');}).join(' · ');
+}
 function doseTxt(s){
   var bits=[];
   if(s.dur)bits.push(s.dur+' min');
@@ -685,27 +701,34 @@ function entBuildRegions(){
     return '<div class="ent-reg" id="ent-'+r.id+'">'
       +'<button type="button" class="ent-reg-name" onclick="entReg(\''+r.id+'\')">'+esc(r.label)+'</button>'
       +'<div class="ent-reg-detail">'
-        +'<div class="seg2 side" id="entside-'+r.id+'">'+sides+'</div>'
+        +'<label class="ent-min"><input type="number" min="0" step="1" inputmode="numeric" id="entmin-'+r.id+'" placeholder="–" oninput="entMin(\''+r.id+'\',this.value)"> min</label>'
+        +'<span class="ent-lbl">Fasciculations</span>'
         +'<div class="seg2 lvl" id="entlvl-'+r.id+'">'+lvls+'</div>'
-        +'<input class="ent-mus" id="entmus-'+r.id+'" placeholder="muscle(s) — optional, comma separated">'
+        +'<div class="ent-fx" id="entfx-'+r.id+'">'
+          +'<div class="seg2 side" id="entside-'+r.id+'">'+sides+'</div>'
+          +'<input class="ent-mus" id="entmus-'+r.id+'" placeholder="muscle(s) — optional, comma separated">'
+        +'</div>'
       +'</div></div>';
   }).join('');
 }
 
 function entReg(id){
-  if(ENT[id])delete ENT[id]; else ENT[id]={side:'B',lvl:2};
+  if(ENT[id])delete ENT[id]; else ENT[id]={side:'B',lvl:0,min:''};
   var el=document.getElementById('ent-'+id);
   if(el)el.classList.toggle('on',!!ENT[id]);
   entSyncSeg(id);
 }
 function entSide(id,sd){if(!ENT[id])return;ENT[id].side=sd;entSyncSeg(id);}
 function entLvl(id,l){if(!ENT[id])return;ENT[id].lvl=l;entSyncSeg(id);}
+function entMin(id,v){if(!ENT[id])return;ENT[id].min=v;entTotal();}
+function entTotal(){var t=Object.keys(ENT).reduce(function(a,id){return a+(Number(ENT[id].min)||0);},0);var d=document.getElementById('entDur');if(d)d.placeholder=t?String(t):'30';}
 function entSyncSeg(id){
   var st=ENT[id];if(!st)return;
   var sb=document.querySelectorAll('#entside-'+id+' button');
   Array.prototype.forEach.call(sb,function(b){b.classList.toggle('on',b.getAttribute('data-side')===st.side);});
   var lb=document.querySelectorAll('#entlvl-'+id+' button');
   Array.prototype.forEach.call(lb,function(b){b.classList.toggle('on',+b.getAttribute('data-lvl')===st.lvl);});
+  var fx=document.getElementById('entfx-'+id);if(fx)fx.style.display=st.lvl>0?'flex':'none';
 }
 
 function entMsg(txt,kind){
@@ -720,7 +743,12 @@ function entBuild(){
   var pz=raw.split('-');                       // yyyy-mm-dd -> M/D/YY
   var d=(+pz[1])+'/'+(+pz[2])+'/'+String(pz[0]).slice(2);
 
-  var keys=Object.keys(ENT);
+  var treatedKeys=Object.keys(ENT);
+  if(!treatedKeys.length)return {err:'Tick at least one area you treated.'};
+  var t=treatedKeys.map(function(id){var o={r:id};var m=Number(ENT[id].min);if(m>0)o.min=m;return o;});
+  // Only areas that fasciculated feed the heat map / reactivity — treating an area
+  // with no response is its own data point, kept in t.
+  var keys=treatedKeys.filter(function(id){return ENT[id].lvl>0;});
   var f=[],a=[],sMap={};
   keys.forEach(function(id){
     var st=ENT[id];
@@ -741,6 +769,7 @@ function entBuild(){
   }
 
   var num=function(id){var v=(document.getElementById(id)||{}).value;return v===''?0:Number(v)||0;};
+  var regMin=t.reduce(function(x,o){return x+(o.min||0);},0);
   var yy=String(pz[0]).slice(2),mm=String(+pz[1]).padStart(2,'0'),dd=String(+pz[2]).padStart(2,'0');
   return {sess:{
     d:d, o:ENT_TONE, p:pv, a:a, s:sMap,
@@ -748,8 +777,8 @@ function entBuild(){
     pdf:'', status:'approved',
     fileId:'self-'+yy+mm+dd+'-'+Date.now().toString(36).slice(-4),
     tx:'PEMF', prac:'Jess', src:'self',
-    dur:num('entDur'), pw:num('entInt'), hz:num('entHz'),
-    f:f
+    dur:num('entDur')||regMin, pw:num('entInt'), hz:num('entHz'),
+    f:f, t:t
   }};
 }
 
@@ -772,6 +801,7 @@ function entPost(sess){
   body.set('intensity',String(sess.pw));
   body.set('freq',String(sess.hz));
   body.set('findings',JSON.stringify(sess.f));
+  body.set('treated',JSON.stringify(sess.t||[]));
   return fetch(EXEC_URL,{method:'POST',body:body});
 }
 

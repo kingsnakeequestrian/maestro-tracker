@@ -265,14 +265,16 @@ const CADENCE=[
   {label:'Bodywork',days:14,match:a=>/bodywork/i.test(a.type),sub:'Barrio: every 2 weeks (9/21 plan)'},
   {label:'IRAP / shockwave',days:45,match:a=>/modality/i.test(a.type)||/irap|shockwave/i.test(a.desc||''),sub:'RF fetlock · every 30–45 days'}
 ];
-let APPTS=[], FILTER=null, EDIT=null, BW=[];
+let APPTS=[], FILTER=null, EDIT=null, BW=[], VETV=[];
 // Barrio sessions come from the bodywork reports (bodywork-data.json), not the Appointments
 // tab — merged in read-only so the bodywork clock and history reflect what actually happened.
 const BW_SEED=[{"d":"2/4/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"2/21/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"3/28/25","tx":"Massage","prac":"Liz","o":"good"},{"d":"6/27/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"7/22/25","tx":"Massage","prac":"Liz","o":"good"},{"d":"8/21/25","tx":"Massage","prac":"Aimee M.","o":"mixed"},{"d":"9/8/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"9/30/25","tx":"Massage","prac":"Aimee M.","o":"concern"},{"d":"10/15/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"10/23/25","tx":"Massage","prac":"Liz","o":"good"},{"d":"11/20/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"12/18/25","tx":"Massage + PEMF","prac":"Aimee M.","o":"mixed"},{"d":"12/31/25","tx":"Massage + PEMF","prac":"Aimee M.","o":"mixed"},{"d":"1/14/26","tx":"Massage + PEMF","prac":"Liz","o":"mixed"},{"d":"1/28/26","tx":"Massage","prac":"Aimee M.","o":"good"},{"d":"2/12/26","tx":"Massage + PEMF","prac":"Aimee M.","o":"good"},{"d":"2/25/26","tx":"Massage + PEMF","prac":"Aimee M.","o":"mixed"},{"d":"7/3/26","tx":"Massage","prac":"Liz","o":"good"},{"d":"7/8/26","tx":"PEMF","prac":"Aimee M.","o":"concern"},{"d":"7/16/26","tx":"Massage","prac":"Aimee McGuire","o":"mixed"},{"d":"7/30/26","tx":"Massage","prac":"Liz Butler","o":"good"},{"d":"9/21/26","tx":"Massage","prac":"Aimee McGuire","o":"mixed"}];
 function bwIso(d){const p=d.split('/');return (2000+(+p[2]))+'-'+String(p[0]).padStart(2,'0')+'-'+String(p[1]).padStart(2,'0');}
 function bwAsAppts(list){return list.filter(s=>s.status!=='pending').map(s=>({id:'bw-'+s.d,date:bwIso(s.d),type:'Bodywork',provider:(s.prac||'Barrio'),
   desc:(s.tx||'Session')+' · '+(s.o==='good'?'positive':s.o==='concern'?'concern':'mixed')+' (from Barrio report)',ro:true}));}
-function merged(){const have=new Set(APPTS.filter(a=>/bodywork/i.test(a.type)).map(a=>a.date));return APPTS.concat(bwAsAppts(BW).filter(b=>!have.has(b.date)));}
+function vetAsAppts(list){return list.map((v,i)=>({id:'vet-'+v.date+'-'+i,date:v.date,type:'Vet',provider:[v.provider,v.clinic].filter(Boolean).join(' / '),
+  desc:[v.visitType,v.procedures,v.lameGrade?'Lameness '+v.lameGrade:'',v.findings].filter(Boolean).join(' · ')+' (visit record)',ro:true,pdf:v.pdfLink}));}
+function merged(){const have=new Set(APPTS.filter(a=>/bodywork/i.test(a.type)).map(a=>a.date));return APPTS.concat(bwAsAppts(BW).filter(b=>!have.has(b.date))).concat(vetAsAppts(VETV));}
 
 function cls(type){const t=(type||'').split(',')[0].trim();const f=TYPES.find(x=>x[0].toLowerCase()===t.toLowerCase());return f?f[1]:'oth';}
 function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -293,6 +295,7 @@ async function load(){
     if(!j.ok)throw new Error(j.error||'read failed');
     APPTS=j.appointments;st.textContent='Live from Winter Tracking (Live) · '+APPTS.length+' entries';
   }catch(e){APPTS=SEED.slice();st.textContent='Offline — showing saved history. ('+e.message+')';}
+  try{const r=await fetch(URL_+'?action=vet');const j=await r.json();if(j&&j.visits)VETV=j.visits;}catch(e){}
   try{const r=await fetch(URL_+'?action=bodywork');const j=await r.json();if(j&&j.sessions&&j.sessions.length)BW=j.sessions;}catch(e){}
   render();
 }
@@ -331,7 +334,7 @@ function card(a,future){
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
       <div><div class="tl-date">${fmtDate(a.date,true)} · ${fmtTime(a.start,a.end)}</div>
       <div class="tl-title">${esc(a.type)}${a.provider?' — '+esc(a.provider):''}</div>
-      ${a.desc?`<div class="tl-note">${esc(a.desc)}</div>`:''}</div>
+      ${a.desc?`<div class="tl-note">${esc(a.desc)}</div>`:''}${a.pdf?`<a href="${esc(a.pdf)}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">Visit PDF ↗</a>`:''}</div>
       ${URL_&&!a.ro?`<div style="display:flex;gap:4px;flex-shrink:0"><button class="icon-btn" title="Edit" onclick="editAppt('${esc(a.id)}')">Edit</button><button class="icon-btn" id="del-${esc(a.id)}" title="Delete" onclick="delAppt('${esc(a.id)}')">✕</button></div>`:''}
     </div></div>`;
 }
