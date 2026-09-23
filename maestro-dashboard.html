@@ -247,19 +247,19 @@ const GAIT=[
     backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
     head:0.1,headSide:'R',pelvis:1.3,pelvSide:'R',withers:null,pushoff:null,impact:null,
     note:'Lameness workup WITH diagnostic analgesia: abaxial sesamoid, low 4-point, RH proximal suspensory ligament infiltration. RF moderate impact, RH very mild push-off. Pelvis push-off 1.3 R. Older Sleip scaling — magnitude not comparable to 2026.',
-    pdf:null},
+    pdf:'https://drive.google.com/file/d/1MuGQbXi6XccD014qiLuSTTqdI4ZZPnLW/view'},
   {d:'2024-04-02',tool:'sleip',ctx:'straight + lunge',band:'Mild',legacy:true,
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'R hind',phase:'push-off'}],
     backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
     head:0.7,headSide:'L',pelvis:0.7,pelvSide:'R',withers:null,pushoff:null,impact:null,
     note:'Three passes (11:22/11:30/11:32). LF mild push-off, RH mild push-off. Head push-off 0.7 L, pelvis push-off 0.7 R. Older Sleip scaling — magnitude not comparable to 2026.',
-    pdf:null},
+    pdf:'https://drive.google.com/file/d/1MuGQbXi6XccD014qiLuSTTqdI4ZZPnLW/view'},
   {d:'2024-04-09',tool:'sleip',ctx:'straight',band:'Mild',legacy:true,
     flags:[{sev:'Mild',limb:'R hind',phase:'push-off'}],
     backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
     head:0.2,headSide:'L',pelvis:0.5,pelvSide:'R',withers:null,pushoff:null,impact:null,
     note:'RH mild push-off. Head push-off 0.2 L, pelvis push-off 0.5 R. Older Sleip scaling — magnitude not comparable to 2026.',
-    pdf:null},
+    pdf:'https://drive.google.com/file/d/1MuGQbXi6XccD014qiLuSTTqdI4ZZPnLW/view'},
   {d:'2026-05-12',tool:'realhorse',ctx:'lunge · baseline',band:'Mild',
     flags:[{sev:'Mild',limb:'L fore',phase:'push-off'},{sev:'Mild',limb:'L fore',phase:'impact'}],
     backAng:5.2,strideLen:202,strideCount:76,poLimb:'L fore',poVal:14,imLimb:'L fore',imVal:23,
@@ -295,7 +295,19 @@ const GAIT=[
     backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
     head:0.5,headSide:'L',pelvis:1.3,pelvSide:'R',withers:null,pushoff:null,impact:null,
     note:'Straight + lunge. Head push-off 0.5 / impact 0.3; pelvis push-off 1.3 / impact 0.3. Stride freq 1.15–1.18/s. RH push-off escalated Mild→Moderate vs 7/24 (pelvis push-off 1.0→1.3). Right hind worsening — the persistent signal across both tools.',
-    pdf:'https://drive.google.com/file/d/1uaY640JwxXLfPkmIeyFK5gpB-kPvbOfg/view'}
+    pdf:'https://drive.google.com/file/d/1uaY640JwxXLfPkmIeyFK5gpB-kPvbOfg/view'},
+  {d:'2026-09-03',tool:'sleip',ctx:'lunge (3 passes)',band:'Mild–Mod',
+    flags:[{sev:'Mild',limb:'R hind',phase:'push-off'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:null,headSide:null,pelvis:1.2,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'Lunge — pelvis push-off peaks 1.2 R across passes (category: pelvis medium). Head elevated to 0.8 but circle-confounded on the lunge, so not reported as a forelimb readout. Side inferred from established R-hind pattern; this export carried no named limb flags. Stride freq 1.13–1.19. Lunge — excluded from the straight-line magnitude trend.',
+    pdf:'https://drive.google.com/file/d/1Xw8UD9Dspoaq2gFR9dNzSyXlbD8sZbUx/view'},
+  {d:'2026-09-16',tool:'sleip',ctx:'lunge (3 passes)',band:'Moderate',
+    flags:[{sev:'Moderate',limb:'R hind',phase:'push-off'}],
+    backAng:null,strideLen:null,strideCount:null,poLimb:null,poVal:null,imLimb:null,imVal:null,
+    head:null,headSide:null,pelvis:1.1,pelvSide:'R',withers:null,pushoff:null,impact:null,
+    note:'Lunge — pelvis push-off peaks 1.1 R; one pass flagged head high / pelvis high. Head nod on the circle is confounded, not reported as a forelimb readout. Side inferred from established R-hind pattern; export carried no named limb flags. Stride freq 1.21–1.24. Lunge — excluded from the straight-line magnitude trend.',
+    pdf:'https://drive.google.com/file/d/1Hc54Azt4KgXGdTct2GJ5tbwK2zeCsep3/view'}
 ];
 
 // ── SCRIPT URL ────────────────────────────────────────────────────────
@@ -1506,13 +1518,15 @@ function buildGait(){
   // and legacy (2024, older Sleip scaling) points are excluded from the magnitude line.
   const backRows=rows.filter(r=>r.backAng!=null);
   const strideRows=rows.filter(r=>r.strideLen!=null);
-  const sleipRows=rows.filter(r=>!r.legacy&&['head','pelvis','withers'].some(k=>r[k]!=null));
+  const lungeOnly=r=>/lunge/i.test(r.ctx||'')&&!/straight/i.test(r.ctx||'');
+  const sleipRows=rows.filter(r=>!r.legacy&&!lungeOnly(r)&&['head','pelvis','withers'].some(k=>r[k]!=null));
   const hasLegacySleip=rows.some(r=>r.legacy&&r.tool==='sleip');
+  const hasLungeSleip=rows.some(r=>r.tool==='sleip'&&!r.legacy&&lungeOnly(r));
   const lineOpts=extra=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:Object.assign({},extra)});
   el.innerHTML=tiles+
     (backRows.length?'<div class="card-sub" style="margin-top:8px">Back movement angle over time (°)</div><div class="cw h200"><canvas id="cGaitBack"></canvas></div>':'')+
     (strideRows.length?'<div class="card-sub" style="margin-top:14px">Stride length over time (cm)</div><div class="cw h200"><canvas id="cGaitStride"></canvas></div>':'')+
-    (sleipRows.length?`<div class="card-sub" style="margin-top:14px">Head / pelvis asymmetry (Sleip${hasLegacySleip?', 2026 scaling':''}) — lower is better${hasLegacySleip?'. 2024 recordings use Sleip’s older scaling and are shown in the table only.':''}</div><div class="cw h200"><canvas id="cGaitSleip"></canvas></div>`:'')+
+    (sleipRows.length?`<div class="card-sub" style="margin-top:14px">Head / pelvis asymmetry (Sleip, straight-line) — lower is better.${hasLegacySleip?' 2024 recordings use Sleip’s older scaling.':''}${hasLungeSleip?' Lunge sessions (circle confounds head/pelvis) are':' Other contexts are'} shown in the table only.</div><div class="cw h200"><canvas id="cGaitSleip"></canvas></div>`:'')+
     tbl;
   if(backRows.length){
     CH.gaitBack=new Chart(document.getElementById('cGaitBack'),{type:'line',
