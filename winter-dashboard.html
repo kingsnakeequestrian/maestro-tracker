@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winter — Progress Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#F4F7F7;--card:#FFFFFF;--text:#1C1A16;--muted:#706E67;--border:rgba(0,0,0,0.08);--radius:14px;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 20px 72px;max-width:980px;margin:0 auto}
+h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
+.sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:32px 0 12px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:22px 22px 18px;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.card-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+.cw{position:relative;width:100%}
+.h240{height:240px}.h200{height:200px}.h280{height:280px}.h260{height:260px}
+.toggle-row{display:flex;gap:8px;margin-bottom:18px}
+.tbtn{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;transition:all .15s}
+.tbtn.on{background:var(--text);color:white;border-color:var(--text)}
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
+.sc{background:var(--bg);border-radius:10px;padding:12px 14px}
+.sv{font-size:22px;font-weight:500;letter-spacing:-.3px}
+.sl{font-size:11px;color:var(--muted);margin-top:2px}
+.sc.g .sv{color:#00BB77}.sc.w .sv{color:#B77A15}.sc.b .sv{color:#C0492B}
+.ann{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.ai{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ad{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+.note{font-size:12px;color:#0A4266;font-style:italic;margin-top:12px;padding:10px 14px;background:#EAF6FB;border-radius:8px;border-left:3px solid #0098CC;line-height:1.6}
+.pb{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pl{font-size:12px;color:var(--muted);width:64px;flex-shrink:0;font-family:'DM Mono',monospace}
+.pt{flex:1;height:8px;background:#EDE9E0;border-radius:4px;overflow:hidden;position:relative}
+.pf{height:100%;border-radius:4px}
+.pc{font-size:11px;color:var(--muted);width:32px;text-align:right;font-family:'DM Mono',monospace}
+.ph{font-size:11px;color:var(--muted);margin-top:8px;display:flex;align-items:center;gap:6px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.cmp-now{color:var(--text)}
+.cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.cmp-now{color:var(--text);font-weight:500}
+.cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
+.cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:14px}
+.cmp-table th{text-align:right;font-size:11px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);padding:0 10px 8px;border-bottom:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table th.cmp-now{color:var(--text)}
+.cmp-table td{padding:6px 10px;border-top:1px solid var(--border);text-align:right;color:var(--muted);font-size:13px}
+.cmp-table td:first-child{text-align:left;color:var(--text);font-weight:500}
+.cmp-table td.cmp-now{color:var(--text);font-weight:500}
+.cmp-up{color:#00BB77;font-size:11px;margin-left:4px}
+.cmp-dn{color:#C0492B;font-size:11px;margin-left:4px}
+.gtag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;padding:2px 7px;border-radius:10px;line-height:1.4}
+.gtag.rh{background:#EAF2F9;color:#0A527F}
+.gtag.sl{background:#EAF6F1;color:#0E8A57}
+.gempty{font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:16px 18px;line-height:1.6}
+</style>
+
+<style id="maestro-nav-style">
+.mnav{
+  position:sticky;top:0;z-index:999;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.mnav-brand{
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
+}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
+.mnav-link{
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
+}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
+@media(max-width:480px){
+  .mnav-brand{display:none}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
+}
+</style>
+
+<style id="horse-switch-style">
+.hsw{display:inline-flex;align-self:center;margin:0 auto 8px 0;background:#E7ECEC;border-radius:20px;padding:3px;gap:2px;font-family:'Plus Jakarta Sans',sans-serif}
+.hsw a{font-size:12px;font-weight:600;padding:5px 13px;border-radius:17px;color:#706E67;text-decoration:none;line-height:1.2;white-space:nowrap}
+.hsw a:hover{color:#141A1C}
+.hsw a.on{background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.10)}
+.hsw a.on.m{color:#00A56A}
+.hsw a.on.w{color:#0A527F}
+@media(max-width:480px){.mnav{flex-wrap:wrap}.hsw{margin:0 0 6px 0}.mnav-links{width:100%}}
+</style>
+</head>
+<body>
+<nav class="mnav">
+  <span class="hsw"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="m">Maestro</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-dashboard.html" class="w on">Winter</a></span>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-index.html" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-dashboard.html" class="mnav-link active">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" class="mnav-link">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" class="mnav-link">Bodywork</a></div>
+</nav>
+<h1>Winter — Progress Dashboard</h1>
+<p class="sub" id="trackingRange">Rehab tracking · loading…</p>
+
+<div class="card" id="thisWeekCard" style="margin-bottom:24px;border-left:3px solid #0A527F"></div>
+
+<p class="section-label">Objective gait analysis</p>
+<div class="card" id="gaitCard" style="border-left:3px solid #005F9D;margin-bottom:24px">
+  <div class="card-title">Gait analysis — Sleip &amp; RealHorse</div>
+  <div class="card-sub">Head asymmetry is the right-fore readout. Sleip runs are lunge circles: the right rein loads the RF as the inside fore and carries the signal; the left rein is his floor. Lower is better. Treated = ice and/or Voltaren before the capture.</div>
+  <div id="gaitContent" style="font-size:13px;color:var(--muted)">Loading…</div>
+</div>
+
+<div class="toggle-row" style="justify-content:space-between;align-items:center">
+  <div style="display:flex;gap:8px">
+    <button class="tbtn on" onclick="setView('weekly',this)">Weekly</button>
+    <button class="tbtn" onclick="setView('monthly',this)">Monthly</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="refreshStatus" style="font-size:11px;color:var(--muted)"></span>
+    <button id="refreshBtn" onclick="refreshData()" class="tbtn" style="background:#1A1814;color:white;border-color:#1A1814">Refresh data</button>
+  </div>
+</div>
+
+<div class="sg" id="sg"></div>
+
+<p class="section-label">Workload</p>
+<div class="card">
+  <div class="card-title">Workload — time in each gait (min)</div>
+  <div class="card-sub">Walk / trot / canter per period</div>
+  <div class="cw h240"><canvas id="cWorkload"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-title">PT exercise compliance</div>
+  <div class="card-sub">Share of periods that hit the plan's 3×/week minimum (weeks with ≥3 logged days)</div>
+  <div id="ptCompliance"></div>
+</div>
+
+<p class="section-label">Ice &amp; Voltaren</p>
+<div class="card">
+  <div class="card-title">Ice &amp; Voltaren days</div>
+  <div class="card-sub">Days per period with each logged. Limb split below.</div>
+  <div class="cw h200"><canvas id="cIceVolt"></canvas></div>
+  <div id="limbSplit" style="margin-top:14px"></div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────
+const DEFAULT_WINTER_URL='https://script.google.com/macros/s/AKfycbzTC52ToRjCLIHtvCREmjTH8XoxieDRf6m2eyiMGbxs2xEp8MSfPGkd4ScczoW2F03L/exec';
+let view='weekly', CH={}, W=[], M=[], VALID=[];
+if(window.Chart){Chart.defaults.font.family="'Plus Jakarta Sans',sans-serif";Chart.defaults.color='#706E67';}
+function getUrl(){try{return (JSON.parse(localStorage.getItem('w_cfg')||'{}')).scriptUrl||DEFAULT_WINTER_URL;}catch(e){return DEFAULT_WINTER_URL;}}
+
+// ── WINTER GAIT ANALYSIS (Sleip lunge + RealHorse) ─────────────────────
+// Winter → Gait Analysis Data Drive folder. Logged by reading each export.
+// Sleip runs are CIRCLES, one per rein. The high-asymmetry run is the RIGHT
+// rein (RF = inside, loaded fore) — runs aren't labelled by the app, so rein is
+// assigned by pattern. Head = forelimb readout; pelvis = hind.
+//   rr / rl   right-rein / left-rein run: po = head push-off, im = head impact,
+//             hz = stride frequency (strides/s), n = head stride count,
+//             ppo/pim = pelvis push-off/impact (signed: +R, −L)
+//   treated   ice and/or Voltaren on board before the capture (true/false/null=unknown).
+//             Treated captures read ~0.3 lower on both phases — compare like with like.
+// RealHorse: lunge, comparing circles. im/po = RF impact / push-off deficit (mm, lower = better).
+const GAIT=[
+  {d:'2026-07-09',t:'13:45',tool:'realhorse',ctx:'lunge · baseline',band:'Moderate',
+    flags:[{sev:'Moderate',limb:'R fore',phase:'impact'},{sev:'Mild–mod',limb:'R fore',phase:'push-off'}],
+    backAng:7.6,strideLen:203,strideCount:87,imLimb:'R fore',imVal:44,poLimb:'R fore',poVal:33,hind:'RH 6 / 6',
+    note:'Baseline recording.',pdf:'https://drive.google.com/file/d/1Q2xJvUPHOeyqDAjg9a_rmG3hIMx5Q-Uz/view'},
+  {d:'2026-07-09',t:'14:51',tool:'realhorse',ctx:'lunge',band:'Mod–Severe',
+    flags:[{sev:'Moderate–severe',limb:'R fore',phase:'impact'},{sev:'Mild',limb:'R fore',phase:'push-off'}],
+    backAng:6.9,strideLen:207,strideCount:105,imLimb:'R fore',imVal:49,poLimb:'R fore',poVal:18,hind:'LH 1 / RH 0',
+    note:'Right-circle stride precision poor.',pdf:'https://drive.google.com/file/d/1Q2xJvUPHOeyqDAjg9a_rmG3hIMx5Q-Uz/view'},
+  {d:'2026-07-11',t:'11:24',tool:'realhorse',ctx:'lunge line',band:'Mod–Severe',
+    flags:[{sev:'Moderate–severe',limb:'R fore',phase:'impact'},{sev:'Moderate–severe',limb:'R fore',phase:'push-off'}],
+    backAng:9.2,strideLen:195,strideCount:62,imLimb:'R fore',imVal:55,poLimb:'R fore',poVal:51,hind:'RH 4 / 14',
+    note:'Broke to walk both directions — low capture confidence, same limb and phases.',pdf:'https://drive.google.com/file/d/1ciyZuyxwp5tNcVLBi2PDi5Dhk2xraod8/view'},
+  {d:'2026-07-16',tool:'sleip',ctx:'lunge · both reins',treated:false,
+    rr:{po:1.4,im:1.3,hz:1.18,n:72,ppo:0.1,pim:-0.1},rl:{po:0.2,im:0.9,hz:1.17,n:65,ppo:0.3,pim:0.2},
+    note:'',pdf:'https://drive.google.com/file/d/1nUY1WEkbrmgMdqW4SRCnAtX9E879c7D3/view'},
+  {d:'2026-07-30',tool:'sleip',ctx:'lunge · both reins',treated:false,
+    rr:{po:1.5,im:1.6,hz:1.12,n:56,ppo:0.0,pim:0.0},rl:{po:0.3,im:0.8,hz:1.15,n:51,ppo:0.4,pim:0.1},
+    note:'Five-week feet, pre-reset, nothing on board. Slowest trot on file.',pdf:'https://drive.google.com/file/d/1NbBD1YaUZjtj7JtHYvAozgP8DChAJXfx/view'},
+  {d:'2026-08-12',tool:'sleip',ctx:'lunge · both reins',treated:true,
+    rr:{po:1.2,im:0.9,hz:1.21,n:68,ppo:-0.2,pim:-0.2},rl:{po:0.1,im:0.8,hz:1.24,n:64,ppo:0.0,pim:-0.2},
+    note:'Two weeks post-reset. Treated capture.',pdf:'https://drive.google.com/file/d/15x7smeGNt-bZ-TYTYZohxCdv-scoXEQ4/view'},
+  {d:'2026-08-18',tool:'sleip',ctx:'lunge · both reins',treated:true,
+    rr:{po:1.6,im:1.3,hz:1.18,n:70,ppo:-0.3,pim:-0.4},rl:{po:0.0,im:0.7,hz:1.18,n:62,ppo:-0.1,pim:-0.1},
+    note:'Best right-rein capture quality to date. Ice + Voltaren on board.',pdf:'https://drive.google.com/file/d/1Khcddv6-eDxQOq41xratpo9ZZvJAbh1Q/view'},
+  {d:'2026-08-30',tool:'sleip',ctx:'lunge · both reins · 1pm',treated:true,
+    rr:{po:1.3,im:1.0,hz:1.18,n:59,ppo:-0.1,pim:-0.1},rl:{po:0.2,im:0.6,hz:1.14,n:58,ppo:0.0,pim:0.2},
+    note:'Ice + Voltaren ~2 h before. Afternoon capture, head variation high.',pdf:'https://drive.google.com/file/d/1eWZABuq3z2cs9oeUgXVlBDGMJMeWLeLP/view'},
+  {d:'2026-09-16',tool:'sleip',ctx:'lunge · both reins',treated:false,
+    rr:{po:1.0,im:1.3,hz:1.18,n:58,ppo:0.2,pim:-0.1},rl:{po:0.3,im:0.7,hz:1.19,n:39,ppo:0.1,pim:-0.1},
+    note:'Clean — no ice or Voltaren. Left-rein run short (39 strides).',pdf:'https://drive.google.com/file/d/1hMtFpPyd3NIo1hRO71RkZuYZcHSrUhUv/view'}
+];
+
+
+// ── LOAD ──────────────────────────────────────────────────────────────
+function setStatus(msg,err){const el=document.getElementById('refreshStatus');if(el){el.textContent=msg;el.style.color=err?'#C0492B':'#706E67';}}
+async function refreshData(){
+  const url=getUrl();
+  if(!url){setStatus('Not connected — Winter → New entry → ⚙',true);buildAll();return;}
+  const btn=document.getElementById('refreshBtn');btn.disabled=true;btn.textContent='Refreshing…';
+  try{
+    const r=await fetch(url+'?action=read&sheet=daily');const j=await r.json();
+    if(!j.success)throw new Error(j.error||'read failed');
+    process(j.data.headers,j.data.rows);setStatus('Updated '+new Date().toLocaleTimeString());
+  }catch(e){setStatus('Refresh failed: '+e.message,true);}
+  finally{btn.disabled=false;btn.textContent='Refresh data';buildAll();}
+}
+
+// ── PROCESS (columns found by header name) ────────────────────────────
+function yn(v){return String(v==null?'':v).trim().toUpperCase().startsWith('Y');}
+function num(v){const n=parseFloat(v);return isNaN(n)?0:n;}
+function limbs(v){return String(v||'').split(/[,\s]+/).map(x=>x.trim().toUpperCase()).filter(x=>['LF','RF','LH','RH'].includes(x));}
+function process(headers,rows){
+  const H=headers.map(h=>String(h).trim().toLowerCase());
+  const g=(r,name)=>{const i=H.indexOf(name);return i<0?null:r[i];};
+  VALID=rows.map(r=>{
+    const date=String(g(r,'date')||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return null;
+    const o={date,d:new Date(date+'T12:00:00'),
+      ride:yn(g(r,'ride')),walk:num(g(r,'walk (min)')),trot:num(g(r,'trot (min)')),canter:num(g(r,'canter (min)')),
+      pt:yn(g(r,'pt exercises')),bands:yn(g(r,'equibands')),bemer:yn(g(r,'bemer')),laser:yn(g(r,'laser')),
+      ice:yn(g(r,'ice')),iceL:limbs(g(r,'ice limbs')),volt:yn(g(r,'voltaren')),voltL:limbs(g(r,'voltaren limbs')),
+      lame:yn(g(r,'lameness'))};
+    const anyVal=['ride','equibands','pt exercises','bemer','laser','lameness','walk (min)','trot (min)','canter (min)','ice','voltaren','notes','pt notes']
+      .some(n=>{const v=g(r,n);return v!=null&&String(v).trim()!=='';});
+    return anyVal?o:null;
+  }).filter(Boolean).sort((a,b)=>a.d-b.d);
+  const today=new Date();today.setHours(23,59,59,999);
+  VALID=VALID.filter(o=>o.d<=today);
+  const wk=d=>{const x=new Date(d);x.setDate(x.getDate()-x.getDay());return iso(x);};
+  const mo=d=>iso(new Date(d.getFullYear(),d.getMonth(),1));
+  W=agg(VALID,wk);M=agg(VALID,mo);
+  if(VALID.length){
+    const f=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    document.getElementById('trackingRange').textContent='Rehab tracking · '+f(VALID[0].d)+' – '+f(VALID[VALID.length-1].d)+' · '+VALID.length+' days logged';
+  }
+  thisWeek();
+}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function agg(rows,keyFn){
+  const m={};rows.forEach(o=>{(m[keyFn(o.d)]=m[keyFn(o.d)]||[]).push(o);});
+  return Object.keys(m).sort().map(k=>{const it=m[k];const c=f=>it.filter(o=>o[f]).length;const s=f=>it.reduce((a,o)=>a+o[f],0);
+    return {period:k,days:it.length,rides:c('ride'),walk:s('walk'),trot:s('trot'),canter:s('canter'),pt:c('pt'),bands:c('bands'),
+      ice:c('ice'),volt:c('volt'),bemer:c('bemer'),laser:c('laser'),lame:c('lame')};});
+}
+
+// ── THIS WEEK ─────────────────────────────────────────────────────────
+function thisWeek(){
+  const el=document.getElementById('thisWeekCard');
+  const sun=new Date();sun.setDate(sun.getDate()-sun.getDay());sun.setHours(0,0,0,0);
+  const wkData=off=>{const s=new Date(sun);s.setDate(s.getDate()+off*7);const e=new Date(s);e.setDate(e.getDate()+6);e.setHours(23,59,59,999);
+    const it=VALID.filter(o=>o.d>=s&&o.d<=e);const r=agg(it,()=> 'x')[0]||{days:0,rides:0,walk:0,trot:0,canter:0,pt:0,bands:0,ice:0,volt:0,lame:0};
+    r.label=(s.getMonth()+1)+'/'+s.getDate()+'–'+(e.getMonth()+1)+'/'+e.getDate();return r;};
+  const w0=wkData(0),w1=wkData(-1),w2=wkData(-2);
+  if(!VALID.length){el.innerHTML='<div class="card-title">This week</div><div class="card-sub" style="margin:0">No entries yet. Log from Winter → New entry.</div>';return;}
+  const cell=(now,prev,good)=>{const d=now-prev;const cls=d===0?'':(good===(d>0)?'cmp-up':'cmp-dn');return `${now}${d?`<span class="${cls}">${d>0?'+':''}${d}</span>`:''}`;};
+  const rows=[['Days logged','days',true],['Rides','rides',true],['Walk (min)','walk',true],['Trot (min)','trot',true],['Canter (min)','canter',true],
+    ['PT days','pt',true],['Equibands','bands',true],['Ice days','ice',null],['Voltaren days','volt',null],['Lameness seen','lame',false]];
+  el.innerHTML=`<div class="card-title">This week — ${w0.label}</div><div class="card-sub">${w0.days} days logged · PT target 3–5×/week</div>
+  <table class="cmp-table"><thead><tr><th></th><th class="cmp-now">This week</th><th>Last week</th><th>2 weeks ago</th></tr></thead><tbody>
+  ${rows.map(([l,k,g])=>`<tr><td>${l}</td><td class="cmp-now">${g===null?w0[k]:cell(w0[k],w1[k],g)}</td><td>${w1[k]}</td><td>${w2[k]}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ── CHARTS ────────────────────────────────────────────────────────────
+function D(){return view==='weekly'?W:M;}
+function L(d){const dt=new Date(d.period+'T12:00:00');return view==='weekly'?(dt.getMonth()+1)+'/'+dt.getDate():dt.toLocaleDateString('en-US',{month:'short',year:'2-digit'});}
+function kill(){Object.values(CH).forEach(c=>c&&c.destroy());CH={};}
+function base(){return {responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',padding:9}},
+  scales:{x:{ticks:{font:{family:'DM Mono',size:9},maxRotation:45,color:'#706E67'},grid:{color:'rgba(0,0,0,0.04)'}},
+          y:{beginAtZero:true,ticks:{font:{family:'Plus Jakarta Sans',size:10},color:'#706E67'},grid:{color:'rgba(0,0,0,0.05)'}}}};}
+function stats(data){
+  const unit=view==='weekly'?' wks':' mo';const ass=data.filter(d=>d.days>=3);
+  const t=k=>data.reduce((s,d)=>s+d[k],0);
+  const items=[{l:'Rides',v:t('rides')},{l:'Walk (min)',v:t('walk')},{l:'Trot (min)',v:t('trot')},{l:'Canter (min)',v:t('canter')},
+    {l:'PT target met',v:ass.length?ass.filter(d=>d.pt>=3).length+'/'+ass.length+unit:'—'},{l:'Ice days',v:t('ice')},{l:'Voltaren days',v:t('volt')},
+    {l:'Lameness seen (days)',v:t('lame'),c:t('lame')?'b':'g'}];
+  document.getElementById('sg').innerHTML=items.map(s=>`<div class="sc ${s.c||''}"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('');
+}
+function workload(data,labels){
+  const o=base();o.plugins.legend={display:true,position:'top',labels:{font:{family:'Plus Jakarta Sans',size:11},boxWidth:12,color:'#706E67'}};
+  o.scales.x.stacked=true;o.scales.y.stacked=true;
+  CH.wl=new Chart(document.getElementById('cWorkload'),{type:'bar',data:{labels,datasets:[
+    {label:'Walk',data:data.map(d=>d.walk),backgroundColor:'rgba(0,187,119,0.55)',borderColor:'#00BB77',borderWidth:.5,borderRadius:2},
+    {label:'Trot',data:data.map(d=>d.trot),backgroundColor:'rgba(0,152,204,0.55)',borderColor:'#0098CC',borderWidth:.5,borderRadius:2},
+    {label:'Canter',data:data.map(d=>d.canter),backgroundColor:'rgba(0,113,156,0.55)',borderColor:'#00719C',borderWidth:.5,borderRadius:2}]},options:o});
+}
+function ptComp(data){
+  const el=document.getElementById('ptCompliance');const ass=data.filter(d=>d.days>=3);const met=ass.filter(d=>d.pt>=3).length;
+  if(!ass.length){el.innerHTML='<div style="font-size:13px;color:var(--muted)">Not enough logged days to assess.</div>';return;}
+  const pct=Math.round(met/ass.length*100);const col=pct>=70?'#00BB77':pct>=40?'#B77A15':'#C0492B';
+  el.innerHTML=`<div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:40px;font-weight:500;letter-spacing:-1px;color:${col}">${pct}%</span>
+    <span style="font-size:13px;color:var(--muted)">of ${view==='weekly'?'weeks':'months'} hit 3× · ${met}/${ass.length}</span></div>
+    <div style="height:10px;background:#EDE9E0;border-radius:5px;overflow:hidden;margin-top:10px"><div style="height:100%;width:${pct}%;background:${col}"></div></div>`;
+}
+function iceVolt(data,labels){
+  const o=base();o.plugins.legend={display:true,position:'top',labels:{font:{family:'Plus Jakarta Sans',size:11},boxWidth:12,color:'#706E67'}};
+  o.scales.y.ticks.precision=0;
+  CH.iv=new Chart(document.getElementById('cIceVolt'),{type:'bar',data:{labels,datasets:[
+    {label:'Ice',data:data.map(d=>d.ice),backgroundColor:'rgba(0,152,204,0.55)',borderColor:'#0098CC',borderWidth:.5,borderRadius:2},
+    {label:'Voltaren',data:data.map(d=>d.volt),backgroundColor:'rgba(10,82,127,0.55)',borderColor:'#0A527F',borderWidth:.5,borderRadius:2}]},options:o});
+  const cnt=k=>{const c={LF:0,RF:0,LH:0,RH:0};VALID.forEach(o=>o[k].forEach(l=>c[l]++));return c;};
+  const ic=cnt('iceL'),vc=cnt('voltL');const mx=Math.max(1,...Object.values(ic),...Object.values(vc));
+  const bar=(l,v,col)=>`<div class="pb"><span class="pl">${l}</span><div class="pt"><div class="pf" style="width:${v/mx*100}%;background:${col}"></div></div><span class="pc">${v}</span></div>`;
+  const off=['LF','LH','RH'].filter(l=>ic[l]||vc[l]);
+  document.getElementById('limbSplit').innerHTML=
+    `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">
+      <div><div class="card-sub" style="margin-bottom:6px">Ice — days by limb</div>${['RF','LF','RH','LH'].map(l=>bar(l,ic[l],'#0098CC')).join('')}</div>
+      <div><div class="card-sub" style="margin-bottom:6px">Voltaren — days by limb</div>${['RF','LF','RH','LH'].map(l=>bar(l,vc[l],'#0A527F')).join('')}</div></div>`+
+    (off.length?`<div class="note">Ice or Voltaren logged on ${off.join(', ')}, not just the RF. A second limb getting treated is information — note why in the log.</div>`:'');
+}
+
+// ── GAIT ──────────────────────────────────────────────────────────────
+function gDate(iso){const p=iso.split('-');return (+p[1])+'/'+(+p[2])+'/'+String(p[0]).slice(2);}
+function sleipBand(v){return v>=1.5?'Marked':v>=1.2?'Moderate':v>=0.95?'Mild–Mod':v>=0.5?'Mild':'Normal';}
+function bandColor(b){b=(b||'').toLowerCase();
+  if(b.indexOf('marked')>-1||b.indexOf('severe')>-1) return '#C0492B';
+  if(b.indexOf('mild')>-1) return '#B77A15';
+  if(b.indexOf('mod')>-1) return '#D9633F';
+  if(b.indexOf('normal')>-1) return '#00A56A';
+  return 'var(--text)';}
+function flagText(flags){return (flags||[]).map(f=>f.limb+' '+f.sev.toLowerCase()+' ('+(f.phase==='impact'?'landing':f.phase)+')').join(' · ');}
+// A capture day is "treated" if the GAIT entry says so OR ice/Voltaren is logged that day.
+function treatedOn(g){
+  const day=VALID.find(o=>o.date===g.d);
+  const logged=day&&(day.ice||day.volt);
+  if(logged)return {v:true,src:'logged'+(day.ice?' · ice':'')+(day.volt?' · Voltaren':'')};
+  if(g.treated===true)return {v:true,src:'noted'};
+  if(g.treated===false)return {v:false,src:'noted'};
+  return {v:null,src:''};
+}
+function trTag(t){return t.v===true?'<span class="gtag" style="background:#E1EEF4;color:#0A527F">treated</span>':t.v===false?'<span class="gtag" style="background:#EAF6F1;color:#0E8A57">clean</span>':'<span class="gtag" style="background:#EEF0F0;color:#706E67">unknown</span>';}
+function buildGait(){
+  const el=document.getElementById('gaitContent');
+  const rows=GAIT.slice().sort((a,b)=>(a.d+(a.t||'')).localeCompare(b.d+(b.t||'')));
+  const sl=rows.filter(r=>r.tool==='sleip'), rh=rows.filter(r=>r.tool==='realhorse');
+  const last=sl[sl.length-1];
+  let html='';
+  if(last){
+    const rmax=Math.max(last.rr.po,last.rr.im), band=sleipBand(rmax), t=treatedOn(last);
+    const clean=sl.filter(r=>treatedOn(r).v===false), treated=sl.filter(r=>treatedOn(r).v===true);
+    const avg=(a,f)=>a.length?(a.reduce((s,r)=>s+f(r),0)/a.length).toFixed(2):'—';
+    html+=`<div style="margin:8px 0 6px"><span class="gtag sl">Sleip</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(last.d)} · ${last.ctx}</span> ${trTag(t)} · <a href="${last.pdf}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">PDF ↗</a></div>
+    <div class="sg" style="margin-bottom:6px">
+      <div class="sc"><div class="sv" style="color:${bandColor(band)}">${band}</div><div class="sl">Right rein (RF loaded)</div></div>
+      <div class="sc"><div class="sv">${last.rr.po} <span style="font-size:12px;color:var(--muted)">R</span></div><div class="sl">Head push-off · R rein</div></div>
+      <div class="sc"><div class="sv">${last.rr.im} <span style="font-size:12px;color:var(--muted)">R</span></div><div class="sl">Head impact · R rein</div></div>
+      <div class="sc"><div class="sv">${last.rl.im}</div><div class="sl">Head impact · L rein (floor)</div></div>
+      <div class="sc"><div class="sv">${last.rr.hz}</div><div class="sl">Stride freq · R rein</div></div>
+      <div class="sc"><div class="sv">${Math.max(Math.abs(last.rr.ppo),Math.abs(last.rr.pim),Math.abs(last.rl.ppo),Math.abs(last.rl.pim)).toFixed(1)}</div><div class="sl">Pelvis max (hinds)</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin:0 0 14px">Right rein, clean vs treated (n=${clean.length} / ${treated.length}) — push-off <strong style="color:var(--text)">${avg(clean,r=>r.rr.po)}</strong> vs <strong style="color:var(--text)">${avg(treated,r=>r.rr.po)}</strong> · impact <strong style="color:var(--text)">${avg(clean,r=>r.rr.im)}</strong> vs <strong style="color:var(--text)">${avg(treated,r=>r.rr.im)}</strong>. Compare like with like; slower trot (lower stride freq) reads worse.</div>`;
+    html+='<div class="card-sub" style="margin-top:8px">Head asymmetry by rein (Sleip). Hollow points = treated capture.</div><div class="cw h260"><canvas id="cGaitSleip"></canvas></div>';
+  }
+  const lr=rh[rh.length-1];
+  if(lr){
+    html+=`<div style="margin:18px 0 6px"><span class="gtag rh">RealHorse</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(lr.d)} ${lr.t||''} · ${lr.ctx}</span> · <a href="${lr.pdf}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">PDF ↗</a></div>
+    <div class="sg" style="margin-bottom:6px">
+      <div class="sc"><div class="sv" style="color:${bandColor(lr.band)}">${lr.band}</div><div class="sl">Asymmetry</div></div>
+      <div class="sc"><div class="sv">${lr.imVal} <span style="font-size:12px;color:var(--muted)">${lr.imLimb}</span></div><div class="sl">Landing deficit (mm)</div></div>
+      <div class="sc"><div class="sv">${lr.poVal} <span style="font-size:12px;color:var(--muted)">${lr.poLimb}</span></div><div class="sl">Push-off deficit (mm)</div></div>
+      <div class="sc"><div class="sv">${lr.backAng}°</div><div class="sl">Back angle</div></div>
+      <div class="sc"><div class="sv">${lr.strideLen}</div><div class="sl">Stride (cm)</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin:0 0 10px"><span style="color:${bandColor(lr.band)};font-weight:500">${lr.band}</span> — ${flagText(lr.flags)}</div>`;
+  }
+  let tbl='<table class="cmp-table" style="margin-top:14px"><thead><tr><th>Date</th><th>Tool</th><th style="text-align:left">Readout</th><th>Freq</th><th>Status</th><th>Source</th></tr></thead><tbody>';
+  rows.slice().reverse().forEach(r=>{
+    let read,freq='—',st='—';
+    if(r.tool==='sleip'){
+      const b=sleipBand(Math.max(r.rr.po,r.rr.im));
+      read=`<span style="color:${bandColor(b)};font-weight:500">${b}</span> · R rein PO ${r.rr.po} / IM ${r.rr.im} · L rein ${r.rl.po} / ${r.rl.im}`;
+      freq=r.rr.hz; st=trTag(treatedOn(r));
+    }else{
+      read=`<span style="color:${bandColor(r.band)};font-weight:500">${r.band}</span> · RF landing ${r.imVal} / push-off ${r.poVal} mm · back ${r.backAng}° · ${r.strideLen} cm`;
+    }
+    if(r.note)read+=`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.note}</div>`;
+    tbl+=`<tr><td>${gDate(r.d)}${r.t?' <span style="font-size:10px;color:var(--muted)">'+r.t+'</span>':''}</td><td><span class="gtag ${r.tool==='sleip'?'sl':'rh'}">${r.tool==='sleip'?'Sleip':'RealHorse'}</span></td>
+      <td style="text-align:left">${read}</td><td>${freq}</td><td>${st}</td><td><a href="${r.pdf}" target="_blank" rel="noopener" style="color:#0A6E96;text-decoration:none">PDF ↗</a></td></tr>`;
+  });
+  el.innerHTML=html+'<div style="overflow-x:auto">'+tbl+'</tbody></table></div>';
+  if(sl.length){
+    const tr=sl.map(r=>treatedOn(r).v===true);
+    const ds=(lab,col,f,dash)=>({label:lab,data:sl.map(f),borderColor:col,backgroundColor:tr.map(x=>x?'#FFFFFF':col),pointBorderColor:col,pointBorderWidth:2,
+      pointRadius:5,tension:.25,borderDash:dash||[],fill:false});
+    CH.gs=new Chart(document.getElementById('cGaitSleip'),{type:'line',
+      data:{labels:sl.map(r=>gDate(r.d)),datasets:[
+        ds('R rein push-off','#C0492B',r=>r.rr.po),ds('R rein impact','#D9633F',r=>r.rr.im,[5,4]),
+        ds('L rein impact (floor)','#0098CC',r=>r.rl.im),ds('L rein push-off','#7FCDE8',r=>r.rl.po,[5,4])]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}},
+        tooltip:{callbacks:{afterTitle:items=>{const r=sl[items[0].dataIndex];const t=treatedOn(r);return 'Stride freq '+r.rr.hz+(t.v===true?' · treated':t.v===false?' · clean':' · treatment unknown');}}}},
+        scales:{y:{beginAtZero:true,suggestedMax:1.8,title:{display:true,text:'head asymmetry',color:'#706E67',font:{size:10}}}}}});
+  }
+}
+
+// ── BUILD ─────────────────────────────────────────────────────────────
+function buildAll(){
+  kill();
+  const data=D(),labels=data.map(L);
+  stats(data);
+  if(data.length){workload(data,labels);iceVolt(data,labels);}
+  else{document.getElementById('limbSplit').innerHTML='<div class="gempty">No daily entries yet.</div>';}
+  ptComp(data);
+  buildGait();
+}
+function setView(v,btn){view=v;document.querySelectorAll('.toggle-row .tbtn[onclick^="setView"]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');buildAll();}
+window.addEventListener('load',refreshData);
+</script>
+</body>
+</html>

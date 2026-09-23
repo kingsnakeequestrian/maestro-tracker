@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winter — Appointments &amp; History</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F7F7;
+  --card:#FFFFFF;
+  --text:#1C1A16;
+  --muted:#706E67;
+  --border:rgba(0,0,0,0.08);
+  --radius:14px;
+
+  /* Category colors — aligned to Index + Progress Dashboard: jade, cyan,
+     deep-blue, forest, terracotta. No orange, no off-palette purple. */
+  --sw:#C0492B;   --sw-bg:#F6ECE8;   --sw-border:#D9633F;
+  --inj:#0098CC;  --inj-bg:#E4F4FB;  --inj-border:#7FCDE8;
+  --laser:#00719C;--laser-bg:#E1EEF4;--laser-border:#6FB0CC;
+  --bw:#1E8E63;   --bw-bg:#E4F1EB;   --bw-border:#7FC4A2;
+  --vet:#00A56A;  --vet-bg:#DFF4EA;  --vet-border:#57C69A;
+
+  /* Minimal warn accent, matching the dashboard's #B77A15 stat/warn usage */
+  --warn:#B77A15; --warn-bg:#FAEEDA;
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);padding:32px 20px 80px;max-width:900px;margin:0 auto;line-height:1.5}
+
+/* HEADER */
+.header{margin-bottom:36px}
+.header h1{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
+.header p{font-size:13px;color:var(--muted)}
+
+/* LEGEND */
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:5px 10px;background:var(--card);border-radius:20px;border:1px solid var(--border)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* Appointment type chips (multi-select) */
+.tchip{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:6px 11px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all .15s}
+.tchip.sel{background:var(--vet);border-color:var(--vet);color:#fff;font-weight:500}
+
+/* UPCOMING ALERT CARDS */
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:30px}
+.alert-card{background:var(--card);border-radius:var(--radius);padding:11px 13px;border:1px solid var(--border)}
+.alert-title{font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-bottom:4px}
+.alert-main{font-size:15px;font-weight:500;margin-bottom:2px}
+.alert-sub{font-size:11px;color:var(--muted)}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px;margin-top:6px;letter-spacing:0.04em}
+.badge.due{background:var(--sw-bg);color:var(--sw)}
+.badge.soon{background:var(--warn-bg);color:var(--warn)}
+.badge.on-track{background:var(--bw-bg);color:var(--bw)}
+
+/* SECTION */
+.section{margin-bottom:40px}
+.section-title{font-family:'Plus Jakarta Sans',-apple-system,sans-serif;font-size:16px;font-weight:600;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.section-dot{width:10px;height:10px;border-radius:50%}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:28px}
+.timeline::before{content:'';position:absolute;left:8px;top:6px;bottom:0;width:1.5px;background:linear-gradient(to bottom,var(--border),transparent)}
+
+.tl-item{position:relative;margin-bottom:20px}
+.tl-dot{position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 0 0 1.5px currentColor;flex-shrink:0}
+.tl-dot.sw{color:var(--sw);background:var(--sw)}
+.tl-dot.inj{color:var(--inj);background:var(--inj)}
+.tl-dot.laser{color:var(--laser);background:var(--laser)}
+.tl-dot.bw{color:var(--bw);background:var(--bw)}
+.tl-dot.vet{color:var(--vet);background:var(--vet)}
+.tl-dot.future{background:white}
+
+.tl-card{background:var(--card);border-radius:10px;padding:14px 16px;border:1px solid var(--border);transition:box-shadow 0.15s}
+.tl-card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.tl-card.sw{border-left:3px solid var(--sw)}
+.tl-card.inj{border-left:3px solid var(--inj)}
+.tl-card.laser{border-left:3px solid var(--laser)}
+.tl-card.bw{border-left:3px solid var(--bw)}
+.tl-card.vet{border-left:3px solid var(--vet)}
+.tl-card.future{border-left:3px solid #C2C8C8;border-style:dashed;background:transparent}
+
+.tl-date{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-bottom:3px}
+.tl-title{font-size:14px;font-weight:500;margin-bottom:3px}
+.tl-site{font-size:12px;color:var(--muted);margin-bottom:4px}
+.tl-note{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5}
+
+.tl-window{margin-top:8px;padding:8px 10px;border-radius:7px;font-size:11px;line-height:1.6}
+.tl-window.sw{background:var(--sw-bg);color:var(--sw)}
+.tl-window.inj{background:var(--inj-bg);color:var(--inj)}
+.tl-window.laser{background:var(--laser-bg);color:var(--laser)}
+
+.tl-gap{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);margin:6px 0 6px -24px;padding-left:24px}
+.tl-gap-line{flex:1;height:1px;background:var(--border);max-width:40px}
+
+/* PROGRESS BAR (for laser compliance) */
+.compliance-wrap{margin-top:8px}
+.compliance-row{display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:11px;color:var(--muted)}
+.compliance-track{flex:1;height:5px;background:#E7ECEC;border-radius:3px;overflow:hidden}
+.compliance-fill{height:100%;border-radius:3px}
+
+/* NEXT TREATMENT CHIP */
+.next-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 10px;border-radius:10px;margin-top:6px}
+.next-chip.sw{background:var(--sw-bg);color:var(--sw)}
+.next-chip.laser{background:var(--laser-bg);color:var(--laser)}
+.next-chip.inj{background:var(--inj-bg);color:var(--inj)}
+
+/* FUTURE SECTION */
+.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.future-item{background:var(--card);border-radius:10px;padding:12px 14px;border:1px dashed var(--border)}
+.future-item-type{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.future-item-date{font-size:16px;font-weight:500;margin-bottom:2px}
+.future-item-sub{font-size:11px;color:var(--muted)}
+</style><style>
+:root{--farr:#8A6A2F;--farr-bg:#F4EEE2;--img:#5C6BC0;--oth:#9AA0A4}
+.tl-dot.farr{color:var(--farr);background:var(--farr)}.tl-card.farr{border-left:3px solid var(--farr)}
+.tl-dot.img{color:var(--img);background:var(--img)}.tl-card.img{border-left:3px solid var(--img)}
+.tl-dot.oth{color:var(--oth);background:var(--oth)}.tl-card.oth{border-left:3px solid var(--oth)}
+.tl-card.up{border-style:dashed;border-left-style:solid}
+.add-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:34px}
+.frow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.frow input{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+.btn-dark{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:7px 16px;border-radius:8px;border:1px solid #0A527F;background:#0A527F;color:#fff;cursor:pointer}
+.btn-dark:disabled{opacity:.6}
+.btn-light{font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer}
+.icon-btn{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer}
+.icon-btn.armed{background:var(--sw-bg);color:var(--sw);border-color:var(--sw-border)}
+.tchip.sel{background:#0A527F;border-color:#0A527F}
+@media(max-width:560px){.section-title{flex-wrap:wrap;gap:8px}}
+</style>
+<style id="maestro-nav-style">
+.mnav{
+  position:sticky;top:0;z-index:999;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.mnav-brand{
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
+}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
+.mnav-link{
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
+}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
+@media(max-width:480px){
+  .mnav-brand{display:none}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
+}
+</style>
+
+<style id="horse-switch-style">
+.hsw{display:inline-flex;align-self:center;margin:0 auto 8px 0;background:#E7ECEC;border-radius:20px;padding:3px;gap:2px;font-family:'Plus Jakarta Sans',sans-serif}
+.hsw a{font-size:12px;font-weight:600;padding:5px 13px;border-radius:17px;color:#706E67;text-decoration:none;line-height:1.2;white-space:nowrap}
+.hsw a:hover{color:#141A1C}
+.hsw a.on{background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.10)}
+.hsw a.on.m{color:#00A56A}
+.hsw a.on.w{color:#0A527F}
+@media(max-width:480px){.mnav{flex-wrap:wrap}.hsw{margin:0 0 6px 0}.mnav-links{width:100%}}
+</style>
+</head>
+<body>
+<nav class="mnav">
+  <span class="hsw"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="m">Maestro</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" class="w on">Winter</a></span>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-index.html" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" class="mnav-link active">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" class="mnav-link">Bodywork</a></div>
+</nav>
+<div class="header">
+  <h1>Winter — Appointments &amp; History</h1>
+  <p>Vet · Farrier · Bodywork · Imaging · Modalities — synced to Winter's Appointments tab and the shared Horse Appointments calendar</p>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div class="alerts" id="dueAlerts"><div style="font-size:13px;color:var(--muted)">Loading…</div></div>
+
+<!-- ADD / EDIT -->
+<div class="add-card">
+  <div class="section-title" style="margin-bottom:12px;border:none;padding:0"><span class="section-dot" style="background:var(--vet)"></span><span id="formTitle">Add an appointment</span></div>
+  <div class="frow">
+    <input type="date" id="aDate">
+    <input type="time" id="aStart" title="Start (blank = all day)">
+    <span style="font-size:12px;color:var(--muted)">to</span>
+    <input type="time" id="aEnd" title="End">
+  </div>
+  <div class="frow" id="typeChips"></div>
+  <div class="frow">
+    <input type="text" id="aProv" placeholder="Provider — e.g. Dr. Smith / EVCT, Tyson Clark, Barrio" style="flex:1;min-width:200px">
+  </div>
+  <div class="frow">
+    <input type="text" id="aDesc" placeholder="Notes — e.g. RF block + Sleip baseline, reset, massage" style="flex:1;min-width:200px" onkeydown="if(event.key==='Enter')saveAppt()">
+  </div>
+  <div class="frow">
+    <button id="aSave" class="btn-dark" onclick="saveAppt()">Add</button>
+    <button id="aCancel" class="btn-light" style="display:none" onclick="cancelEdit()">Cancel</button>
+    <span id="aMsg" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+  <div style="font-size:11px;color:var(--muted)">Leave times blank for an all-day entry. Past dates are fine — they go straight into the history below (no calendar event).</div>
+</div>
+
+<div class="section">
+  <div class="section-title" style="justify-content:space-between">
+    <span style="display:flex;align-items:center;gap:10px"><span class="section-dot" style="background:var(--vet)"></span>Upcoming</span>
+  </div>
+  <div id="upcoming" style="display:grid;gap:8px"></div>
+</div>
+
+<div class="section">
+  <div class="section-title" style="justify-content:space-between">
+    <span style="display:flex;align-items:center;gap:10px"><span class="section-dot" style="background:var(--laser)"></span>History</span>
+    <span style="display:flex;gap:6px;align-items:center">
+      <span id="filterChips" style="display:flex;gap:5px;flex-wrap:wrap"></span>
+      <button class="btn-light" onclick="load()">Refresh</button>
+    </span>
+  </div>
+  <div id="status" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+  <div class="timeline" id="history"></div>
+</div>
+
+<script>
+const DEFAULT_WINTER_URL='https://script.google.com/macros/s/AKfycbzTC52ToRjCLIHtvCREmjTH8XoxieDRf6m2eyiMGbxs2xEp8MSfPGkd4ScczoW2F03L/exec';
+function getUrl(){try{return (JSON.parse(localStorage.getItem('w_cfg')||'{}')).scriptUrl||DEFAULT_WINTER_URL;}catch(e){return DEFAULT_WINTER_URL;}}
+const URL_=getUrl();
+
+// Offline fallback — the Appointments tab as of 9/23/26. Live data replaces it on load.
+const SEED=[
+ {id:'sp0',date:'2026-01-21',type:'Imaging',provider:'Cave Creek Equine',desc:'MRI bilateral front feet. RF lateral palmar process edema + laminar inflammation; mild navicular edema; mild DIP OA/synovitis.'},
+ {id:'sp1',date:'2026-02-26',type:'Rehab',provider:'ESMR-AZ',desc:'Admitted to professional rehabilitation.'},
+ {id:'sp2',date:'2026-03-09',type:'Imaging',provider:'ESMR-AZ',desc:'Ultrasound RF fetlock & suspensory branches: mild medial suspensory branch desmopathy; osseous roughening dorsal MC3 condyles.'},
+ {id:'sp3',date:'2026-03-14',type:'Modality',provider:'ESMR-AZ',desc:'IRAP harvest.'},
+ {id:'sp4',date:'2026-03-27',type:'Modality',provider:'ESMR-AZ',desc:'IRAP + shockwave (800 pulses, 20mm, E6), RF fetlock.'},
+ {id:'sp5',date:'2026-04-10',type:'Modality',provider:'ESMR-AZ',desc:'IRAP + shockwave, RF fetlock.'},
+ {id:'sp6',date:'2026-04-22',type:'Modality',provider:'ESMR-AZ',desc:'Shockwave, RF fetlock.'},
+ {id:'sp7',date:'2026-05-08',type:'Modality',provider:'ESMR-AZ',desc:'IRAP, RF fetlock.'},
+ {id:'sp8',date:'2026-05-26',type:'Imaging',provider:'Cave Creek Equine',desc:'Recheck MRI (feet + RF fetlock): resolved P3/navicular edema, improved palmar process. Residual RF fetlock OA. Consider increasing work.'},
+ {id:'sp9',date:'2026-06-04',type:'Modality',provider:'ESMR-AZ',desc:'IRAP + shockwave, RF fetlock. Last combined treatment.'},
+ {id:'sp10',date:'2026-06-24',type:'Farrier',provider:'Sara Ferguson',desc:'Reset. Balance / negative palmar angle. 6-week cycle.'},
+ {id:'sp11',date:'2026-06-25',type:'Rehab',provider:'ESMR-AZ',desc:'Discharged — sound trotting in hand and on lunge both directions.'},
+ {id:'su0',date:'2026-07-06',type:'Vet',provider:'Dr. Smith / EVCT',desc:'1-4PM Baseline lameness',start:'13:00',end:'16:00'},
+ {id:'u1783360674416',date:'2026-07-16',type:'Bodywork',provider:'Barrio',desc:'',start:'08:00',end:'09:00'},
+ {id:'u1784330503518',date:'2026-07-21',type:'Vet',provider:'Chauncey Smith - EVCT',desc:'Scope (confirm), cervical rads, rf ultrasound',start:'06:45',end:'09:00'},
+ {id:'su2',date:'2026-07-30',type:'Farrier',provider:'Tyson Clark',desc:'7AM - joint appointment w Chauncey for rads',start:'07:00',end:'09:00'},
+ {id:'u1786632271011',date:'2026-08-18',type:'Vet',provider:'Dr. Chauncey',desc:'Rads. Someone needs to be present due to sedation',start:'09:00',end:'11:00'}
+];
+const TYPES=[['Vet','vet'],['Farrier','farr'],['Bodywork','bw'],['Imaging','img'],['Modality','sw'],['Rehab','laser'],['Other','oth']];
+// Recurring cadences from Winter's plan. Days = interval; source types that reset the clock.
+const CADENCE=[
+  {label:'Farrier',days:42,match:a=>/farrier/i.test(a.type),sub:'6-week cycle · rads before resets'},
+  {label:'Bodywork',days:14,match:a=>/bodywork/i.test(a.type),sub:'Barrio: every 2 weeks (9/21 plan)'},
+  {label:'IRAP / shockwave',days:45,match:a=>/modality/i.test(a.type)||/irap|shockwave/i.test(a.desc||''),sub:'RF fetlock · every 30–45 days'}
+];
+let APPTS=[], FILTER=null, EDIT=null, BW=[];
+// Barrio sessions come from the bodywork reports (bodywork-data.json), not the Appointments
+// tab — merged in read-only so the bodywork clock and history reflect what actually happened.
+const BW_SEED=[{"d":"2/4/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"2/21/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"3/28/25","tx":"Massage","prac":"Liz","o":"good"},{"d":"6/27/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"7/22/25","tx":"Massage","prac":"Liz","o":"good"},{"d":"8/21/25","tx":"Massage","prac":"Aimee M.","o":"mixed"},{"d":"9/8/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"9/30/25","tx":"Massage","prac":"Aimee M.","o":"concern"},{"d":"10/15/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"10/23/25","tx":"Massage","prac":"Liz","o":"good"},{"d":"11/20/25","tx":"Massage","prac":"Liz","o":"mixed"},{"d":"12/18/25","tx":"Massage + PEMF","prac":"Aimee M.","o":"mixed"},{"d":"12/31/25","tx":"Massage + PEMF","prac":"Aimee M.","o":"mixed"},{"d":"1/14/26","tx":"Massage + PEMF","prac":"Liz","o":"mixed"},{"d":"1/28/26","tx":"Massage","prac":"Aimee M.","o":"good"},{"d":"2/12/26","tx":"Massage + PEMF","prac":"Aimee M.","o":"good"},{"d":"2/25/26","tx":"Massage + PEMF","prac":"Aimee M.","o":"mixed"},{"d":"7/3/26","tx":"Massage","prac":"Liz","o":"good"},{"d":"7/8/26","tx":"PEMF","prac":"Aimee M.","o":"concern"},{"d":"7/16/26","tx":"Massage","prac":"Aimee McGuire","o":"mixed"},{"d":"7/30/26","tx":"Massage","prac":"Liz Butler","o":"good"},{"d":"9/21/26","tx":"Massage","prac":"Aimee McGuire","o":"mixed"}];
+function bwIso(d){const p=d.split('/');return (2000+(+p[2]))+'-'+String(p[0]).padStart(2,'0')+'-'+String(p[1]).padStart(2,'0');}
+function bwAsAppts(list){return list.filter(s=>s.status!=='pending').map(s=>({id:'bw-'+s.d,date:bwIso(s.d),type:'Bodywork',provider:(s.prac||'Barrio'),
+  desc:(s.tx||'Session')+' · '+(s.o==='good'?'positive':s.o==='concern'?'concern':'mixed')+' (from Barrio report)',ro:true}));}
+function merged(){const have=new Set(APPTS.filter(a=>/bodywork/i.test(a.type)).map(a=>a.date));return APPTS.concat(bwAsAppts(BW).filter(b=>!have.has(b.date)));}
+
+function cls(type){const t=(type||'').split(',')[0].trim();const f=TYPES.find(x=>x[0].toLowerCase()===t.toLowerCase());return f?f[1]:'oth';}
+function todayIso(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmtDate(iso,long){const d=new Date(iso+'T12:00:00');return d.toLocaleDateString('en-US',long?{weekday:'short',month:'short',day:'numeric',year:'numeric'}:{month:'short',day:'numeric',year:'numeric'});}
+function fmtTime(s,e){if(!s)return 'All day';const f=x=>{const[h,m]=x.split(':');const H=+h;return ((H%12)||12)+':'+m+(H<12?' AM':' PM');};return e?f(s)+'–'+f(e):f(s);}
+function days(a,b){return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000);}
+function addDays(iso,n){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── LOAD ─────────────────────────────────────────────────────────────
+async function load(){
+  const st=document.getElementById('status');
+  BW=BW_SEED;
+  if(!URL_){APPTS=SEED.slice();st.textContent='Showing saved history — connect the Winter backend (New entry → ⚙) to add appointments and sync the calendar.';render();return;}
+  st.textContent='Loading…';
+  try{
+    const r=await fetch(URL_+'?action=appts');const j=await r.json();
+    if(!j.ok)throw new Error(j.error||'read failed');
+    APPTS=j.appointments;st.textContent='Live from Winter Tracking (Live) · '+APPTS.length+' entries';
+  }catch(e){APPTS=SEED.slice();st.textContent='Offline — showing saved history. ('+e.message+')';}
+  try{const r=await fetch(URL_+'?action=bodywork');const j=await r.json();if(j&&j.sessions&&j.sessions.length)BW=j.sessions;}catch(e){}
+  render();
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────
+function render(){
+  const today=todayIso();
+  const ALL=merged();
+  ALL.sort((a,b)=>(a.date+(a.start||'')).localeCompare(b.date+(b.start||'')));
+  // legend + filters
+  document.getElementById('legend').innerHTML=TYPES.map(([t,c])=>`<span class="leg"><span class="leg-dot" style="background:var(--${c})"></span>${t}</span>`).join('');
+  document.getElementById('filterChips').innerHTML=['All'].concat(TYPES.map(t=>t[0])).map(t=>`<button class="tchip${(FILTER===t||(!FILTER&&t==='All'))?' sel':''}" onclick="setFilter('${t}')">${t}</button>`).join('');
+  // due alerts
+  document.getElementById('dueAlerts').innerHTML=CADENCE.map(c=>{
+    const past=ALL.filter(a=>a.date<=today&&c.match(a));const next=ALL.filter(a=>a.date>today&&c.match(a))[0];
+    const last=past[past.length-1];
+    if(!last)return `<div class="alert-card"><div class="alert-title">${c.label}</div><div class="alert-main">No record</div><div class="alert-sub">${c.sub}</div></div>`;
+    const due=addDays(last.date,c.days),left=days(today,due);
+    const badge=next?`<span class="badge on-track">Booked ${fmtDate(next.date)}</span>`:left<0?`<span class="badge due">Overdue ${-left}d</span>`:left<=7?`<span class="badge soon">Due in ${left}d</span>`:`<span class="badge on-track">${left}d to go</span>`;
+    return `<div class="alert-card"><div class="alert-title">${c.label}</div><div class="alert-main">Due ${fmtDate(due)}</div><div class="alert-sub">Last ${fmtDate(last.date)} · ${c.sub}</div>${badge}</div>`;
+  }).join('');
+  // upcoming
+  const up=ALL.filter(a=>a.date>=today);
+  document.getElementById('upcoming').innerHTML=up.length?up.map(a=>card(a,true)).join(''):'<div style="font-size:13px;color:var(--muted)">Nothing booked. Add one above.</div>';
+  // history
+  let past=ALL.filter(a=>a.date<today).reverse();
+  if(FILTER&&FILTER!=='All')past=past.filter(a=>(a.type||'').toLowerCase().includes(FILTER.toLowerCase()));
+  document.getElementById('history').innerHTML=past.length?past.map((a,i)=>{
+    const gap=i<past.length-1?days(past[i+1].date,a.date):0;
+    return `<div class="tl-item"><div class="tl-dot ${cls(a.type)}"></div>${card(a,false)}</div>`+(gap>=21?`<div class="tl-gap"><span class="tl-gap-line"></span>${gap} days</div>`:'');
+  }).join(''):'<div style="font-size:13px;color:var(--muted);padding:12px 0">No history for this filter.</div>';
+}
+function card(a,future){
+  const c=cls(a.type);
+  return `<div class="tl-card ${c}${future?' up':''}">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+      <div><div class="tl-date">${fmtDate(a.date,true)} · ${fmtTime(a.start,a.end)}</div>
+      <div class="tl-title">${esc(a.type)}${a.provider?' — '+esc(a.provider):''}</div>
+      ${a.desc?`<div class="tl-note">${esc(a.desc)}</div>`:''}</div>
+      ${URL_&&!a.ro?`<div style="display:flex;gap:4px;flex-shrink:0"><button class="icon-btn" title="Edit" onclick="editAppt('${esc(a.id)}')">Edit</button><button class="icon-btn" id="del-${esc(a.id)}" title="Delete" onclick="delAppt('${esc(a.id)}')">✕</button></div>`:''}
+    </div></div>`;
+}
+function setFilter(t){FILTER=t==='All'?null:t;render();}
+
+// ── FORM ─────────────────────────────────────────────────────────────
+function chips(sel){document.getElementById('typeChips').innerHTML=TYPES.map(([t])=>`<button type="button" class="tchip${sel.includes(t)?' sel':''}" data-type="${t}" onclick="this.classList.toggle('sel')">${t}</button>`).join('');}
+function selTypes(){return [...document.querySelectorAll('#typeChips .tchip.sel')].map(b=>b.dataset.type);}
+function msg(t){document.getElementById('aMsg').textContent=t;}
+async function post(p){const body=new URLSearchParams();Object.keys(p).forEach(k=>body.set(k,p[k]));const r=await fetch(URL_,{method:'POST',body});const j=await r.json();if(!j.ok)throw new Error(j.error||'failed');return j;}
+async function saveAppt(){
+  if(!URL_){msg('Connect the Winter backend first (New entry → ⚙).');return;}
+  const p={action:EDIT?'apptEdit':'apptAdd',date:document.getElementById('aDate').value,start:document.getElementById('aStart').value,end:document.getElementById('aEnd').value,
+    type:selTypes().join(', ')||'Vet',provider:document.getElementById('aProv').value.trim(),desc:document.getElementById('aDesc').value.trim()};
+  if(EDIT)p.id=EDIT;
+  if(!p.date){msg('Pick a date.');return;}
+  if(!p.provider&&!p.desc){msg('Add a provider or a note.');return;}
+  const btn=document.getElementById('aSave');btn.disabled=true;msg('Saving…');
+  try{const j=await post(p);msg(j.calendar&&/timed|all-day/.test(j.calendar)?'Saved · on the calendar':'Saved');cancelEdit(true);await load();}
+  catch(e){msg('Could not save: '+e.message);}
+  finally{btn.disabled=false;}
+}
+function editAppt(id){
+  const a=APPTS.find(x=>x.id===id);if(!a)return;EDIT=id;
+  document.getElementById('aDate').value=a.date;document.getElementById('aStart').value=a.start||'';document.getElementById('aEnd').value=a.end||'';
+  document.getElementById('aProv').value=a.provider||'';document.getElementById('aDesc').value=a.desc||'';
+  chips((a.type||'').split(',').map(x=>x.trim()));
+  document.getElementById('formTitle').textContent='Edit appointment';document.getElementById('aSave').textContent='Save changes';
+  document.getElementById('aCancel').style.display='';window.scrollTo({top:document.querySelector('.add-card').offsetTop-60,behavior:'smooth'});
+}
+function cancelEdit(keepMsg){
+  EDIT=null;['aStart','aEnd','aProv','aDesc'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('aDate').value=todayIso();chips(['Vet']);
+  document.getElementById('formTitle').textContent='Add an appointment';document.getElementById('aSave').textContent='Add';
+  document.getElementById('aCancel').style.display='none';if(!keepMsg)msg('');
+}
+let ARMED=null;
+async function delAppt(id){
+  const b=document.getElementById('del-'+id);
+  if(ARMED!==id){ARMED=id;if(b){b.textContent='Confirm';b.classList.add('armed');}setTimeout(()=>{if(ARMED===id){ARMED=null;const x=document.getElementById('del-'+id);if(x){x.textContent='✕';x.classList.remove('armed');}}},4000);return;}
+  ARMED=null;
+  try{await post({action:'apptDelete',id});APPTS=APPTS.filter(a=>a.id!==id);render();}catch(e){msg('Delete failed: '+e.message);}
+}
+
+cancelEdit();load();
+</script>
+</body>
+</html>

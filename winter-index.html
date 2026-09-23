@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Winter Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+:root {
+  --bg: #F4F7F7;
+  --surface: #FFFFFF;
+  --surface2: #EDEFEE;
+  --border: #DCDEDC;
+  --border-light: #E8EAE9;
+  --text: #141A1C;
+  --text-mid: #5C5850;
+  --text-muted: #9AA0A4;
+  --green-bg: #DFF4EA; --green: #00A56A; --green-border: #57C69A;
+  --amber-bg: #FAEEDA; --amber: #B77A15; --amber-border: #E3A93C;
+  --red-bg: #F6ECE8; --red: #C0492B; --red-border: #D9633F;
+  --blue-bg: #E4F4FB; --blue: #0098CC; --blue-border: #7FCDE8;
+  --accent: #00A56A; --accent-light: #DFF4EA;
+  --radius: 12px; --radius-sm: 8px;
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Plus Jakarta Sans', -apple-system, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; max-width: 480px; margin: 0 auto; }
+
+/* HEADER */
+.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 18px 10px; position: sticky; top: 0; z-index: 100; }
+.app-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.app-title { font-family: var(--font-display); font-size: 21px; color: var(--text); letter-spacing: -0.3px; }
+.app-title span { font-style: italic; color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.day-badge { background: var(--accent-light); color: var(--accent); font-size: 11px; font-weight: 500; padding: 4px 9px; border-radius: 20px; white-space: nowrap; }
+.sync-status { font-size: 11px; padding: 4px 9px; border-radius: 20px; white-space: nowrap; font-weight: 500; }
+.sync-status.connected { background: var(--green-bg); color: var(--green); }
+.sync-status.disconnected { background: var(--surface2); color: var(--text-muted); cursor: pointer; border: 1px solid var(--border); }
+.sync-status.syncing { background: var(--blue-bg); color: var(--blue); }
+.date-row { display: flex; align-items: center; gap: 8px; }
+.date-row input[type="date"] { font-family: var(--font); font-size: 14px; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; flex: 1; outline: none; -webkit-appearance: none; }
+.date-row input[type="date"]:focus { border-color: var(--accent); }
+
+/* NAV */
+.nav-tabs { display: flex; flex-wrap: wrap; gap: 7px; padding: 12px 16px; border-bottom: 1px solid var(--border-light); background: var(--surface); }
+.nav-tab { flex-shrink: 0; font-family: var(--font); font-size: 12.5px; font-weight: 400; color: var(--text-muted); background: var(--surface2); border: none; padding: 7px 13px; border-radius: 20px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+.nav-tab.active { background: var(--accent); color: #fff; font-weight: 600; }
+.nav-tab.has-data::after { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--blue); border-radius: 50%; margin-left: 5px; vertical-align: middle; margin-top: -2px; }
+
+/* CONTENT */
+.content { padding: 14px 14px 110px; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* CARDS */
+.card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
+.card-title { font-size: 10px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 13px; }
+
+/* FIELDS */
+.field { margin-bottom: 13px; }
+.field:last-child { margin-bottom: 0; }
+label { display: block; font-size: 13px; color: var(--text-mid); margin-bottom: 5px; }
+input[type="text"], input[type="number"], textarea, select {
+  width: 100%; font-family: var(--font); font-size: 15px; color: var(--text);
+  background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 9px 11px; outline: none; -webkit-appearance: none; appearance: none; transition: border-color 0.15s;
+}
+input[type="text"]:focus, input[type="number"]:focus, textarea:focus, select:focus { border-color: var(--accent); background: var(--surface); }
+textarea { resize: none; min-height: 76px; line-height: 1.5; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239C9488' d='M6 8L0 0h12z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; padding-right: 30px; }
+
+/* TOGGLES */
+.toggle-group { display: flex; gap: 7px; }
+.toggle-btn { flex: 1; font-family: var(--font); font-size: 14px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
+.toggle-btn.sel-yes { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
+.toggle-btn.sel-no { background: var(--surface2); color: var(--text-mid); border-color: var(--border); }
+
+/* SCORES */
+.score-group { display: flex; gap: 5px; }
+.score-btn { flex: 1; font-family: var(--font); font-size: 15px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 4px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; }
+.score-btn[data-v="1"].sel { background: var(--red-bg); color: var(--red); border-color: var(--red-border); font-weight: 500; }
+.score-btn[data-v="2"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
+.score-btn[data-v="3"].sel { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); font-weight: 500; }
+.score-btn[data-v="4"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
+.score-btn[data-v="5"].sel { background: var(--green-bg); color: var(--green); border-color: var(--green-border); font-weight: 500; }
+.score-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; min-height: 15px; }
+
+/* CHIPS */
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--font); font-size: 13px; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; -webkit-appearance: none; white-space: nowrap; }
+.chip.sel { background: var(--accent-light); color: var(--accent); border-color: var(--green-border); font-weight: 500; }
+
+/* DURATION ROW */
+.dur-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.dur-row label { font-size: 12px; }
+.dur-row input { text-align: center; }
+
+/* CONDITIONAL */
+.cond { display: none; }
+.cond.show { display: block; }
+
+/* SEVERITY */
+.sev-group { display: flex; flex-direction: column; gap: 7px; }
+.sev-opt { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; cursor: pointer; transition: all 0.15s; }
+.sev-opt.sel { background: var(--amber-bg); border-color: var(--amber-border); }
+.sev-opt.sel.severe { background: var(--red-bg); border-color: var(--red-border); }
+.sev-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid var(--border); transition: all 0.15s; }
+.sev-opt.sel .sev-dot { background: #E3A93C; border-color: #E3A93C; }
+.sev-opt.sel.severe .sev-dot { background: #D9633F; border-color: #D9633F; }
+.sev-label { font-size: 14px; color: var(--text-mid); }
+.sev-hint { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.sev-opt.sel .sev-label { color: var(--amber); font-weight: 500; }
+.sev-opt.sel.severe .sev-label { color: var(--red); }
+
+/* DAY RATING */
+.rating-row { display: flex; gap: 8px; }
+.rating-btn { flex: 1; font-family: var(--font); font-size: 13px; border-radius: var(--radius-sm); padding: 11px 6px; cursor: pointer; text-align: center; transition: all 0.15s; -webkit-appearance: none; border: 1.5px solid transparent; }
+.rating-btn.good { background: var(--green-bg); color: var(--green); border-color: var(--border-light); }
+.rating-btn.ok   { background: var(--amber-bg); color: var(--amber); border-color: var(--border-light); }
+.rating-btn.bad  { background: var(--red-bg);   color: var(--red);   border-color: var(--border-light); }
+.rating-btn.sel.good { border-color: var(--green-border); font-weight: 600; }
+.rating-btn.sel.ok   { border-color: var(--amber-border); font-weight: 600; }
+.rating-btn.sel.bad  { border-color: var(--red-border);   font-weight: 600; }
+
+/* MEDIA */
+.upload-area { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 22px 14px; text-align: center; cursor: pointer; background: var(--surface2); transition: border-color 0.15s; position: relative; overflow: hidden; }
+.upload-area:hover { border-color: var(--accent); }
+.upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.upload-icon { font-size: 26px; margin-bottom: 6px; filter: grayscale(1) opacity(0.5); }
+.upload-label { font-size: 14px; color: var(--text-mid); }
+.upload-hint { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.media-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-top: 11px; }
+.m-thumb { position: relative; aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface2); border: 1px solid var(--border-light); }
+.m-thumb img, .m-thumb video { width: 100%; height: 100%; object-fit: cover; }
+.m-remove { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; background: rgba(0,0,0,0.55); border: none; border-radius: 50%; color: white; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1; }
+.m-badge { position: absolute; bottom: 3px; left: 3px; background: rgba(0,0,0,0.58); color: white; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
+.m-status { position: absolute; bottom: 3px; right: 3px; font-size: 9px; padding: 2px 5px; border-radius: 4px; }
+.m-status.uploading { background: var(--blue-bg); color: var(--blue); }
+.m-status.done { background: var(--green-bg); color: var(--green); }
+.m-status.error { background: var(--red-bg); color: var(--red); }
+
+/* SETUP CARD */
+.setup-card { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 15px; margin-bottom: 10px; }
+.setup-card h3 { font-size: 13px; font-weight: 500; color: var(--blue); margin-bottom: 8px; }
+.setup-card p { font-size: 13px; color: #0098CC; line-height: 1.55; margin-bottom: 8px; }
+.setup-card p:last-child { margin-bottom: 0; }
+.setup-input { margin-top: 10px; }
+.setup-input label { color: var(--blue); font-size: 12px; margin-bottom: 4px; }
+.setup-input input { font-size: 13px; padding: 8px 10px; }
+.setup-btn { width: 100%; font-family: var(--font); font-size: 14px; font-weight: 500; color: white; background: var(--blue); border: none; border-radius: var(--radius-sm); padding: 11px; cursor: pointer; margin-top: 10px; transition: opacity 0.15s; }
+.setup-btn:active { opacity: 0.85; }
+
+/* SAVE BAR */
+.save-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; padding: 10px 14px; background: var(--surface); border-top: 1px solid var(--border-light); z-index: 200; }
+.save-btn { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: white; background: var(--accent); border: none; border-radius: var(--radius); padding: 14px; cursor: pointer; transition: opacity 0.15s; }
+.save-btn:active { opacity: 0.85; }
+.save-btn:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+/* HISTORY */
+.hist-entry { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 9px; cursor: pointer; }
+.hist-entry:hover { border-color: var(--border); }
+.hist-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.hist-date { font-size: 14px; font-weight: 500; }
+.hist-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+.dot-good { background: var(--green); }
+.dot-ok { background: #E3A93C; }
+.dot-bad { background: #D9633F; }
+.dot-none { background: var(--border); }
+.hist-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 8px; flex-wrap: wrap; }
+.hist-notes { font-size: 13px; color: var(--text-mid); margin-top: 8px; line-height: 1.5; border-top: 1px solid var(--border-light); padding-top: 8px; display: none; }
+.hist-entry.open .hist-notes { display: block; }
+.hist-media { display: flex; gap: 5px; margin-top: 7px; overflow-x: auto; scrollbar-width: none; }
+.hist-media::-webkit-scrollbar { display: none; }
+.hist-media img, .hist-media video { flex-shrink: 0; width: 54px; height: 54px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border-light); }
+.empty-hist { text-align: center; padding: 44px 20px; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+
+/* DIVIDER */
+.div { height: 1px; background: var(--border-light); margin: 12px 0; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 82px; left: 50%; transform: translateX(-50%) translateY(16px); background: var(--text); color: white; font-size: 13px; padding: 9px 18px; border-radius: 20px; opacity: 0; pointer-events: none; transition: all 0.22s; z-index: 300; white-space: nowrap; max-width: 90vw; text-align: center; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { background: var(--red); }
+
+/* REMINDER BANNER */
+.reminder-banner { background: var(--amber-bg); border: 1px solid var(--amber-border); border-radius: var(--radius-sm); padding: 10px 14px; margin: 10px 14px 0; display: none; }
+.reminder-banner.show { display: block; }
+.reminder-banner-title { font-size: 12px; font-weight: 500; color: var(--amber); margin-bottom: 4px; }
+.reminder-item { font-size: 13px; color: var(--amber); line-height: 1.5; padding: 3px 0; border-bottom: 1px solid var(--amber-border); }
+.reminder-item:last-child { border-bottom: none; }
+.reminder-overdue { color: var(--red); }
+
+/* VET / BODYWORK SPECIFIC */
+.procedures-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.proc-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; cursor: pointer; transition: all 0.15s; }
+.proc-item.sel { background: var(--accent-light); border-color: var(--green-border); }
+.proc-check { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.15s; }
+.proc-item.sel .proc-check { background: var(--accent); border-color: var(--accent); color: white; }
+.proc-label { font-size: 13px; color: var(--text-mid); }
+.proc-item.sel .proc-label { color: var(--accent); font-weight: 500; }
+
+/* MODALITY CHIPS for bodywork */
+.mod-chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* VET save btn secondary */
+.save-btn-secondary { width: 100%; font-family: var(--font); font-size: 15px; font-weight: 500; color: var(--blue); background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius); padding: 13px; cursor: pointer; margin-bottom: 8px; transition: opacity 0.15s; }
+.save-btn-secondary:active { opacity: 0.8; }
+
+/* INFO NOTE */
+.info-note { background: var(--blue-bg); border: 1px solid var(--blue-border); border-radius: var(--radius-sm); padding: 11px 13px; font-size: 13px; color: var(--blue); line-height: 1.55; }
+.info-note strong { font-weight: 500; display: block; margin-bottom: 3px; }
+</style>
+
+<style id="maestro-nav-style">
+.mnav{
+  position:sticky;top:0;z-index:999;
+  display:flex;align-items:flex-end;gap:4px;
+  background:#F4F7F7;
+  padding:8px 14px 0;
+  min-height:46px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+}
+.mnav-brand{
+  font-size:13px;font-weight:600;color:#141A1C;
+  margin-right:auto;letter-spacing:0.01em;white-space:nowrap;padding-bottom:11px;
+}
+.mnav-brand span{color:#00A56A}
+.mnav-links{display:flex;gap:4px;align-items:flex-end}
+.mnav-link{
+  font-size:12.5px;font-weight:500;text-decoration:none;
+  padding:8px 14px 9px;border-radius:9px 9px 0 0;
+  background:#E7ECEC;border-top:3px solid transparent;
+  transition:all 0.15s;white-space:nowrap;line-height:1;
+}
+.mnav-link:hover{background:#EFF2F2}
+.mnav-link.active{background:#FFFFFF;font-weight:600;padding-top:7px;padding-bottom:12px}
+.mnav-links a:nth-child(1){color:#0E8A57}
+.mnav-links a:nth-child(1).active{border-top-color:#00BB77}
+.mnav-links a:nth-child(2){color:#0A6E96}
+.mnav-links a:nth-child(2).active{border-top-color:#0098CC}
+.mnav-links a:nth-child(3){color:#0A527F}
+.mnav-links a:nth-child(3).active{border-top-color:#005F9D}
+.mnav-links a:nth-child(4){color:#1E7D57}
+.mnav-links a:nth-child(4).active{border-top-color:#1E8E63}
+@media(max-width:480px){
+  .mnav-brand{display:none}
+  .mnav-link{padding:8px 10px 9px;font-size:11px}
+  .mnav-link.active{padding-top:7px;padding-bottom:12px}
+}
+</style>
+<style>
+.w-accent{font-style:italic;color:#0A527F}
+.w-badge{background:#E1EEF4;color:#0A527F}
+.w-save{background:#0A527F}
+.limb-row .chip{min-width:52px;text-align:center}
+.proc-item.sel .proc-check{background:#0A527F;border-color:#0A527F}
+.proc-item.sel{background:#E1EEF4;border-color:#6FB0CC}
+.proc-item.sel .proc-label{color:#0A527F}
+.reminder-banner.show{display:block}
+</style>
+
+<style id="horse-switch-style">
+.hsw{display:inline-flex;align-self:center;margin:0 auto 8px 0;background:#E7ECEC;border-radius:20px;padding:3px;gap:2px;font-family:'Plus Jakarta Sans',sans-serif}
+.hsw a{font-size:12px;font-weight:600;padding:5px 13px;border-radius:17px;color:#706E67;text-decoration:none;line-height:1.2;white-space:nowrap}
+.hsw a:hover{color:#141A1C}
+.hsw a.on{background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.10)}
+.hsw a.on.m{color:#00A56A}
+.hsw a.on.w{color:#0A527F}
+@media(max-width:480px){.mnav{flex-wrap:wrap}.hsw{margin:0 0 6px 0}.mnav-links{width:100%}}
+</style>
+</head>
+<body>
+<nav class="mnav">
+  <span class="hsw"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="m">Maestro</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-index.html" class="w on">Winter</a></span>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-index.html" class="mnav-link active">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" class="mnav-link">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" class="mnav-link">Bodywork</a></div>
+</nav>
+
+<div class="app-header">
+  <div class="app-header-top">
+    <div class="app-title"><span class="w-accent">Winter</span> Daily Log</div>
+    <div class="header-right">
+      <div class="day-badge w-badge" id="dayBadge">—</div>
+      <div class="sync-status disconnected" id="syncStatus" onclick="showSection('settings')">Not connected</div>
+    </div>
+  </div>
+  <div class="date-row">
+    <input type="date" id="entryDate" onchange="onDateChange(this.value)">
+  </div>
+</div>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="nav-tab active" data-s="log" onclick="showSection('log',this)">Log</button>
+  <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
+  <button class="nav-tab" data-s="plan" onclick="showSection('plan',this)">Rehab plan</button>
+  <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
+</div>
+
+<div id="loadedNote" class="reminder-banner" style="background:var(--blue-bg);border-color:var(--blue-border)">
+  <div class="reminder-banner-title" style="color:var(--blue);margin:0" id="loadedText"></div>
+</div>
+
+<div class="content">
+
+<!-- LOG -->
+<div class="section active" id="s-log">
+
+  <div class="card">
+    <div class="card-title">Workload</div>
+    <div class="field">
+      <label>Ridden today?</label>
+      <div class="toggle-group" data-f="ride">
+        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
+        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Minutes in each gait</label>
+      <div class="dur-row">
+        <div><label for="walk">Walk</label><input type="number" inputmode="numeric" min="0" id="walk" data-f="walk" oninput="numIn(this)" placeholder="0"></div>
+        <div><label for="trot">Trot</label><input type="number" inputmode="numeric" min="0" id="trot" data-f="trot" oninput="numIn(this)" placeholder="0"></div>
+        <div><label for="canter">Canter</label><input type="number" inputmode="numeric" min="0" id="canter" data-f="canter" oninput="numIn(this)" placeholder="0"></div>
+      </div>
+      <div class="score-hint" id="totalHint">Total: 0 min</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">PT &amp; bands</div>
+    <div class="field">
+      <label>PT exercises done?</label>
+      <div class="toggle-group" data-f="pt">
+        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
+        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
+      </div>
+    </div>
+    <div class="field">
+      <label for="ptNotes">PT notes</label>
+      <textarea id="ptNotes" data-f="ptNotes" oninput="txtIn(this)" placeholder="What got done, what he resisted, anything skipped…"></textarea>
+    </div>
+    <div class="field">
+      <label>Equibands <span id="bandHint" style="color:var(--text-muted);font-size:12px"></span></label>
+      <div class="toggle-group" data-f="equibands">
+        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
+        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Ice &amp; Voltaren</div>
+    <div class="field">
+      <div class="proc-item" id="iceBox" onclick="togCheck('ice')"><div class="proc-check" id="iceChk"></div><div class="proc-label">Iced</div></div>
+      <div class="chip-group limb-row" id="iceLimbs" style="margin-top:8px"></div>
+    </div>
+    <div class="div"></div>
+    <div class="field">
+      <div class="proc-item" id="voltBox" onclick="togCheck('volt')"><div class="proc-check" id="voltChk"></div><div class="proc-label">Voltaren applied</div></div>
+      <div class="chip-group limb-row" id="voltLimbs" style="margin-top:8px"></div>
+    </div>
+    <div class="score-hint" style="margin-top:8px">Both feed the gait card — a Sleip capture on a treated day reads lower, so it gets flagged.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Other modalities</div>
+    <div class="field">
+      <label>Bemer</label>
+      <div class="toggle-group" data-f="bemer">
+        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
+        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Laser</label>
+      <div class="toggle-group" data-f="laser">
+        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
+        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Lameness seen today?</label>
+      <div class="toggle-group" data-f="lameness">
+        <button class="toggle-btn" data-v="Y" onclick="setTog(this)">Yes</button>
+        <button class="toggle-btn" data-v="N" onclick="setTog(this)">No</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Notes</div>
+    <textarea id="notes" data-f="notes" oninput="txtIn(this)" placeholder="Walker, turnout, feet, behavior, anything that stood out…"></textarea>
+  </div>
+
+  <div class="info-note" style="margin-bottom:10px"><strong>Vet, farrier, bodywork</strong>Add appointments on the <a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" style="color:inherit">Appts/History</a> tab — they go to Winter's Appointments tab and the Horse Appointments calendar.</div>
+</div>
+
+<!-- HISTORY -->
+<div class="section" id="s-history">
+  <div id="histList"><div class="empty-hist">Loading…</div></div>
+</div>
+
+<!-- PLAN -->
+<div class="section" id="s-plan">
+  <div class="card">
+    <div class="card-title">Core &amp; stretches — once a day, 3–5×/week</div>
+    <ol style="font-size:13px;color:var(--text-mid);line-height:1.7;padding-left:18px">
+      <li>Combined CT mobilizations + sternal lifts — 5 reps, hold 5–8 s</li>
+      <li>Wither pulls — 3 each side, hold 5–8 s</li>
+      <li>Lateral stretches — 3 each direction</li>
+      <li>Hindlimb circumductions — 15 reps each direction, each hind</li>
+      <li>Diagonal tail pulls — 3 reps, hold 5–8 s</li>
+      <li>Ventral cervical flexions to front fetlocks — 5 reps (do last)</li>
+      <li>After ride/walk: hind limb crossover stretch — let him hold</li>
+    </ol>
+  </div>
+  <div class="card">
+    <div class="card-title">Poles</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.6">In hand: 3 poles one stride apart, 3–5×/week. Straddle pole: 2 passes, 3×/week.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Walker &amp; bands</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.6">Up to 30 min every day. Mon/Wed/Fri belly band · Tue/Thu/Sat butt band · Sunday none.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Always avoid</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.6">Excessive lunging (&gt;5 min or fast), tight turns, hard backing, uneven ground.</p>
+  </div>
+  <div class="score-hint">From the Rehab Plan tab in Winter Tracking (Live). Edit it there; update here when it changes.</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="section" id="s-settings">
+  <div class="setup-card">
+    <h3>Winter backend — Web App URL</h3>
+    <p>Paste the /exec URL from the Winter Apps Script deployment (winter-backend.gs). Every Winter page — log, progress, appointments, bodywork — reads it from here.</p>
+    <div class="setup-input">
+      <label>Apps Script Web App URL</label>
+      <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/…/exec">
+    </div>
+  </div>
+  <button class="save-btn" style="margin-bottom:10px" onclick="saveSettings()">Save settings</button>
+  <div id="settingsStatus" style="font-size:13px;color:var(--text-muted);text-align:center;padding:4px"></div>
+  <div class="card" style="margin-top:14px">
+    <div class="card-title">Offline queue</div>
+    <p style="font-size:13px;color:var(--text-mid);line-height:1.55;margin-bottom:10px" id="queueInfo">Nothing waiting.</p>
+    <button class="save-btn" onclick="flushQueue(true)">Send queued entries now</button>
+  </div>
+</div>
+
+</div>
+
+<div class="save-bar"><button class="save-btn w-save" id="saveBtn" onclick="saveEntry()">Save entry</button></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────
+const DEFAULT_WINTER_URL='https://script.google.com/macros/s/AKfycbzTC52ToRjCLIHtvCREmjTH8XoxieDRf6m2eyiMGbxs2xEp8MSfPGkd4ScczoW2F03L/exec';   // paste the /exec URL here after deploy so every device has it
+const LIMBS=['LF','RF','LH','RH'];
+let CFG={scriptUrl:''};
+let ROWS=null;          // [{headers},{rows}] from the sheet
+let F={};               // current form values
+let TOUCHED={};         // fields the user changed — only these are sent
+function loadCfg(){
+  try{CFG=JSON.parse(localStorage.getItem('w_cfg')||'{}');}catch(e){CFG={};}
+  CFG.scriptUrl=CFG.scriptUrl||DEFAULT_WINTER_URL;
+  document.getElementById('scriptUrl').value=CFG.scriptUrl||'';
+  badge();
+}
+function saveSettings(){
+  CFG.scriptUrl=document.getElementById('scriptUrl').value.trim();
+  try{localStorage.setItem('w_cfg',JSON.stringify(CFG));}catch(e){}
+  document.getElementById('settingsStatus').textContent='Saved.';
+  badge(); toast('Settings saved'); loadSheet();
+}
+function badge(t,cls){
+  const el=document.getElementById('syncStatus');
+  if(t){el.className='sync-status '+(cls||'syncing');el.textContent=t;return;}
+  if(CFG.scriptUrl){el.className='sync-status connected';el.textContent='Sheet connected';}
+  else{el.className='sync-status disconnected';el.textContent='Not connected';}
+}
+
+// ── DATE ─────────────────────────────────────────────────────────────
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function initDate(){const t=iso(new Date());document.getElementById('entryDate').value=t;onDateChange(t);}
+function onDateChange(v){
+  const d=new Date(v+'T12:00:00');
+  document.getElementById('dayBadge').textContent=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  const band=['none','belly band','butt band','belly band','butt band','belly band','butt band'][d.getDay()];
+  document.getElementById('bandHint').textContent='· plan today: '+band;
+  resetForm(); prefill(v);
+}
+
+// ── FORM ─────────────────────────────────────────────────────────────
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active',b.dataset.s===id));
+  document.querySelector('.save-bar').style.display=id==='log'?'':'none';
+  if(id==='history')renderHistory();
+  if(id==='settings')queueInfo();
+}
+function setTog(btn,silent){
+  const g=btn.parentElement, f=g.dataset.f, v=btn.dataset.v;
+  const same=F[f]===v && !silent;
+  g.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
+  if(same){F[f]='';}else{F[f]=v;btn.classList.add(v==='Y'?'sel-yes':'sel-no');}
+  if(!silent)TOUCHED[f]=1;
+}
+function setTogVal(f,v){
+  const g=document.querySelector('.toggle-group[data-f="'+f+'"]'); if(!g)return;
+  g.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn'); F[f]='';
+  const b=g.querySelector('[data-v="'+v+'"]'); if(b)setTog(b,true);
+}
+function numIn(el){F[el.dataset.f]=el.value;TOUCHED[el.dataset.f]=1;TOUCHED.total=1;total();}
+function txtIn(el){F[el.dataset.f]=el.value;TOUCHED[el.dataset.f]=1;}
+function total(){const t=(+F.walk||0)+(+F.trot||0)+(+F.canter||0);F.total=t?String(t):'';document.getElementById('totalHint').textContent='Total: '+t+' min';}
+
+function buildLimbs(which){
+  const el=document.getElementById(which+'Limbs');
+  el.innerHTML=LIMBS.map(l=>`<button type="button" class="chip" data-l="${l}" onclick="togLimb('${which}','${l}')">${l}</button>`).join('');
+}
+function togCheck(which,forceOn,silent){
+  const on=forceOn!==undefined?forceOn:!(F[which]==='Y');
+  F[which]=on?'Y':'N';
+  document.getElementById(which+'Box').classList.toggle('sel',on);
+  document.getElementById(which+'Chk').textContent=on?'✓':'';
+  document.getElementById(which+'Limbs').style.display=on?'':'none';
+  const key=which+'Limbs';
+  if(on && !F[key] && !silent){F[key]='RF';}          // default RF
+  if(!on){F[key]='';}
+  syncLimbs(which);
+  if(!silent){TOUCHED[which]=1;TOUCHED[key]=1;}
+}
+function togLimb(which,l){
+  const key=which+'Limbs';
+  const set=new Set((F[key]||'').split(',').map(x=>x.trim()).filter(Boolean));
+  set.has(l)?set.delete(l):set.add(l);
+  F[key]=LIMBS.filter(x=>set.has(x)).join(', ');
+  TOUCHED[key]=1; syncLimbs(which);
+}
+function syncLimbs(which){
+  const set=new Set((F[which+'Limbs']||'').split(',').map(x=>x.trim()));
+  document.querySelectorAll('#'+which+'Limbs .chip').forEach(c=>c.classList.toggle('sel',set.has(c.dataset.l)));
+}
+function resetForm(){
+  F={};TOUCHED={};
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
+  ['walk','trot','canter','ptNotes','notes'].forEach(id=>document.getElementById(id).value='');
+  togCheck('ice',false,true); togCheck('volt',false,true); total();
+  document.getElementById('loadedNote').classList.remove('show');
+}
+
+// ── SHEET ────────────────────────────────────────────────────────────
+// Headers are matched by name, so the page keeps working whatever order the columns are in.
+const HMAP={ride:'ride',walk:'walk (min)',trot:'trot (min)',canter:'canter (min)',total:'total (min)',equibands:'equibands',
+  pt:'pt exercises',ptNotes:'pt notes',bemer:'bemer',laser:'laser',ice:'ice',iceLimbs:'ice limbs',volt:'voltaren',voltLimbs:'voltaren limbs',lameness:'lameness',notes:'notes'};
+function rowObj(headers,r){const o={};headers.forEach((h,i)=>{o[String(h).trim().toLowerCase()]=r[i];});return o;}
+function sheetRows(){
+  if(!ROWS)return [];
+  return ROWS.rows.map(r=>rowObj(ROWS.headers,r)).filter(o=>o.date).map(o=>{o.date=String(o.date).slice(0,10);return o;});
+}
+function hasData(o){return Object.keys(HMAP).some(k=>{const v=o[HMAP[k]];return v!==null&&v!==undefined&&String(v).trim()!=='';});}
+async function loadSheet(){
+  if(!CFG.scriptUrl){renderHistory();return;}
+  try{
+    badge('Loading…');
+    const r=await fetch(CFG.scriptUrl+'?action=read&sheet=daily');
+    const j=await r.json(); if(!j.success)throw new Error(j.error||'read failed');
+    ROWS=j.data; badge(); prefill(document.getElementById('entryDate').value); renderHistory();
+  }catch(e){badge('Offline','disconnected');renderHistory();}
+}
+function prefill(date){
+  const o=sheetRows().find(x=>x.date===date);
+  if(!o||!hasData(o))return;
+  const v=k=>{const x=o[HMAP[k]];return x===null||x===undefined?'':String(x);};
+  ['ride','pt','equibands','bemer','laser','lameness'].forEach(k=>{if(v(k))setTogVal(k,v(k).toUpperCase().charAt(0));});
+  ['walk','trot','canter'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
+  ['ptNotes','notes'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
+  total();
+  F.iceLimbs=v('iceLimbs'); F.voltLimbs=v('voltLimbs');
+  togCheck('ice',v('ice').toUpperCase()==='Y',true); togCheck('volt',v('volt').toUpperCase()==='Y',true);
+  document.getElementById('loadedText').textContent='Editing the entry already saved for this day — only what you change gets written.';
+  document.getElementById('loadedNote').classList.add('show');
+}
+
+// ── SAVE ─────────────────────────────────────────────────────────────
+function payload(){
+  const p={action:'daily',date:document.getElementById('entryDate').value};
+  Object.keys(TOUCHED).forEach(k=>{p[k]=F[k]==null?'':F[k];});
+  return p;
+}
+function qGet(){try{return JSON.parse(localStorage.getItem('w_queue')||'[]');}catch(e){return [];}}
+function qSet(q){try{localStorage.setItem('w_queue',JSON.stringify(q));}catch(e){}}
+async function post(p){
+  const body=new URLSearchParams(); Object.keys(p).forEach(k=>body.set(k,p[k]));
+  const r=await fetch(CFG.scriptUrl,{method:'POST',body}); const j=await r.json();
+  if(!j.success)throw new Error(j.error||'write failed'); return j;
+}
+async function saveEntry(){
+  const p=payload();
+  if(!p.date){toast('Set a date',true);return;}
+  if(Object.keys(TOUCHED).length===0){toast('Nothing changed');return;}
+  const btn=document.getElementById('saveBtn'); btn.disabled=true; btn.textContent='Saving…';
+  try{
+    if(!CFG.scriptUrl)throw new Error('no url');
+    await post(p); toast('Saved to Winter sheet ✓'); TOUCHED={};
+    loadSheet();
+  }catch(e){
+    const q=qGet(); q.push(p); qSet(q);
+    toast(CFG.scriptUrl?'No signal — queued, will send later':'Saved on this device — add the Script URL in ⚙',true);
+  }finally{btn.disabled=false;btn.textContent='Save entry';}
+}
+async function flushQueue(manual){
+  const q=qGet(); if(!q.length||!CFG.scriptUrl){if(manual)toast(q.length?'Add the Script URL first':'Nothing queued');return;}
+  const left=[];
+  for(const p of q){try{await post(p);}catch(e){left.push(p);}}
+  qSet(left); queueInfo();
+  if(manual||q.length!==left.length)toast('Sent '+(q.length-left.length)+' of '+q.length+' queued');
+}
+function queueInfo(){const n=qGet().length;const el=document.getElementById('queueInfo');if(el)el.textContent=n?n+' entr'+(n===1?'y':'ies')+' waiting to send.':'Nothing waiting.';}
+
+// ── HISTORY ──────────────────────────────────────────────────────────
+function yn(v){return String(v||'').toUpperCase().startsWith('Y');}
+function renderHistory(){
+  const el=document.getElementById('histList');
+  const rows=sheetRows().filter(hasData).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+  if(!rows.length){el.innerHTML='<div class="empty-hist">'+(CFG.scriptUrl?'No entries yet.':'Connect the Winter sheet in ⚙ to see history.')+'</div>';return;}
+  el.innerHTML=rows.map(o=>{
+    const d=new Date(o.date+'T12:00:00');
+    const w=+o['walk (min)']||0,t=+o['trot (min)']||0,c=+o['canter (min)']||0;
+    const meta=[
+      yn(o.ride)?'Rode':null,
+      (w||t||c)?`W ${w} · T ${t} · C ${c}`:null,
+      yn(o['pt exercises'])?'PT':null,
+      yn(o.equibands)?'Bands':null,
+      yn(o.ice)?'Ice '+(o['ice limbs']||''):null,
+      yn(o.voltaren)?'Voltaren '+(o['voltaren limbs']||''):null,
+      yn(o.bemer)?'Bemer':null, yn(o.laser)?'Laser':null,
+      yn(o.lameness)?'<span style="color:var(--red)">Lameness</span>':null
+    ].filter(Boolean).map(x=>`<span>${x}</span>`).join('');
+    const notes=[o['pt notes'],o.notes].filter(Boolean).map(esc).join(' · ');
+    return `<div class="hist-entry" onclick="this.classList.toggle('open')">
+      <div class="hist-header"><div><div class="hist-date">${d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div></div>
+      <div class="dot ${yn(o.lameness)?'dot-bad':'dot-good'}"></div></div>
+      <div class="hist-meta">${meta}</div>${notes?`<div class="hist-notes">${notes}</div>`:''}</div>`;
+  }).join('');
+}
+function esc(x){return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m,err){const t=document.getElementById('toast');t.textContent=m;t.className='toast show'+(err?' err':'');clearTimeout(t._to);t._to=setTimeout(()=>t.className='toast',2600);}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+buildLimbs('ice'); buildLimbs('volt');
+loadCfg(); initDate(); loadSheet(); flushQueue(false);
+</script>
+</body>
+</html>

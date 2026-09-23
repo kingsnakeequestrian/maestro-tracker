@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maestro — Bodywork Analysis</title>
+<title>Winter — Bodywork Analysis</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
@@ -171,13 +171,13 @@
 </head>
 <body>
 <nav class="mnav">
-  <span class="hsw"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="m on">Maestro</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" class="w">Winter</a></span>
-  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link active">Bodywork</a></div>
+  <span class="hsw"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="m">Maestro</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" class="w on">Winter</a></span>
+  <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-index.html" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" class="mnav-link">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-bodywork.html" class="mnav-link active">Bodywork</a></div>
 </nav>
 
 <div class="page-header">
-  <h1>Maestro — Bodywork Analysis</h1>
-  <p id="subtitle">Barrio Performance Therapy · 35 sessions · Aug 2024 – Jun 2026</p>
+  <h1>Winter — Bodywork Analysis</h1>
+  <p id="subtitle">Barrio Performance Therapy · 22 sessions · Feb 2025 – Sep 2026</p>
 </div>
 <div id="pendingReview"></div>
 
@@ -185,7 +185,7 @@
   <div class="ent-toggle">
     <div>
       <div class="card-title">Log a session</div>
-      <div class="card-sub" style="margin-bottom:0">Your own Magnawave work, recorded the same way Barrio's reports are — so it lands in the same charts, heat map and notes.</div>
+      <div class="card-sub" style="margin-bottom:0">Your own Magnawave work on Winter, recorded the same way Barrio's reports are — so it lands in the same charts, heat map and notes.</div>
     </div>
     <button type="button" class="ent-open-btn" id="entOpenBtn" onclick="entToggle()">+ New session</button>
   </div>
@@ -223,12 +223,12 @@
 
 <div class="card">
   <div class="card-title">Session reactivity over time</div>
-  <div class="card-sub">Overall session tone (bars) and PEMF reactivity level (line) across all <span id="sesCount1">–</span> sessions</div>
+  <div class="card-sub">Overall session tone (bars) and reactivity / restriction level (line) across all <span id="sesCount1">–</span> sessions</div>
   <div class="legend">
     <span class="legend-item"><span class="legend-swatch" style="background:rgba(0,165,106,0.8);border:1px solid #00A56A;"></span>Positive</span>
     <span class="legend-item"><span class="legend-swatch" style="background:rgba(227,169,60,0.8);border:1px solid #B77A15;"></span>Mixed</span>
     <span class="legend-item"><span class="legend-swatch" style="background:rgba(192,73,43,0.8);border:1px solid #C0492B;"></span>Concern</span>
-    <span class="legend-item"><span class="legend-line"></span>PEMF reactivity (right axis)</span>
+    <span class="legend-item"><span class="legend-line"></span>PEMF reactivity / restriction grade (right axis; gaps = massage-only, not graded)</span>
     <span class="legend-item"><span class="legend-swatch" style="background:#fff;border:2px solid #7E7C74;"></span>Outlined = logged by me</span>
     <label class="self-toggle" style="margin-left:auto"><input type="checkbox" id="selfToggle" checked onchange="setSelf(this.checked)">Include my sessions</label>
   </div>
@@ -236,7 +236,7 @@
     <strong style="color:var(--text)">Session tone classification</strong> — based on clinical reactivity, not demeanor<br>
     <span style="color:#00A56A">Positive</span> — PEMF ≤ 1.5 and ≤ 2 reactive areas. Minimal fasciculations, low palpation sensitivity.<br>
     <span style="color:#B77A15">Mixed</span> — PEMF 2.0 or 3+ reactive areas. Moderate fasciculations present; may feel good overall but body is still reactive.<br>
-    <span style="color:#C0492B">Concern</span> — PEMF 2.5+ or explicit soreness noted. Significant fasciculations, multiple reactive areas, or therapist flags specific findings.
+    <span style="color:#C0492B">Concern</span> — PEMF 2.5+ or explicit soreness noted. Significant fasciculations, multiple reactive areas, or therapist flags specific findings.<br><span style="color:var(--text)">Massage-only sessions</span> (most of Winter's 2025 record) have no PEMF grade — tone is read from trigger-point size/count and the therapist's notes. EquiPro reports: minor/"tight" = 1, moderate = 2, severe = 3.
   </div>
   <div class="chart-wrap"><canvas id="tlChart"></canvas></div>
 </div>
@@ -289,7 +289,7 @@
         <ellipse id="region-shoulder" class="heat-region" cx="300" cy="206" rx="40" ry="46" fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82" onmouseenter="hlRegion('shoulder',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-thoracic" class="heat-region" cx="410" cy="252" rx="62" ry="40" fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82" onmouseenter="hlRegion('thoracic',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-forearms" class="heat-region" cx="258" cy="320" rx="26" ry="46" fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82" onmouseenter="hlRegion('forearms',this)" onmouseleave="resetRegion(this)"/>
-        <ellipse id="region-hind_right" class="heat-region" cx="540" cy="292" rx="30" ry="44" fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82" onmouseenter="hlRegion('hind_right',this)" onmouseleave="resetRegion(this)"/>
+        <ellipse id="region-hind_right" style="display:none" class="heat-region" cx="540" cy="292" rx="30" ry="44" fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82" onmouseenter="hlRegion('hind_right',this)" onmouseleave="resetRegion(this)"/>
         <ellipse id="region-hamstring" class="heat-region" cx="585" cy="322" rx="26" ry="48" fill="#EAE5DC" stroke="#BCB8AF" stroke-width="1.5" opacity="0.82" onmouseenter="hlRegion('hamstring',this)" onmouseleave="resetRegion(this)"/>
         <g font-family="Plus Jakarta Sans, sans-serif" font-size="8.5" fill="#1C1A16" pointer-events="none" text-anchor="middle" font-weight="500">
           <text x="135" y="73">poll</text>
@@ -303,7 +303,7 @@
           <text x="300" y="209">shoulder</text>
           <text x="410" y="255">thoracic</text>
           <text x="258" y="323">forearms</text>
-          <text x="540" y="295">hind R</text>
+          
           <text x="585" y="325">hamstring</text>
         </g>
       </svg>
@@ -323,7 +323,7 @@
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#F0997B;"></span>9–13 sessions</span>
     <span class="heat-legend-item"><span class="heat-swatch" style="background:#D9633F;"></span>14+ sessions</span>
   </div>
-  <div class="note">Right-side dominance noted in 13 of 35 sessions. Low back / glutes present in 21 of 35 sessions and has never fully cleared. Aug 2024 showed significant left-side restriction (neck, shoulder, triceps, glutes) consistent with compensation pattern pre-diagnosis.</div>
+  <div class="note">Poll and neck/shoulder junction are the constant: one or both flagged in 21 of 22 sessions since Feb 2025, almost always bilateral — Barrio calls it his "usual" restriction. The change since rehab is the hind end: glutes/hamstrings flagged in all 5 sessions since July 2026 versus 9 of 17 before. 7/8/26 was the one clear left-hind flare (PEMF 3, "significant inflammation"). Left forearm extensor flagged 7/30 — the sound fore carrying the load.</div>
   <div id="regionTimeline" class="region-timeline" style="display:none"></div>
 </div>
 <div class="notes-section">
@@ -334,26 +334,28 @@
 
 
 <script>
-const EXEC_URL='https://script.google.com/macros/s/AKfycbwC6nbEKsxQrHaofxI_-P-fLf69TlnmFlN2sdgPXIYD0rNhN6iV5Oy5KaQu30q_hw2k/exec';
+// Winter's backend (winter-backend.gs). Set once in Winter → New entry → Settings,
+// or paste the deployed /exec URL into DEFAULT_WINTER_URL below.
+const DEFAULT_WINTER_URL='https://script.google.com/macros/s/AKfycbzTC52ToRjCLIHtvCREmjTH8XoxieDRf6m2eyiMGbxs2xEp8MSfPGkd4ScczoW2F03L/exec';
+const EXEC_URL=(function(){try{return (JSON.parse(localStorage.getItem('w_cfg')||'{}')).scriptUrl||DEFAULT_WINTER_URL;}catch(e){return DEFAULT_WINTER_URL;}})();
 
 // Live data comes from bodywork-data.json in Drive (served by the Apps Script).
 // This seed is only a fallback shown if that fetch fails.
-let S=[{"d":"8/28/24","o":"mixed","p":0,"a":["neck","shoulder","forearms","glutes_med","glutes_sup"],"s":{"neck":"L","shoulder":"L","forearms":"L","glutes_med":"L","glutes_sup":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/16/24","o":"mixed","p":1.5,"a":["thoracic","neck","lowback","glutes_med","glutes_sup","forearms","hind_right"],"s":{"thoracic":"B","neck":"L","lowback":"L","glutes_med":"L","glutes_sup":"L","forearms":"L","hind_right":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/26/25","o":"concern","p":2.5,"a":["neck","shoulder","thoracic","glutes_med","glutes_sup","lowback","si"],"s":{"neck":"B","shoulder":"L","thoracic":"B","glutes_med":"B","glutes_sup":"B","lowback":"L","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"2/21/25","o":"concern","p":1.5,"a":["glutes_med","glutes_sup","shoulder","neck"],"s":{"glutes_med":"B","glutes_sup":"B","shoulder":"L","neck":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/28/25","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","si"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/27/25","o":"good","p":1.0,"a":["lowback","glutes_med","glutes_sup","forearms"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","forearms":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"7/22/25","o":"good","p":1.5,"a":["lowback","si"],"s":{"lowback":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"7/31/25","o":"good","p":1.0,"a":[],"s":{},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"11/22/25","o":"concern","p":2.5,"a":["midback"],"s":{"midback":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"11/28/25","o":"concern","p":1.0,"a":["lowback","glutes_med","glutes_sup"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/5/25","o":"mixed","p":2.0,"a":[],"s":{},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/13/25","o":"concern","p":2.5,"a":["withers"],"s":{"withers":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/18/25","o":"mixed","p":1.5,"a":["lowback","glutes_med","glutes_sup"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"12/31/25","o":"concern","p":0,"a":["glutes_med","glutes_sup","neck","forearms","hind_right"],"s":{"glutes_med":"B","glutes_sup":"B","neck":"B","forearms":"B","hind_right":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/9/26","o":"mixed","p":1.5,"a":["shoulder","lowback"],"s":{"shoulder":"L","lowback":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/14/26","o":"mixed","p":1.5,"a":["glutes_med","glutes_sup","lowback"],"s":{"glutes_med":"R","glutes_sup":"R","lowback":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/21/26","o":"mixed","p":2.0,"a":["lowback"],"s":{"lowback":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"1/26/26","o":"mixed","p":2.0,"a":["neck","lowback","glutes_med","glutes_sup","poll"],"s":{"neck":"B","lowback":"B","glutes_med":"B","glutes_sup":"B","poll":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"2/12/26","o":"mixed","p":2.0,"a":["neck","thoracic","si"],"s":{"neck":"B","thoracic":"R","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"2/25/26","o":"mixed","p":2.0,"a":["glutes_med","glutes_sup"],"s":{"glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/4/26","o":"good","p":1.5,"a":["glutes_med","glutes_sup"],"s":{"glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/11/26","o":"good","p":1.0,"a":["lowback"],"s":{"lowback":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/16/26","o":"mixed","p":1.5,"a":["lowback","si"],"s":{"lowback":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"3/25/26","o":"mixed","p":1.5,"a":["lowback","glutes_med","glutes_sup","si"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","si":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/2/26","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","si","neck","thoracic"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B","si":"B","neck":"B","thoracic":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/7/26","o":"mixed","p":1.5,"a":["si","glutes_med","glutes_sup","neck","shoulder"],"s":{"si":"B","glutes_med":"B","glutes_sup":"B","neck":"B","shoulder":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/15/26","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","neck","thoracic"],"s":{"lowback":"R","glutes_med":"R","glutes_sup":"R","neck":"B","thoracic":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/21/26","o":"concern","p":2.5,"a":["lowback","glutes_med","glutes_sup","midback","neck","shoulder"],"s":{"lowback":"R","glutes_med":"R","glutes_sup":"R","midback":"R","neck":"B","shoulder":"L"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"4/30/26","o":"concern","p":1.5,"a":["poll","neck","shoulder","lowback","si","glutes_med","glutes_sup"],"s":{"poll":"L","neck":"B","shoulder":"B","lowback":"B","si":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"5/6/26","o":"mixed","p":2.0,"a":["shoulder","neck","lowback","glutes_med","glutes_sup"],"s":{"shoulder":"B","neck":"B","lowback":"R","glutes_med":"R","glutes_sup":"R"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"5/13/26","o":"mixed","p":2.0,"a":["lowback","glutes_med","glutes_sup","shoulder","neck"],"s":{"lowback":"L","glutes_med":"B","glutes_sup":"B","shoulder":"B","neck":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"5/21/26","o":"mixed","p":2.0,"a":["neck","shoulder","lowback","glutes_med","glutes_sup"],"s":{"neck":"L","shoulder":"R","lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/8/26","o":"mixed","p":2.0,"a":["lowback","shoulder","neck","glutes_med","glutes_sup"],"s":{"lowback":"B","shoulder":"R","neck":"L","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/11/26","o":"good","p":0,"a":["shoulder","forearms","glutes_med","glutes_sup"],"s":{"shoulder":"B","forearms":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""},{"d":"6/17/26","o":"good","p":1.5,"a":["lowback","glutes_med","glutes_sup"],"s":{"lowback":"B","glutes_med":"B","glutes_sup":"B"},"obs":"","pdf":"","status":"approved","fileId":""}];
+let S=[{"d":"2/4/25","tx":"Massage","prac":"Liz","p":0,"o":"mixed","a":["poll","withers","shoulder","hamstring"],"s":{"poll":"B","withers":"B","shoulder":"B","hamstring":"B"},"obs":"New horse, long travel. Feels great overall. Restriction through shoulders and pecs, fascial adhesion through hind limbs. Notable restriction through poll, resistance to lateral movement (R/L).","pdf":"https://drive.google.com/file/d/1eKhMdyBpvRoEFiE0yKR742oXz0_KWYVf/view","fileId":"1eKhMdyBpvRoEFiE0yKR742oXz0_KWYVf","status":"approved","src":"barrio"},{"d":"2/21/25","tx":"Massage","prac":"Liz","p":0,"o":"mixed","a":["poll","neck","withers","shoulder","lowback"],"s":{"poll":"R","neck":"B","withers":"B","shoulder":"B","lowback":"R"},"obs":"Maintenance. Continues to display restriction through poll (right more than left) and neck/shoulder junction.","pdf":"https://drive.google.com/file/d/1PXziUaqccjcBLtwzkvwa5nuH6vTCpuiO/view","fileId":"1PXziUaqccjcBLtwzkvwa5nuH6vTCpuiO","status":"approved","src":"barrio"},{"d":"3/28/25","tx":"Massage","prac":"Liz","p":0,"o":"good","a":["poll","neck"],"s":{"poll":"B","neck":"B"},"obs":"More fidgety than past sessions. Notable restriction through poll (overdevelopment) and neck/shoulder junction.","pdf":"https://drive.google.com/file/d/12j_ZdufnRmW9-ISBiq-vqPuwWkJ_-XW5/view","fileId":"12j_ZdufnRmW9-ISBiq-vqPuwWkJ_-XW5","status":"approved","src":"barrio"},{"d":"6/27/25","tx":"Massage","prac":"Liz","p":0,"o":"mixed","a":["poll","neck","shoulder","lowback"],"s":{"poll":"B","neck":"R","shoulder":"B","lowback":"B"},"obs":"Continuing care — dental yesterday (TMJ worked). Protective/resistant at right neck/back. Loved hind end work.","pdf":"https://drive.google.com/file/d/1FsQqBLy9GLX_TqAJHqZfd7CIAI8zcxPs/view","fileId":"1FsQqBLy9GLX_TqAJHqZfd7CIAI8zcxPs","status":"approved","src":"barrio"},{"d":"7/22/25","tx":"Massage","prac":"Liz","p":0,"o":"good","a":["poll","withers","midback","shoulder"],"s":{"poll":"B","withers":"B","midback":"B","shoulder":"B"},"obs":"Great today — worked in cross ties, amazing. Mostly small trigger points (withers, midback, chest); poll bilateral.","pdf":"https://drive.google.com/file/d/12SY8oW0mluULgkzhWbjfPxxzgE2HcPZb/view","fileId":"12SY8oW0mluULgkzhWbjfPxxzgE2HcPZb","status":"approved","src":"barrio"},{"d":"8/21/25","tx":"Massage","prac":"Aimee M.","p":0,"o":"mixed","a":["neck","lowback","glutes_sup","hamstring"],"s":{"neck":"B","lowback":"B","glutes_sup":"B","hamstring":"L"},"obs":"Felt great. Tight in low back and glutes; tension through neck but nothing out of the normal. Rear view: left hamstring chain marked.","pdf":"https://drive.google.com/file/d/1HiIDpnAE0O-T7FbxKTAjinY-lLVOmR4Y/view","fileId":"1HiIDpnAE0O-T7FbxKTAjinY-lLVOmR4Y","status":"approved","src":"barrio"},{"d":"9/8/25","tx":"Massage","prac":"Liz","p":0,"o":"mixed","a":["poll","neck","shoulder","lowback","hamstring"],"s":{"poll":"B","neck":"B","shoulder":"B","lowback":"R","hamstring":"B"},"obs":"Continuing care — palmar angle changes. Feels great overall, very relaxed. Notable restriction through neck/shoulder junction.","pdf":"https://drive.google.com/file/d/1eWi9pojfDEFQOzFsCn3q6Xm2BAMW-kSX/view","fileId":"1eWi9pojfDEFQOzFsCn3q6Xm2BAMW-kSX","status":"approved","src":"barrio"},{"d":"9/30/25","tx":"Massage","prac":"Aimee M.","p":0,"o":"concern","a":["poll","neck","forearms","lowback"],"s":{"poll":"B","neck":"B","forearms":"B","lowback":"B"},"obs":"Very protective over his back — no reactivity to palpation but did not want it worked on. Worked mostly front end; tension in neck bilaterally.","pdf":"https://drive.google.com/file/d/1YGzLwRtNHNtli9ukooQEqNuQ4nw15KDC/view","fileId":"1YGzLwRtNHNtli9ukooQEqNuQ4nw15KDC","status":"approved","src":"barrio"},{"d":"10/15/25","tx":"Massage","prac":"Liz","p":0,"o":"mixed","a":["poll","withers","shoulder"],"s":{"poll":"R","withers":"R","shoulder":"B"},"obs":"Feeling great overall. More right-sided restriction; some funk through both shoulders at triceps + deltoids.","pdf":"https://drive.google.com/file/d/1bICWn2W13Gl3CMC8oVrvhoQ3P1xr61cL/view","fileId":"1bICWn2W13Gl3CMC8oVrvhoQ3P1xr61cL","status":"approved","src":"barrio"},{"d":"10/23/25","tx":"Massage","prac":"Liz","p":0,"o":"good","a":["poll","neck","glutes_med"],"s":{"poll":"B","neck":"B","glutes_med":"R"},"obs":"Feeling great. \"Normal\" restriction through poll and neck/shoulder junction. Minor reactivity through right glutes.","pdf":"https://drive.google.com/file/d/1zj-9tKfitz5rzZeEUbU9YupW2Pl0nIZq/view","fileId":"1zj-9tKfitz5rzZeEUbU9YupW2Pl0nIZq","status":"approved","src":"barrio"},{"d":"11/20/25","tx":"Massage","prac":"Liz","p":0,"o":"mixed","a":["poll","neck","midback","lowback","forearms"],"s":{"poll":"B","neck":"B","midback":"R","lowback":"B","forearms":"B"},"obs":"Sooo into it today. His \"usual\" restrictions at poll and neck/shoulder junction. Large points also marked lumbar and forearms both sides.","pdf":"https://drive.google.com/file/d/1mFUabYLYk2lx53X0pN5_xucg7tkfBwyP/view","fileId":"1mFUabYLYk2lx53X0pN5_xucg7tkfBwyP","status":"approved","src":"barrio"},{"d":"12/18/25","tx":"Massage + PEMF","prac":"Aimee M.","p":1.5,"o":"mixed","a":["neck","midback","lowback","glutes_sup","forearms"],"s":{"neck":"L","midback":"B","lowback":"B","glutes_sup":"L","forearms":"B"},"obs":"First PEMF on the form. Felt great. Tight through neck (more left), glutes (more left), tight forearms. PEMF 2 at neck both sides, 1–2 along back.","pdf":"https://drive.google.com/file/d/1JLXLiLkkK78Hm2CKuLz3haw63bYgbtKL/view","fileId":"1JLXLiLkkK78Hm2CKuLz3haw63bYgbtKL","status":"approved","src":"barrio"},{"d":"12/31/25","tx":"Massage + PEMF","prac":"Aimee M.","p":2.0,"o":"mixed","a":["poll","midback","lowback","hamstring"],"s":{"poll":"B","midback":"B","lowback":"B","hamstring":"R"},"obs":"Felt good. A little tighter in right hind and tight in poll. No massage on neck — just had neck injections. PEMF 2 along the back both sides. Moving to every other week, alternating massage and combo.","pdf":"https://drive.google.com/file/d/1j1SHs8LtK8NI3fozCfQ4eUq1gRhbGmGr/view","fileId":"1j1SHs8LtK8NI3fozCfQ4eUq1gRhbGmGr","status":"approved","src":"barrio"},{"d":"1/14/26","tx":"Massage + PEMF","prac":"Liz","p":1.5,"o":"mixed","a":["poll","neck","midback","lowback","glutes_sup"],"s":{"poll":"B","neck":"B","midback":"B","lowback":"L","glutes_sup":"L"},"obs":"New site (Sonoran Sun). Felt great overall — tight at neck/shoulder junction and reactive at left low back into glutes (PEMF 2 there, 1s elsewhere).","pdf":"https://drive.google.com/file/d/11eaCTptjez2eLKkFOLNBkIHWHRX1Boeu/view","fileId":"11eaCTptjez2eLKkFOLNBkIHWHRX1Boeu","status":"approved","src":"barrio"},{"d":"1/28/26","tx":"Massage","prac":"Aimee M.","p":0,"o":"good","a":["poll","neck","withers","glutes_sup"],"s":{"poll":"B","neck":"B","withers":"B","glutes_sup":"B"},"obs":"Felt amazing. Tight through poll and masseter; slight reactivity in glutes bilaterally.","pdf":"https://drive.google.com/file/d/1qDES64_Of6p8yHRWImv2oDaO7V_7xU1f/view","fileId":"1qDES64_Of6p8yHRWImv2oDaO7V_7xU1f","status":"approved","src":"barrio"},{"d":"2/12/26","tx":"Massage + PEMF","prac":"Aimee M.","p":1.0,"o":"good","a":["poll","neck","shoulder","lowback"],"s":{"poll":"B","neck":"B","shoulder":"B","lowback":"L"},"obs":"Felt amazing. Still tight in neck/shoulder junction and poll. Very slight reactivity in left low back but really felt great overall. PEMF 1s along back.","pdf":"https://drive.google.com/file/d/1Fso3rRYwF4l28WjGf_ieUdR0VwszZQVd/view","fileId":"1Fso3rRYwF4l28WjGf_ieUdR0VwszZQVd","status":"approved","src":"barrio"},{"d":"2/25/26","tx":"Massage + PEMF","prac":"Aimee M.","p":2.0,"o":"mixed","a":["poll","neck","withers","glutes_sup"],"s":{"poll":"B","neck":"B","withers":"B","glutes_sup":"B"},"obs":"Felt good, just tight. Still tight through poll and neck/shoulder junction but back felt great. Tight in glutes, even both sides. PEMF peaks 3 at the withers both sides, 1s elsewhere. (Admitted to ESMR rehab next day.)","pdf":"https://drive.google.com/file/d/1wCjaAWlWoyQRVAFgM-No3eyXtDoCGeIq/view","fileId":"1wCjaAWlWoyQRVAFgM-No3eyXtDoCGeIq","status":"approved","src":"barrio"},{"d":"7/3/26","tx":"Massage","prac":"Liz","p":0,"o":"good","a":["poll","neck","glutes_med"],"s":{"poll":"B","neck":"B","glutes_med":"B"},"obs":"First session post-ESMR discharge (site Bandalero; form dated 7/2). Feels great overall. Some restriction through glutes and poll. No/minimal soreness.","pdf":"https://drive.google.com/file/d/14E0v867JoSY3Q5KbLMH64R-GhhcGp1rG/view","fileId":"14E0v867JoSY3Q5KbLMH64R-GhhcGp1rG","status":"approved","src":"barrio"},{"d":"7/8/26","tx":"PEMF","prac":"Aimee M.","p":2.0,"o":"concern","a":["withers","shoulder","midback","lowback","hamstring"],"s":{"withers":"R","shoulder":"R","midback":"B","lowback":"L","hamstring":"L"},"obs":"Slightly more sore on his left side. Significant inflammation in his left hind; otherwise even throughout. PEMF 3 at left croup and left hind, 2 at right withers/shoulder/hind.","pdf":"https://drive.google.com/file/d/1KcrMkhcfbnuNIANtGZM5C1Qlq0wBbXbn/view","fileId":"1KcrMkhcfbnuNIANtGZM5C1Qlq0wBbXbn","status":"approved","src":"barrio"},{"d":"7/16/26","tx":"Massage","prac":"Aimee McGuire","p":2.0,"o":"mixed","a":["neck","shoulder","midback","glutes_med","hamstring"],"s":{"neck":"B","shoulder":"B","midback":"B","glutes_med":"B","hamstring":"B"},"f":[{"m":"Splenius","r":"neck","side":"B","lvl":2},{"m":"Infraspinatus","r":"shoulder","side":"B","lvl":2},{"m":"Supraspinatus","r":"shoulder","side":"B","lvl":2},{"m":"Latissimus Dorsi","r":"midback","side":"B","lvl":2},{"m":"Medial Glute","r":"glutes_med","side":"B","lvl":2},{"m":"Semimembranosus","r":"hamstring","side":"B","lvl":2},{"m":"Semitendinosus","r":"hamstring","side":"B","lvl":2}],"obs":"First EquiPro typed report. Every finding moderate restriction, perfectly symmetric L/R. Plan: full-body massage monthly; hamstring stretch + glute massage/stretches as follow-up.","pdf":"https://drive.google.com/file/d/1LaT5yJfWQvaMytSR8DepZlCpjlgK9teA/view","fileId":"1LaT5yJfWQvaMytSR8DepZlCpjlgK9teA","status":"approved","src":"barrio"},{"d":"7/30/26","tx":"Massage","prac":"Liz Butler","p":1.0,"o":"good","a":["neck","forearms","glutes_sup"],"s":{"neck":"B","forearms":"L","glutes_sup":"R"},"f":[{"m":"Cervical Serratus Ventralis","r":"neck","side":"B","lvl":1},{"m":"Splenius","r":"neck","side":"B","lvl":1},{"m":"Extensor Carpi Radialis","r":"forearms","side":"L","lvl":1},{"m":"Superficial Glute","r":"glutes_sup","side":"R","lvl":1}],"obs":"All findings graded \"tight\" (logged as minor). Left forearm extensor tight — the sound fore carrying load. Plan: full-body PEMF and massage weekly, alternating. Neck stretch + thoracic sling/neck-shoulder junction stretch.","pdf":"https://drive.google.com/file/d/19YcmJMMcYoWqU_J7uDHnRQso6gzeTPgz/view","fileId":"19YcmJMMcYoWqU_J7uDHnRQso6gzeTPgz","status":"approved","src":"barrio"},{"d":"9/21/26","tx":"Massage","prac":"Aimee McGuire","p":1.0,"o":"mixed","a":["neck","shoulder","midback","glutes_sup","hamstring"],"s":{"neck":"B","shoulder":"B","midback":"B","glutes_sup":"B","hamstring":"B"},"f":[{"m":"Brachiocephalicus","r":"neck","side":"B","lvl":1},{"m":"Deltoid","r":"shoulder","side":"B","lvl":1},{"m":"Latissimus Dorsi","r":"midback","side":"B","lvl":1},{"m":"Longissimus Dorsi","r":"midback","side":"B","lvl":1},{"m":"Biceps Femoris","r":"hamstring","side":"B","lvl":1},{"m":"Semimembranosus","r":"hamstring","side":"B","lvl":1},{"m":"Semitendinosus","r":"hamstring","side":"B","lvl":1},{"m":"Superficial Glute","r":"glutes_sup","side":"B","lvl":1},{"m":"Tensor Fascia Latae","r":"glutes_sup","side":"B","lvl":1}],"obs":"Sweet boy; a little trouble settling in, great otherwise. Tighter in his hind end; slight sensitivity at the poll. 18 findings, all \"tight\"/\"tension\", fully bilateral. Plan: full-body massage every 2 weeks.","pdf":"https://drive.google.com/file/d/1FiK0atKDM8Fm0FAepEGaX3n_6CSYfvP_/view","fileId":"1FiK0atKDM8Fm0FAepEGaX3n_6CSYfvP_","status":"approved","src":"barrio"}];
 
 const RD=[
   {id:'glutes_med',label:'Glutes — medial (med. gluteal)'},
   {id:'glutes_sup',label:'Glutes — superficial (sup. gluteal)'},
   {id:'lowback',label:'Low back / lumbar'},
   {id:'si',label:'SI / lumbosacral'},
-  {id:'neck',label:'Neck / shoulder jct.'},
-  {id:'shoulder',label:'Front end / shoulder'},
+  {id:'neck',label:'Neck / neck–shoulder jct.'},
+  {id:'shoulder',label:'Shoulder / triceps / pecs'},
   {id:'thoracic',label:'Thoracic / serratus'},
   {id:'midback',label:'Mid back'},
-  {id:'poll',label:'Poll & neck'},
+  {id:'poll',label:'Poll / TMJ'},
   {id:'withers',label:'Withers'},
   {id:'forearms',label:'Forearms'},
-  {id:'hind_right',label:'Hind right'},
-  {id:'hamstring',label:'Hamstrings (semimem./semitend.)'},
+  {id:'hamstring',label:'Hamstrings / hind limb'},
 ];
 
 // ── HEAT MAP STATE ───────────────────────────────────────────────────
@@ -513,7 +515,7 @@ function buildChart(){
       labels:V.map(function(s){return s.d;}),
       datasets:[
         {type:'bar',data:V.map(function(s){return s.o==='good'?3:s.o==='mixed'?2:1;}),backgroundColor:bgC,borderColor:bdC,borderWidth:bwC,yAxisID:'y',order:2,borderRadius:3},
-        {type:'line',data:V.map(function(s){return s.p;}),borderColor:'#00719C',backgroundColor:'rgba(0,113,156,0.06)',borderWidth:2,pointBackgroundColor:ptF,pointBorderColor:'#00719C',pointBorderWidth:1.8,pointRadius:ptR,pointStyle:ptS,tension:0.35,fill:false,yAxisID:'y2',order:1}
+        {type:'line',spanGaps:true,data:V.map(function(s){return s.p||null;}),borderColor:'#00719C',backgroundColor:'rgba(0,113,156,0.06)',borderWidth:2,pointBackgroundColor:ptF,pointBorderColor:'#00719C',pointBorderWidth:1.8,pointRadius:ptR,pointStyle:ptS,tension:0.35,fill:false,yAxisID:'y2',order:1}
       ]
     },
     options:{
@@ -521,7 +523,7 @@ function buildChart(){
       plugins:{legend:{display:false},tooltip:{backgroundColor:'#1C1A16',titleFont:{family:'Plus Jakarta Sans',size:12},bodyFont:{family:'Plus Jakarta Sans',size:12},padding:10,callbacks:{
         title:function(items){var s_=V[items[0].dataIndex];return s_.d+(isSelf(s_)?'  ·  mine':'');},
         label:function(ctx){
-          if(ctx.datasetIndex===1)return' PEMF: '+(ctx.raw===0?'None':ctx.raw===1?'Slight':ctx.raw===2?'Moderate':'Acute');
+          if(ctx.datasetIndex===1)return' Reactivity/restriction: '+(ctx.raw===0?'None':ctx.raw===1?'Slight':ctx.raw===2?'Moderate':'Acute');
           const v=ctx.raw;return' Session: '+(v===3?'Positive':v===2?'Mixed':'Concern');
         },
         afterBody:function(items){var s_=V[items[0].dataIndex];return isSelf(s_)?[' '+doseTxt(s_)]:[];}
@@ -549,8 +551,8 @@ function fmtFindings(s){
   });
   return '<div style="margin-top:6px">'+rows.join('')+'</div>';
 }
-function getSessionNotes(){try{return JSON.parse(localStorage.getItem('m_bw_notes')||'{}');}catch(e){return {};}}
-function saveSessionNote(date,text){const notes=getSessionNotes();notes[date]=text;localStorage.setItem('m_bw_notes',JSON.stringify(notes));}
+function getSessionNotes(){try{return JSON.parse(localStorage.getItem('w_bw_notes')||'{}');}catch(e){return {};}}
+function saveSessionNote(date,text){const notes=getSessionNotes();notes[date]=text;localStorage.setItem('w_bw_notes',JSON.stringify(notes));}
 function renderSessionNotes(){
   const el=document.getElementById('sessionNotes');
   if(!el)return;
@@ -564,7 +566,7 @@ function renderSessionNotes(){
     const mod=(s.tx||'PEMF');
     const mine=isSelf(s);
     return '<div class="note-card"'+(mine?' style="border-left:3px solid #00A56A"':'')+'><div class="note-header">'
-      +'<span class="note-date">'+s.d+' · '+esc(mod)+' '+s.p+(mine?' <span class="mine-badge">mine</span>':'')+'</span>'
+      +'<span class="note-date">'+s.d+' · '+esc(mod)+(s.p?' '+s.p:'')+(mine?' <span class="mine-badge">mine</span>':'')+'</span>'
       +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span></div>'
       +(mine&&doseTxt(s)?'<div class="mine-dose" style="margin-bottom:6px">'+esc(doseTxt(s))+'</div>':'')
       +'<div class="note-obs">Areas: '+areas+'</div>'
@@ -594,7 +596,7 @@ function renderPending(){
       const pdf=s.pdf?' · <a href="'+esc(s.pdf)+'" target="_blank" rel="noopener">source PDF</a>':'';
       const obs=s.obs?'<div class="note-obs">“'+esc(s.obs)+'”</div>':'';
       return '<div class="note-card"><div class="note-header">'
-        +'<span class="note-date">'+esc(s.d)+' · '+esc(s.tx||'PEMF')+' '+esc(s.p)+pdf+'</span>'
+        +'<span class="note-date">'+esc(s.d)+' · '+esc(s.tx||'PEMF')+(s.p?' '+esc(s.p):'')+pdf+'</span>'
         +'<span class="note-tone '+toneClass+'">'+toneLabel+'</span></div>'
         +'<div class="note-obs">Areas: '+esc(areas)+'</div>'
         +(sb?'<div class="note-obs" style="font-size:12px">Side bias: '+esc(sb)+'</div>':'')
@@ -608,10 +610,10 @@ function renderPending(){
 
 function approve(fileId,date){
   const body=new URLSearchParams();
-  body.set('action','setStatus');
+  body.set('action','bwStatus');
   body.set('status','approved');
   if(fileId)body.set('fileId',fileId); else body.set('date',date);
-  fetch(EXEC_URL,{method:'POST',body:body}).catch(function(){});
+  (EXEC_URL?fetch(EXEC_URL,{method:'POST',body:body}):Promise.reject(new Error('no url'))).catch(function(){});
   S.forEach(function(s){if((fileId&&s.fileId===fileId)||(!fileId&&s.d===date))s.status='approved';});
   renderAll();
 }
@@ -755,7 +757,7 @@ function entBuild(){
 
 function entPost(sess){
   var body=new URLSearchParams();
-  body.set('action','append');
+  body.set('action','bwAppend');
   body.set('date',sess.d);
   body.set('tone',sess.o);
   body.set('pemf',String(sess.p));
@@ -772,13 +774,13 @@ function entPost(sess){
   body.set('intensity',String(sess.pw));
   body.set('freq',String(sess.hz));
   body.set('findings',JSON.stringify(sess.f));
-  return fetch(EXEC_URL,{method:'POST',body:body});
+  return (EXEC_URL?fetch(EXEC_URL,{method:'POST',body:body}):Promise.reject(new Error('no url')));
 }
 
 // Bad signal at the barn shouldn't lose an entry: anything that fails to send is
 // queued locally and retried on the next page load.
-function queueGet(){try{return JSON.parse(localStorage.getItem('m_bw_queue')||'[]');}catch(e){return [];}}
-function queueSet(q){try{localStorage.setItem('m_bw_queue',JSON.stringify(q));}catch(e){}}
+function queueGet(){try{return JSON.parse(localStorage.getItem('w_bw_queue')||'[]');}catch(e){return [];}}
+function queueSet(q){try{localStorage.setItem('w_bw_queue',JSON.stringify(q));}catch(e){}}
 function queueAdd(sess){var q=queueGet();q.push(sess);queueSet(q);}
 function queueFlush(){
   var q=queueGet();if(!q.length)return;
@@ -828,14 +830,14 @@ function delSelf(fileId){
   }
   _armed=null;
   var body=new URLSearchParams();
-  body.set('action','remove');body.set('fileId',fileId);
-  fetch(EXEC_URL,{method:'POST',body:body}).catch(function(){});
+  body.set('action','bwRemove');body.set('fileId',fileId);
+  (EXEC_URL?fetch(EXEC_URL,{method:'POST',body:body}):Promise.reject(new Error('no url'))).catch(function(){});
   S=S.filter(function(x){return x.fileId!==fileId;});
   renderAll();
 }
 
 function loadLive(){
-  fetch(EXEC_URL+'?action=read')
+  (EXEC_URL?fetch(EXEC_URL+'?action=bodywork'):Promise.reject('no url'))
     .then(function(r){return r.json();})
     .then(function(d){if(d&&d.sessions&&d.sessions.length)S=d.sessions;})
     .catch(function(){})

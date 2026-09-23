@@ -150,10 +150,20 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
   .mnav-link.active{padding-top:7px;padding-bottom:12px}
 }
 </style>
+
+<style id="horse-switch-style">
+.hsw{display:inline-flex;align-self:center;margin:0 auto 8px 0;background:#E7ECEC;border-radius:20px;padding:3px;gap:2px;font-family:'Plus Jakarta Sans',sans-serif}
+.hsw a{font-size:12px;font-weight:600;padding:5px 13px;border-radius:17px;color:#706E67;text-decoration:none;line-height:1.2;white-space:nowrap}
+.hsw a:hover{color:#141A1C}
+.hsw a.on{background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.10)}
+.hsw a.on.m{color:#00A56A}
+.hsw a.on.w{color:#0A527F}
+@media(max-width:480px){.mnav{flex-wrap:wrap}.hsw{margin:0 0 6px 0}.mnav-links{width:100%}}
+</style>
 </head>
 <body>
 <nav class="mnav">
-  <span class="mnav-brand">Maestro <span>Djinto</span></span>
+  <span class="hsw"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="m on">Maestro</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/winter-vet-timeline.html" class="w">Winter</a></span>
   <div class="mnav-links"><a href="https://kingsnakeequestrian.github.io/maestro-tracker/" class="mnav-link">New entry</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-dashboard.html" class="mnav-link">Progress</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-vet-timeline.html" class="mnav-link active">Appts/History</a><a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" class="mnav-link">Bodywork</a></div>
 </nav>
 
