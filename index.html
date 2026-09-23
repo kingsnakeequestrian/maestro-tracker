@@ -524,7 +524,6 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <button class="chip" data-f="pt"            onclick="multiChip(this,'mod')">PT exercises</button>
         <button class="chip" data-f="poles"         onclick="multiChip(this,'mod')">Poles</button>
         <button class="chip" data-f="straddlepoles" onclick="multiChip(this,'mod')">Straddle Poles</button>
-        <button class="chip" data-f="treadmill"     onclick="multiChip(this,'mod')">Treadmill</button>
         <button class="chip" data-f="theraplate"    onclick="multiChip(this,'mod')">Theraplate</button>
         <button class="chip" data-f="balancepad"    onclick="multiChip(this,'mod')">Balance Pad</button>
         <button class="chip" data-f="bemer"         onclick="multiChip(this,'mod')">Bemer</button>
@@ -1269,7 +1268,8 @@ async function saveEntry() {
   // (prevent blank saves from overwriting real data for the same date)
   const hasMeaningfulData = entry.rode || entry.will || entry.stops || entry.dayType ||
     entry.cranky || entry.siReactive || entry.behaviorNotes || entry.rating ||
-    entry.cL || entry.cR || entry.modalities?.length;
+    entry.cL || entry.cR || entry.modalities?.length ||
+    entry.walkMin || entry.trotMin || entry.canterMin || entry.totalDur || entry.ptNotes || entry.equibands;
 
   if (CFG.scriptUrl && hasMeaningfulData) {
     setSyncBadgeText('Syncing…');
