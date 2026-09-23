@@ -121,7 +121,7 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 <p class="section-label">Objective gait analysis</p>
 <div class="card" id="gaitCard" style="border-left:3px solid #005F9D;margin-bottom:24px">
   <div class="card-title">Gait analysis — Sleip &amp; RealHorse</div>
-  <div class="card-sub">Head asymmetry is the right-fore readout. Sleip runs are lunge circles: the right rein loads the RF as the inside fore and carries the signal; the left rein is his floor. Lower is better. Treated = ice and/or Voltaren before the capture.</div>
+  <div class="card-sub">Objective motion data, summarized worst-limb by phase (push-off / landing), same as Maestro's card. Lower is better. Treated = ice and/or Voltaren before the capture.</div>
   <div id="gaitContent" style="font-size:13px;color:var(--muted)">Loading…</div>
 </div>
 
@@ -207,13 +207,13 @@ const GAIT=[
     note:'Two weeks post-reset. Treated capture.',pdf:'https://drive.google.com/file/d/15x7smeGNt-bZ-TYTYZohxCdv-scoXEQ4/view'},
   {d:'2026-08-18',tool:'sleip',ctx:'lunge · both reins',treated:true,
     rr:{po:1.6,im:1.3,hz:1.18,n:70,ppo:-0.3,pim:-0.4},rl:{po:0.0,im:0.7,hz:1.18,n:62,ppo:-0.1,pim:-0.1},
-    note:'Best right-rein capture quality to date. Ice + Voltaren on board.',pdf:'https://drive.google.com/file/d/1Khcddv6-eDxQOq41xratpo9ZZvJAbh1Q/view'},
+    note:'Best capture quality to date. Ice + Voltaren on board.',pdf:'https://drive.google.com/file/d/1Khcddv6-eDxQOq41xratpo9ZZvJAbh1Q/view'},
   {d:'2026-08-30',tool:'sleip',ctx:'lunge · both reins · 1pm',treated:true,
     rr:{po:1.3,im:1.0,hz:1.18,n:59,ppo:-0.1,pim:-0.1},rl:{po:0.2,im:0.6,hz:1.14,n:58,ppo:0.0,pim:0.2},
     note:'Ice + Voltaren ~2 h before. Afternoon capture, head variation high.',pdf:'https://drive.google.com/file/d/1eWZABuq3z2cs9oeUgXVlBDGMJMeWLeLP/view'},
   {d:'2026-09-16',tool:'sleip',ctx:'lunge · both reins',treated:false,
     rr:{po:1.0,im:1.3,hz:1.18,n:58,ppo:0.2,pim:-0.1},rl:{po:0.3,im:0.7,hz:1.19,n:39,ppo:0.1,pim:-0.1},
-    note:'Clean — no ice or Voltaren. Left-rein run short (39 strides).',pdf:'https://drive.google.com/file/d/1hMtFpPyd3NIo1hRO71RkZuYZcHSrUhUv/view'}
+    note:'Clean — no ice or Voltaren. One circle short (39 strides).',pdf:'https://drive.google.com/file/d/1hMtFpPyd3NIo1hRO71RkZuYZcHSrUhUv/view'}
 ];
 
 
@@ -342,14 +342,31 @@ function iceVolt(data,labels){
 
 // ── GAIT ──────────────────────────────────────────────────────────────
 function gDate(iso){const p=iso.split('-');return (+p[1])+'/'+(+p[2])+'/'+String(p[0]).slice(2);}
-function sleipBand(v){return v>=1.5?'Marked':v>=1.2?'Moderate':v>=0.95?'Mild–Mod':v>=0.5?'Mild':'Normal';}
+// Sleip magnitude -> band word, same vocabulary as Maestro's card.
+function sleipBand(v){return v>=1.5?'Mod–Severe':v>=1.2?'Moderate':v>=0.95?'Mild–Mod':v>=0.5?'Mild':'Normal';}
+// Worst-limb summary, Maestro-style: each lunge session reduced to limb · phase.
+// Head asymmetry on both circles reads R-sided = right fore. Worst of the two circles per phase.
+function sleipSummary(r){
+  const po=Math.max(r.rr.po,r.rl.po), im=Math.max(r.rr.im,r.rl.im);
+  const hpo=Math.max(Math.abs(r.rr.ppo),Math.abs(r.rl.ppo)), him=Math.max(Math.abs(r.rr.pim),Math.abs(r.rl.pim));
+  const flags=[];
+  if(sleipBand(po)!=='Normal')flags.push({sev:sleipBand(po),limb:'R fore',phase:'push-off',val:po.toFixed(1)});
+  if(sleipBand(im)!=='Normal')flags.push({sev:sleipBand(im),limb:'R fore',phase:'impact',val:im.toFixed(1)});
+  if(sleipBand(hpo)!=='Normal')flags.push({sev:sleipBand(hpo),limb:'Hind',phase:'push-off',val:hpo.toFixed(1)});
+  if(sleipBand(him)!=='Normal')flags.push({sev:sleipBand(him),limb:'Hind',phase:'impact',val:him.toFixed(1)});
+  return {po,im,pelvis:Math.max(hpo,him),hz:r.rr.hz,band:sleipBand(Math.max(po,im)),flags};
+}
 function bandColor(b){b=(b||'').toLowerCase();
   if(b.indexOf('marked')>-1||b.indexOf('severe')>-1) return '#C0492B';
   if(b.indexOf('mild')>-1) return '#B77A15';
   if(b.indexOf('mod')>-1) return '#D9633F';
   if(b.indexOf('normal')>-1) return '#00A56A';
   return 'var(--text)';}
-function flagText(flags){return (flags||[]).map(f=>f.limb+' '+f.sev.toLowerCase()+' ('+(f.phase==='impact'?'landing':f.phase)+')').join(' · ');}
+function flagText(flags){
+  const by={},order=[];
+  (flags||[]).forEach(f=>{if(!by[f.limb]){by[f.limb]=[];order.push(f.limb);}by[f.limb].push((f.phase==='impact'?'landing':f.phase)+' '+(f.val!=null?f.val+' ':'')+f.sev.toLowerCase());});
+  return order.map(l=>l+' — '+by[l].join(' · ')).join('  |  ');
+}
 // A capture day is "treated" if the GAIT entry says so OR ice/Voltaren is logged that day.
 function treatedOn(g){
   const day=VALID.find(o=>o.date===g.d);
@@ -364,62 +381,55 @@ function buildGait(){
   const el=document.getElementById('gaitContent');
   const rows=GAIT.slice().sort((a,b)=>(a.d+(a.t||'')).localeCompare(b.d+(b.t||'')));
   const sl=rows.filter(r=>r.tool==='sleip'), rh=rows.filter(r=>r.tool==='realhorse');
-  const last=sl[sl.length-1];
   let html='';
+  const last=sl[sl.length-1];
   if(last){
-    const rmax=Math.max(last.rr.po,last.rr.im), band=sleipBand(rmax), t=treatedOn(last);
+    const S=sleipSummary(last), t=treatedOn(last);
     const clean=sl.filter(r=>treatedOn(r).v===false), treated=sl.filter(r=>treatedOn(r).v===true);
-    const avg=(a,f)=>a.length?(a.reduce((s,r)=>s+f(r),0)/a.length).toFixed(2):'—';
-    html+=`<div style="margin:8px 0 6px"><span class="gtag sl">Sleip</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(last.d)} · ${last.ctx}</span> ${trTag(t)} · <a href="${last.pdf}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">PDF ↗</a></div>
+    const avg=(a,f)=>a.length?(a.reduce((x,r)=>x+f(sleipSummary(r)),0)/a.length).toFixed(2):'—';
+    html+=`<div style="margin:8px 0 6px"><span class="gtag sl">Sleip</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(last.d)} · lunge</span> ${trTag(t)} · <a href="${last.pdf}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">PDF ↗</a></div>
     <div class="sg" style="margin-bottom:6px">
-      <div class="sc"><div class="sv" style="color:${bandColor(band)}">${band}</div><div class="sl">Right rein (RF loaded)</div></div>
-      <div class="sc"><div class="sv">${last.rr.po} <span style="font-size:12px;color:var(--muted)">R</span></div><div class="sl">Head push-off · R rein</div></div>
-      <div class="sc"><div class="sv">${last.rr.im} <span style="font-size:12px;color:var(--muted)">R</span></div><div class="sl">Head impact · R rein</div></div>
-      <div class="sc"><div class="sv">${last.rl.im}</div><div class="sl">Head impact · L rein (floor)</div></div>
-      <div class="sc"><div class="sv">${last.rr.hz}</div><div class="sl">Stride freq · R rein</div></div>
-      <div class="sc"><div class="sv">${Math.max(Math.abs(last.rr.ppo),Math.abs(last.rr.pim),Math.abs(last.rl.ppo),Math.abs(last.rl.pim)).toFixed(1)}</div><div class="sl">Pelvis max (hinds)</div></div>
+      <div class="sc"><div class="sv" style="color:${bandColor(S.band)}">${S.band}</div><div class="sl">Asymmetry</div></div>
+      <div class="sc"><div class="sv">${S.po.toFixed(1)} <span style="font-size:12px;color:var(--muted)">RF</span></div><div class="sl">Worst push-off</div></div>
+      <div class="sc"><div class="sv">${S.im.toFixed(1)} <span style="font-size:12px;color:var(--muted)">RF</span></div><div class="sl">Worst landing</div></div>
+      <div class="sc"><div class="sv">${S.pelvis.toFixed(1)}</div><div class="sl">Pelvis (hinds)</div></div>
+      <div class="sc"><div class="sv">${S.hz}</div><div class="sl">Stride freq</div></div>
     </div>
-    <div style="font-size:12px;color:var(--muted);margin:0 0 14px">Right rein, clean vs treated (n=${clean.length} / ${treated.length}) — push-off <strong style="color:var(--text)">${avg(clean,r=>r.rr.po)}</strong> vs <strong style="color:var(--text)">${avg(treated,r=>r.rr.po)}</strong> · impact <strong style="color:var(--text)">${avg(clean,r=>r.rr.im)}</strong> vs <strong style="color:var(--text)">${avg(treated,r=>r.rr.im)}</strong>. Compare like with like; slower trot (lower stride freq) reads worse.</div>`;
-    html+='<div class="card-sub" style="margin-top:8px">Head asymmetry by rein (Sleip). Hollow points = treated capture.</div><div class="cw h260"><canvas id="cGaitSleip"></canvas></div>';
+    <div style="font-size:12px;color:var(--muted);margin:0 0 6px"><span style="color:${bandColor(S.band)};font-weight:500">${S.band}</span> — ${flagText(S.flags)||'no flags'}</div>
+    <div style="font-size:12px;color:var(--muted);margin:0 0 14px">RF clean vs treated (n=${clean.length} / ${treated.length}) — push-off <strong style="color:var(--text)">${avg(clean,x=>x.po)}</strong> vs <strong style="color:var(--text)">${avg(treated,x=>x.po)}</strong> · landing <strong style="color:var(--text)">${avg(clean,x=>x.im)}</strong> vs <strong style="color:var(--text)">${avg(treated,x=>x.im)}</strong>. Slower trot (lower stride freq) reads worse.</div>
+    <div class="card-sub" style="margin-top:8px">RF push-off and landing (Sleip head asymmetry) — lower is better. Hollow points = treated capture.</div><div class="cw h260"><canvas id="cGaitSleip"></canvas></div>`;
   }
   const lr=rh[rh.length-1];
   if(lr){
     html+=`<div style="margin:18px 0 6px"><span class="gtag rh">RealHorse</span> <span style="font-size:11px;color:var(--muted)">latest · ${gDate(lr.d)} ${lr.t||''} · ${lr.ctx}</span> · <a href="${lr.pdf}" target="_blank" rel="noopener" style="font-size:11px;color:#0A6E96;text-decoration:none">PDF ↗</a></div>
     <div class="sg" style="margin-bottom:6px">
       <div class="sc"><div class="sv" style="color:${bandColor(lr.band)}">${lr.band}</div><div class="sl">Asymmetry</div></div>
-      <div class="sc"><div class="sv">${lr.imVal} <span style="font-size:12px;color:var(--muted)">${lr.imLimb}</span></div><div class="sl">Landing deficit (mm)</div></div>
-      <div class="sc"><div class="sv">${lr.poVal} <span style="font-size:12px;color:var(--muted)">${lr.poLimb}</span></div><div class="sl">Push-off deficit (mm)</div></div>
+      <div class="sc"><div class="sv">${lr.poVal} <span style="font-size:12px;color:var(--muted)">RF</span></div><div class="sl">Worst push-off (mm)</div></div>
+      <div class="sc"><div class="sv">${lr.imVal} <span style="font-size:12px;color:var(--muted)">RF</span></div><div class="sl">Worst landing (mm)</div></div>
       <div class="sc"><div class="sv">${lr.backAng}°</div><div class="sl">Back angle</div></div>
       <div class="sc"><div class="sv">${lr.strideLen}</div><div class="sl">Stride (cm)</div></div>
     </div>
     <div style="font-size:12px;color:var(--muted);margin:0 0 10px"><span style="color:${bandColor(lr.band)};font-weight:500">${lr.band}</span> — ${flagText(lr.flags)}</div>`;
   }
-  let tbl='<table class="cmp-table" style="margin-top:14px"><thead><tr><th>Date</th><th>Tool</th><th style="text-align:left">Readout</th><th>Freq</th><th>Status</th><th>Source</th></tr></thead><tbody>';
+  let tbl='<table class="cmp-table" style="margin-top:14px"><thead><tr><th>Date</th><th>Tool</th><th style="text-align:left">Asymmetry (limb · phase)</th><th>Push-off</th><th>Landing</th><th>Freq</th><th>Status</th><th>Source</th></tr></thead><tbody>';
   rows.slice().reverse().forEach(r=>{
-    let read,freq='—',st='—';
-    if(r.tool==='sleip'){
-      const b=sleipBand(Math.max(r.rr.po,r.rr.im));
-      read=`<span style="color:${bandColor(b)};font-weight:500">${b}</span> · R rein PO ${r.rr.po} / IM ${r.rr.im} · L rein ${r.rl.po} / ${r.rl.im}`;
-      freq=r.rr.hz; st=trTag(treatedOn(r));
-    }else{
-      read=`<span style="color:${bandColor(r.band)};font-weight:500">${r.band}</span> · RF landing ${r.imVal} / push-off ${r.poVal} mm · back ${r.backAng}° · ${r.strideLen} cm`;
-    }
-    if(r.note)read+=`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.note}</div>`;
+    let band,flags,po,im,freq='—',st='—';
+    if(r.tool==='sleip'){const S=sleipSummary(r);band=S.band;flags=S.flags;po=S.po.toFixed(1)+' RF';im=S.im.toFixed(1)+' RF';freq=S.hz;st=trTag(treatedOn(r));}
+    else{band=r.band;flags=r.flags;po=r.poVal+' RF';im=r.imVal+' RF';}
+    const note=r.note?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${r.note}</div>`:'';
     tbl+=`<tr><td>${gDate(r.d)}${r.t?' <span style="font-size:10px;color:var(--muted)">'+r.t+'</span>':''}</td><td><span class="gtag ${r.tool==='sleip'?'sl':'rh'}">${r.tool==='sleip'?'Sleip':'RealHorse'}</span></td>
-      <td style="text-align:left">${read}</td><td>${freq}</td><td>${st}</td><td><a href="${r.pdf}" target="_blank" rel="noopener" style="color:#0A6E96;text-decoration:none">PDF ↗</a></td></tr>`;
+      <td style="text-align:left"><span style="color:${bandColor(band)};font-weight:500">${band}</span>${flags&&flags.length?' · '+flagText(flags):''}${note}</td>
+      <td>${po}</td><td>${im}</td><td>${freq}</td><td>${st}</td><td><a href="${r.pdf}" target="_blank" rel="noopener" style="color:#0A6E96;text-decoration:none">PDF ↗</a></td></tr>`;
   });
-  el.innerHTML=html+'<div style="overflow-x:auto">'+tbl+'</tbody></table></div>';
+  el.innerHTML=html+'<div style="overflow-x:auto">'+tbl+'</tbody></table></div><div style="font-size:11px;color:var(--muted);margin-top:8px">Sleip values are head asymmetry (RF readout), worst of the two lunge circles; RealHorse values are RF deficit in mm. Different scales — compare within a tool.</div>';
   if(sl.length){
-    const tr=sl.map(r=>treatedOn(r).v===true);
-    const ds=(lab,col,f,dash)=>({label:lab,data:sl.map(f),borderColor:col,backgroundColor:tr.map(x=>x?'#FFFFFF':col),pointBorderColor:col,pointBorderWidth:2,
-      pointRadius:5,tension:.25,borderDash:dash||[],fill:false});
+    const tr=sl.map(r=>treatedOn(r).v===true), SS=sl.map(sleipSummary);
+    const ds=(lab,col,f,dash)=>({label:lab,data:SS.map(f),borderColor:col,backgroundColor:tr.map(x=>x?'#FFFFFF':col),pointBorderColor:col,pointBorderWidth:2,pointRadius:5,tension:.25,borderDash:dash||[],fill:false});
     CH.gs=new Chart(document.getElementById('cGaitSleip'),{type:'line',
-      data:{labels:sl.map(r=>gDate(r.d)),datasets:[
-        ds('R rein push-off','#C0492B',r=>r.rr.po),ds('R rein impact','#D9633F',r=>r.rr.im,[5,4]),
-        ds('L rein impact (floor)','#0098CC',r=>r.rl.im),ds('L rein push-off','#7FCDE8',r=>r.rl.po,[5,4])]},
+      data:{labels:sl.map(r=>gDate(r.d)),datasets:[ds('RF push-off','#C0492B',x=>x.po),ds('RF landing','#0098CC',x=>x.im,[5,4]),ds('Pelvis (hinds)','#9AA0A4',x=>x.pelvis,[2,3])]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{boxWidth:12,font:{size:11}}},
         tooltip:{callbacks:{afterTitle:items=>{const r=sl[items[0].dataIndex];const t=treatedOn(r);return 'Stride freq '+r.rr.hz+(t.v===true?' · treated':t.v===false?' · clean':' · treatment unknown');}}}},
-        scales:{y:{beginAtZero:true,suggestedMax:1.8,title:{display:true,text:'head asymmetry',color:'#706E67',font:{size:10}}}}}});
+        scales:{y:{beginAtZero:true,suggestedMax:1.8,title:{display:true,text:'asymmetry',color:'#706E67',font:{size:10}}}}}});
   }
 }
 
