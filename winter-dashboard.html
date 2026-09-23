@@ -146,6 +146,12 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 </div>
 
 <div class="card">
+  <div class="card-title">Turnout (hours)</div>
+  <div class="card-sub">Time out per period — his grass reintroduction lives here</div>
+  <div class="cw h200"><canvas id="cTurnout"></canvas></div>
+</div>
+
+<div class="card">
   <div class="card-title">PT exercise compliance</div>
   <div class="card-sub">Share of periods that hit the plan's 3×/week minimum (weeks with ≥3 logged days)</div>
   <div id="ptCompliance"></div>
@@ -235,11 +241,11 @@ function process(headers,rows){
   VALID=rows.map(r=>{
     const date=String(g(r,'date')||'').slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return null;
     const o={date,d:new Date(date+'T12:00:00'),
-      ride:yn(g(r,'ride')),walk:num(g(r,'walk (min)')),trot:num(g(r,'trot (min)')),canter:num(g(r,'canter (min)')),
+      ride:yn(g(r,'ride')),walk:num(g(r,'walk (min)')),turnout:num(g(r,'turnout (min)')),trot:num(g(r,'trot (min)')),canter:num(g(r,'canter (min)')),
       pt:yn(g(r,'pt exercises')),bands:yn(g(r,'equibands')),bemer:yn(g(r,'bemer')),laser:yn(g(r,'laser')),magna:yn(g(r,'magnawave')),massage:yn(g(r,'massage')),balpad:yn(g(r,'balance pad')),
       ice:yn(g(r,'ice')),iceL:limbs(g(r,'ice limbs')),volt:yn(g(r,'voltaren')),voltL:limbs(g(r,'voltaren limbs')),
       lame:yn(g(r,'lameness'))};
-    const anyVal=['ride','equibands','pt exercises','bemer','laser','lameness','walk (min)','trot (min)','canter (min)','ice','voltaren','magnawave','massage','balance pad','notes','pt notes']
+    const anyVal=['ride','equibands','pt exercises','bemer','laser','lameness','turnout (min)','walk (min)','trot (min)','canter (min)','ice','voltaren','magnawave','massage','balance pad','notes','pt notes']
       .some(n=>{const v=g(r,n);return v!=null&&String(v).trim()!=='';});
     return anyVal?o:null;
   }).filter(Boolean).sort((a,b)=>a.d-b.d);
@@ -259,7 +265,7 @@ function agg(rows,keyFn){
   const m={};rows.forEach(o=>{(m[keyFn(o.d)]=m[keyFn(o.d)]||[]).push(o);});
   return Object.keys(m).sort().map(k=>{const it=m[k];const c=f=>it.filter(o=>o[f]).length;const s=f=>it.reduce((a,o)=>a+o[f],0);
     return {period:k,days:it.length,rides:c('ride'),walk:s('walk'),trot:s('trot'),canter:s('canter'),pt:c('pt'),bands:c('bands'),
-      ice:c('ice'),volt:c('volt'),bemer:c('bemer'),laser:c('laser'),magna:c('magna'),massage:c('massage'),balpad:c('balpad'),lame:c('lame')};});
+      turnout:Math.round(s('turnout')/6)/10,ice:c('ice'),volt:c('volt'),bemer:c('bemer'),laser:c('laser'),magna:c('magna'),massage:c('massage'),balpad:c('balpad'),lame:c('lame')};});
 }
 
 // ── THIS WEEK ─────────────────────────────────────────────────────────
@@ -267,12 +273,12 @@ function thisWeek(){
   const el=document.getElementById('thisWeekCard');
   const sun=new Date();sun.setDate(sun.getDate()-sun.getDay());sun.setHours(0,0,0,0);
   const wkData=off=>{const s=new Date(sun);s.setDate(s.getDate()+off*7);const e=new Date(s);e.setDate(e.getDate()+6);e.setHours(23,59,59,999);
-    const it=VALID.filter(o=>o.d>=s&&o.d<=e);const r=agg(it,()=> 'x')[0]||{days:0,rides:0,walk:0,trot:0,canter:0,pt:0,bands:0,ice:0,volt:0,bemer:0,laser:0,magna:0,massage:0,balpad:0,lame:0};
+    const it=VALID.filter(o=>o.d>=s&&o.d<=e);const r=agg(it,()=> 'x')[0]||{days:0,rides:0,walk:0,trot:0,canter:0,turnout:0,pt:0,bands:0,ice:0,volt:0,bemer:0,laser:0,magna:0,massage:0,balpad:0,lame:0};
     r.label=(s.getMonth()+1)+'/'+s.getDate()+'–'+(e.getMonth()+1)+'/'+e.getDate();return r;};
   const w0=wkData(0),w1=wkData(-1),w2=wkData(-2);
   if(!VALID.length){el.innerHTML='<div class="card-title">This week</div><div class="card-sub" style="margin:0">No entries yet. Log from Winter → New entry.</div>';return;}
   const cell=(now,prev,good)=>{const d=now-prev;const cls=d===0?'':(good===(d>0)?'cmp-up':'cmp-dn');return `${now}${d?`<span class="${cls}">${d>0?'+':''}${d}</span>`:''}`;};
-  const rows=[['Days logged','days',true],['Rides','rides',true],['Walk (min)','walk',true],['Trot (min)','trot',true],['Canter (min)','canter',true],
+  const rows=[['Days logged','days',true],['Rides','rides',true],['Walk (min)','walk',true],['Trot (min)','trot',true],['Canter (min)','canter',true],['Turnout (hrs)','turnout',true],
     ['PT days','pt',true],['Equibands','bands',true],['Ice days','ice',null],['Voltaren days','volt',null],['Magnawave','magna',null],['Massage','massage',null],['Balance pad','balpad',null],['Bemer','bemer',null],['Laser','laser',null],['Lameness seen','lame',false]];
   el.innerHTML=`<div class="card-title">This week — ${w0.label}</div><div class="card-sub">${w0.days} days logged · PT target 3–5×/week</div>
   <table class="cmp-table"><thead><tr><th></th><th class="cmp-now">This week</th><th>Last week</th><th>2 weeks ago</th></tr></thead><tbody>
@@ -303,6 +309,11 @@ function workload(data,labels){
     {label:'Walk',data:data.map(d=>d.walk),backgroundColor:'rgba(0,187,119,0.55)',borderColor:'#00BB77',borderWidth:.5,borderRadius:2},
     {label:'Trot',data:data.map(d=>d.trot),backgroundColor:'rgba(0,152,204,0.55)',borderColor:'#0098CC',borderWidth:.5,borderRadius:2},
     {label:'Canter',data:data.map(d=>d.canter),backgroundColor:'rgba(0,113,156,0.55)',borderColor:'#00719C',borderWidth:.5,borderRadius:2}]},options:o});
+}
+function turnoutChart(data,labels){
+  const o=base();o.scales.y.title={display:true,text:'hours',color:'#706E67',font:{size:10}};
+  CH.to=new Chart(document.getElementById('cTurnout'),{type:'bar',data:{labels,datasets:[{label:'Turnout',data:data.map(d=>d.turnout),
+    backgroundColor:'rgba(87,198,154,0.45)',borderColor:'#00A56A',borderWidth:.5,borderRadius:2}]},options:o});
 }
 function ptComp(data){
   const el=document.getElementById('ptCompliance');const ass=data.filter(d=>d.days>=3);const met=ass.filter(d=>d.pt>=3).length;
@@ -417,7 +428,7 @@ function buildAll(){
   kill();
   const data=D(),labels=data.map(L);
   stats(data);
-  if(data.length){workload(data,labels);iceVolt(data,labels);}
+  if(data.length){workload(data,labels);turnoutChart(data,labels);iceVolt(data,labels);}
   else{document.getElementById('limbSplit').innerHTML='<div class="gempty">No daily entries yet.</div>';}
   ptComp(data);
   buildGait();

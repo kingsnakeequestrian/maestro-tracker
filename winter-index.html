@@ -332,6 +332,11 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       </div>
       <div class="score-hint" id="totalHint">Total: 0 min</div>
     </div>
+    <div class="field">
+      <label for="turnout">Turnout (min)</label>
+      <input type="number" inputmode="numeric" min="0" id="turnout" data-f="turnout" oninput="txtIn(this)" placeholder="e.g. 120">
+      <div class="score-hint">Time out, separate from work — grazing, walking to hay/water.</div>
+    </div>
   </div>
 
   <div class="card">
@@ -780,14 +785,14 @@ function syncLimbs(which){
 function resetForm(){
   F={};TOUCHED={};
   document.querySelectorAll('.toggle-btn').forEach(b=>b.className='toggle-btn');
-  ['walk','trot','canter','ptNotes','notes'].forEach(id=>document.getElementById(id).value='');
+  ['walk','trot','canter','turnout','ptNotes','notes'].forEach(id=>document.getElementById(id).value='');
   ['bemer','laser','magna','massage','balpad','ice','volt'].forEach(k=>togCheck(k,false,true)); total();
   document.getElementById('loadedNote').classList.remove('show');
 }
 
 // ── SHEET ────────────────────────────────────────────────────────────
 // Headers are matched by name, so the page keeps working whatever order the columns are in.
-const HMAP={ride:'ride',walk:'walk (min)',trot:'trot (min)',canter:'canter (min)',total:'total (min)',equibands:'equibands',
+const HMAP={ride:'ride',walk:'walk (min)',trot:'trot (min)',canter:'canter (min)',total:'total (min)',turnout:'turnout (min)',equibands:'equibands',
   pt:'pt exercises',ptNotes:'pt notes',bemer:'bemer',laser:'laser',magna:'magnawave',massage:'massage',balpad:'balance pad',ice:'ice',iceLimbs:'ice limbs',volt:'voltaren',voltLimbs:'voltaren limbs',lameness:'lameness',notes:'notes'};
 function rowObj(headers,r){const o={};headers.forEach((h,i)=>{o[String(h).trim().toLowerCase()]=r[i];});return o;}
 function sheetRows(){
@@ -810,7 +815,7 @@ function prefill(date){
   const v=k=>{const x=o[HMAP[k]];return x===null||x===undefined?'':String(x);};
   ['ride','pt','equibands','lameness'].forEach(k=>{if(v(k))setTogVal(k,v(k).toUpperCase().charAt(0));});
   ['walk','trot','canter'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
-  ['ptNotes','notes'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
+  ['ptNotes','notes','turnout'].forEach(k=>{document.getElementById(k).value=v(k);F[k]=v(k);});
   total();
   F.iceLimbs=v('iceLimbs'); F.voltLimbs=v('voltLimbs');
   ['bemer','laser','magna','massage','balpad','ice','volt'].forEach(k=>togCheck(k,v(k).toUpperCase()==='Y',true));
@@ -866,6 +871,7 @@ function renderHistory(){
     const meta=[
       yn(o.ride)?'Rode':null,
       (w||t||c)?`W ${w} · T ${t} · C ${c}`:null,
+      +o['turnout (min)']?'Turnout '+o['turnout (min)']+' min':null,
       yn(o['pt exercises'])?'PT':null,
       yn(o.equibands)?'Bands':null,
       yn(o.ice)?'Ice '+(o['ice limbs']||''):null,

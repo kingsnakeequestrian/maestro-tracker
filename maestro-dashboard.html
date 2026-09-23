@@ -152,6 +152,12 @@ h1{font-size:26px;font-weight:500;letter-spacing:-0.4px;margin-bottom:4px}
 </div>
 
 <div class="card">
+  <div class="card-title">Turnout (hours)</div>
+  <div class="card-sub">Time out per period — low-grade movement that isn't in the workload chart</div>
+  <div class="cw h200"><canvas id="cTurnout"></canvas></div>
+</div>
+
+<div class="card">
   <div class="card-title">PT exercise compliance</div>
   <div class="card-sub">Share of weeks that hit the 3×/week target</div>
   <div id="ptCompliance"></div>
@@ -360,7 +366,7 @@ function processRawRows(headers, rows){
   const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
   const CRANKY_I=13,STOPS_I=15,SI_I=18,EQUI_I=21,PT_I=22;
   const POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
-  const STRADDLE_I=32,TREADMILL_I=33;
+  const STRADDLE_I=32,TREADMILL_I=33,TURNOUT_I=37;
 
   function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
   function stopsN(v){
@@ -394,7 +400,7 @@ function processRawRows(headers, rows){
 
   function agg(groups){
     return Object.entries(groups).map(([period,items])=>{
-      const hasData=items.some(({r})=>r[PT_I]==='Y'||r[POLES_I]==='Y'||r[EQUI_I]==='Y'||r[RODE_I]==='Y'||r[BW_I]!=null||(toF(r[WALK_I])||0)>0||(toF(r[TROT_I])||0)>0||(toF(r[CANT_I])||0)>0||r[SW_I]==='Y'||r[LASER_I]==='Y');
+      const hasData=items.some(({r})=>r[PT_I]==='Y'||r[POLES_I]==='Y'||r[EQUI_I]==='Y'||r[RODE_I]==='Y'||r[BW_I]!=null||(toF(r[WALK_I])||0)>0||(toF(r[TROT_I])||0)>0||(toF(r[CANT_I])||0)>0||r[SW_I]==='Y'||r[LASER_I]==='Y'||(toF(r[TURNOUT_I])||0)>0);
       if(!hasData) return null;
       const willV=items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
       const stopsV=items.map(({r})=>stopsN(r[STOPS_I])).filter(v=>v!==null);
@@ -405,6 +411,7 @@ function processRawRows(headers, rows){
         walk:items.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0),
         trot:items.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0),
         canter:items.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0),
+        turnout:items.reduce((s,{r})=>s+(toF(r[TURNOUT_I])||0),0),
         rode:items.filter(({r})=>r[RODE_I]==='Y').length,
         pt:items.filter(({r})=>r[PT_I]==='Y').length,
         poles:items.filter(({r})=>r[POLES_I]==='Y').length,
@@ -460,7 +467,7 @@ function updateThisWeekCard(valid){
     if(!items.length) return null;
     const DATE_I=2,RODE_I=5,WALK_I=7,TROT_I=8,CANT_I=9,WILL_I=11;
     const CRANKY_I=13,EQUI_I=21,PT_I=22,POLES_I=23,BW_I=25,LASER_I=26,SW_I=27;
-    const STRADDLE_I=32,TREADMILL_I=33;
+    const STRADDLE_I=32,TREADMILL_I=33,TURNOUT_I=37;
     function toF(v){const n=parseFloat(v);return isNaN(n)?null:n;}
     const willV=items.map(({r})=>toF(r[WILL_I])).filter(v=>v!==null);
     const crankyD=items.map(({r})=>r[CRANKY_I]).filter(v=>v!=null);
@@ -472,6 +479,7 @@ function updateThisWeekCard(valid){
       walk: items.reduce((s,{r})=>s+(toF(r[WALK_I])||0),0),
       trot: items.reduce((s,{r})=>s+(toF(r[TROT_I])||0),0),
       cant: items.reduce((s,{r})=>s+(toF(r[CANT_I])||0),0),
+      turnout: Math.round(items.reduce((s,{r})=>s+(toF(r[TURNOUT_I])||0),0)/6)/10,
       pt: items.filter(({r})=>r[PT_I]==='Y').length,
       equi: items.filter(({r})=>r[EQUI_I]==='Y').length,
       poles: items.filter(({r})=>r[POLES_I]==='Y').length,
@@ -556,6 +564,7 @@ function updateThisWeekCard(valid){
         ${row('Walk (min)','walk')}
         ${row('Trot (min)','trot')}
         ${row('Canter (min)','cant')}
+        ${row('Turnout (hrs)','turnout')}
         ${row('PT exercises','pt','x')}
         ${row('Straddle poles','straddle','x')}
         ${row('Equibands','equi','x')}
@@ -647,6 +656,14 @@ function buildWorkload(data,labels){
       {label:'Canter',data:data.map(d=>d.canter), backgroundColor:'rgba(0,113,156,0.55)', borderColor:'#00719C',borderWidth:.5,borderRadius:2},
     ]},options:o
   });
+}
+
+// ── TURNOUT ───────────────────────────────────────────────────────────
+function buildTurnout(data,labels){
+  const el=document.getElementById('cTurnout'); if(!el) return;
+  const o=base(); o.scales.y.title={display:true,text:'hours',font:{family:'Plus Jakarta Sans',size:10},color:'#706E67'};
+  CH.to=new Chart(el,{type:'bar',data:{labels,datasets:[{label:'Turnout (hrs)',data:data.map(d=>Math.round((d.turnout||0)/6)/10),
+    backgroundColor:'rgba(87,198,154,0.45)',borderColor:'#00A56A',borderWidth:.5,borderRadius:2}]},options:o});
 }
 
 // ── PT COMPLIANCE (single overall %) ──────────────────────────────────
@@ -1575,6 +1592,7 @@ function buildAll(){
   buildStats(data);
   if(data.length){
     buildWorkload(data,labels);
+    buildTurnout(data,labels);
     buildPTCompliance(data,labels);
   }
   buildGap();
