@@ -968,7 +968,7 @@ let CFG = { sheetId:'', scriptUrl:'', driveFolderId:'' };
 function loadCfg() {
   try { CFG = JSON.parse(localStorage.getItem('m_cfg') || '{}'); } catch {}
   CFG.sheetId = CFG.sheetId || '';
-  CFG.scriptUrl = CFG.scriptUrl || '';
+  CFG.scriptUrl = CFG.scriptUrl || 'https://script.google.com/macros/s/AKfycbw_k93GYdEep6zD0cC251zj-FONXkPUP3uMPqyRL0zJWRCup5nnaoN0q_6INAeRLL7a/exec';
   CFG.apptScriptUrl = CFG.apptScriptUrl || '';
   CFG.driveFolderId = CFG.driveFolderId || '';
   if (CFG.sheetId) { document.getElementById('sheetId').value = CFG.sheetId; }
