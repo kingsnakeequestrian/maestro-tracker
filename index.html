@@ -263,6 +263,19 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .hsw a.on.w{color:#0A527F}
 @media(max-width:480px){.mnav{flex-wrap:wrap}.hsw{margin:0 0 6px 0}.mnav-links{width:100%}}
 </style>
+<style id="turnout-timer-style">
+.to-card{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 14px 0;padding:12px 14px;border:1px solid var(--border-light,#E8EAE9);border-radius:12px;background:#fff}
+.to-card.run{background:#EAF7F1;border-color:#57C69A}
+.to-title{font-size:13px;font-weight:600;color:#141A1C}
+.to-sub{font-size:12px;color:#5C5850;margin-top:2px}
+.to-card.run .to-sub{color:#0E6B47;font-weight:500}
+.to-btns{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.to-btn{font-family:inherit;font-size:13px;font-weight:600;border:none;border-radius:9px;padding:10px 14px;cursor:pointer;background:#00A56A;color:#fff;white-space:nowrap}
+.to-card.run .to-btn{background:#C0492B}
+.to-btn:disabled{opacity:.55}
+.to-x{font-family:inherit;font-size:11px;border:none;background:none;color:#9AA0A4;cursor:pointer;text-decoration:underline;display:none}
+.to-card.run .to-x{display:inline}
+</style>
 </head>
 <body>
 <nav class="mnav">
@@ -297,6 +310,10 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
 </div>
 
+<div class="to-card" id="toCard">
+  <div><div class="to-title">Turnout</div><div class="to-sub" id="toSub">Checking…</div></div>
+  <div class="to-btns"><button class="to-x" id="toX" onclick="toCancel()">cancel</button><button class="to-btn" id="toBtn" onclick="toToggle()">Start</button></div>
+</div>
 <div id="reminderBanner" class="reminder-banner">
   <div class="reminder-banner-title">Follow-up reminders</div>
   <div id="reminderList"></div>
@@ -326,7 +343,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="field">
       <label>Turnout (min)</label>
       <input type="number" id="turnoutMin" placeholder="e.g. 240" inputmode="numeric">
-      <div class="score-hint">Time out, separate from work. Walking to hay/water and the hill count here.</div>
+      <div class="score-hint">Time out, separate from work. The Turnout timer at the top adds to this automatically — leave blank to keep what it logged.</div>
     </div>
   </div>
   <div class="card">
@@ -1709,6 +1726,75 @@ initDate();
 initVetBwDates();
 checkReminders();
 
+
+// ── TURNOUT TIMER ────────────────────────────────────────────────────
+// Start on any device, stop on any device: the running start time is kept by the
+// backend. Stopping ADDS the minutes to that day's Turnout (min) in the sheet.
+// No signal at start or stop → timed on this phone and sent when signal returns.
+var TO={running:null,today:null,skew:0,tick:null,busy:false};
+function toUrl(){return (CFG&&CFG.scriptUrl)||'';}
+function toIso(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function toLocalGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}}
+function toLocalSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+async function toGet(){const r=await fetch(toUrl()+'?action=turnoutStatus&date='+toIso());return r.json();}
+async function toPost(action,extra){const p=Object.assign({action:action},extra||{});const b=new URLSearchParams();b.append('payload',JSON.stringify(p));const r=await fetch(toUrl(),{method:'POST',body:b});return r.json();}
+function toFmt(min){min=Math.max(0,Math.round(min));const h=Math.floor(min/60),m=min%60;return h?h+'h '+m+'m':m+' min';}
+function toRender(){
+  const card=document.getElementById('toCard'),sub=document.getElementById('toSub'),btn=document.getElementById('toBtn');
+  if(!card)return;
+  const run=TO.running||toLocalGet('m_to_local');
+  card.classList.toggle('run',!!run);
+  if(run){
+    const el=(Date.now()+TO.skew-run.start)/60000;
+    const t=new Date(run.start-TO.skew);
+    sub.textContent='Out since '+t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' · '+toFmt(el)+(run.local?' · on this phone':'');
+    btn.textContent='Stop';
+  }else{
+    sub.textContent=TO.today?('In · '+toFmt(TO.today)+' logged today'):'In';
+    btn.textContent='Start';
+  }
+  const q=(toLocalGet('m_to_q')||[]).length;
+  if(q)sub.textContent+=' · '+q+' waiting to send';
+}
+async function toRefresh(){
+  if(!toUrl()){toRender();return;}
+  try{const j=await toGet();TO.running=j.running;TO.today=j.today;TO.skew=(j.now||Date.now())-Date.now();}catch(e){}
+  await toFlush();toRender();
+}
+async function toFlush(){
+  const q=toLocalGet('m_to_q')||[];if(!q.length||!toUrl())return;
+  const left=[];
+  for(const it of q){try{const j=await toPost('turnoutAdd',it);if(!(j.success||j.ok))left.push(it);else if(it.date===toIso())TO.today=j.total;}catch(e){left.push(it);}}
+  toLocalSet('m_to_q',left.length?left:null);
+}
+async function toToggle(){
+  if(TO.busy)return;TO.busy=true;const btn=document.getElementById('toBtn');btn.disabled=true;
+  try{
+    const local=toLocalGet('m_to_local');
+    if(local){                                   // timed on this phone
+      const it={date:local.date,minutes:Math.round((Date.now()-local.start)/60000)};
+      toLocalSet('m_to_local',null);
+      try{const j=await toPost('turnoutAdd',it);if(!(j.success||j.ok))throw 0;TO.today=j.total;toToast('Logged '+toFmt(it.minutes)+' turnout');}
+      catch(e){const q=toLocalGet('m_to_q')||[];q.push(it);toLocalSet('m_to_q',q);toToast('No signal — '+toFmt(it.minutes)+' saved here, sends later');}
+    }else if(TO.running){
+      try{const j=await toPost('turnoutStop');if(!(j.success||j.ok))throw new Error(j.error);TO.running=null;TO.today=j.total;
+        toToast('Logged '+toFmt(j.minutes)+' · '+toFmt(j.total)+' total'+(j.minutes>14*60?' — long, check it':''));toAfterStop(j);}
+      catch(e){toToast('Could not reach the sheet — tap Stop again when you have signal',true);}
+    }else{
+      try{const j=await toPost('turnoutStart',{date:toIso()});if(!(j.success||j.ok))throw 0;TO.running=j.running;toToast(j.already?'Already out':'Turnout started');}
+      catch(e){toLocalSet('m_to_local',{start:Date.now(),date:toIso(),local:true});toToast('No signal — timing on this phone');}
+    }
+  }finally{TO.busy=false;btn.disabled=false;toRender();}
+}
+async function toCancel(){
+  if(toLocalGet('m_to_local')){toLocalSet('m_to_local',null);}
+  else{try{await toPost('turnoutCancel');}catch(e){}}
+  TO.running=null;toRender();toToast('Turnout cancelled — nothing logged');
+}
+function toToast(m,err){if(typeof toast==='function')toast(m,err);}
+toRefresh();TO.tick=setInterval(toRender,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)toRefresh();});
+function toAfterStop(j){const el=document.getElementById('turnoutMin');const d=document.getElementById('entryDate');if(el&&d&&d.value===j.date)el.value=j.total;}
 </script>
 </body>
 </html>
