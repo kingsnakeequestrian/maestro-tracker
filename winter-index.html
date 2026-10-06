@@ -285,6 +285,14 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .to-btn:disabled{opacity:.55}
 .to-x{font-family:inherit;font-size:11px;border:none;background:none;color:#9AA0A4;cursor:pointer;text-decoration:underline;display:none}
 .to-card.run .to-x{display:inline}
+.to-wrap{margin:10px 14px 0}.to-wrap .to-card{margin:0}
+.to-edit-link{font-family:inherit;font-size:11px;border:none;background:none;color:#0A6E96;cursor:pointer;padding:0;margin-top:3px;text-decoration:underline}
+.to-edit{display:none;flex-direction:column;gap:8px;margin-top:6px;padding:10px 14px;border:1px dashed #C9D3D3;border-radius:10px;background:#FAFBFB}
+.to-edit.show{display:flex}
+.to-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:#5C5850}
+.to-row input[type=time]{font-family:inherit;font-size:14px;padding:6px 8px;border:1px solid #DCDEDC;border-radius:8px;background:#fff;width:auto}
+.to-row button{font-family:inherit;font-size:12px;font-weight:600;border:1px solid #00A56A;background:#fff;color:#0E8A57;border-radius:8px;padding:7px 11px;cursor:pointer}
+.to-row button.stop{border-color:#C0492B;color:#C0492B}
 </style>
 </head>
 <body>
@@ -314,9 +322,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
   <button class="nav-tab" data-s="settings" onclick="showSection('settings',this)">⚙</button>
 </div>
 
+<div class="to-wrap">
 <div class="to-card" id="toCard">
-  <div><div class="to-title">Turnout</div><div class="to-sub" id="toSub">Checking…</div></div>
+  <div><div class="to-title">Turnout</div><div class="to-sub" id="toSub">Checking…</div><button class="to-edit-link" id="toEditLink" onclick="toEditToggle()">Forgot to tap? Set the time</button></div>
   <div class="to-btns"><button class="to-x" id="toX" onclick="toCancel()">cancel</button><button class="to-btn" id="toBtn" onclick="toToggle()">Start</button></div>
+</div>
+<div class="to-edit" id="toEdit">
+  <div class="to-row" id="toRowStart"><span id="toStartLbl">Went out at</span><input type="time" id="toStartT"><button onclick="toSetStart()" id="toStartBtn">Start from this time</button></div>
+  <div class="to-row" id="toRowStop" style="display:none"><span>Came in at</span><input type="time" id="toStopT"><button class="stop" onclick="toStopAt()">Stop at this time</button></div>
+</div>
 </div>
 <div id="reminderBanner" class="reminder-banner">
   <div class="reminder-banner-title">Follow-up reminders</div>
@@ -1005,6 +1019,44 @@ function toLocalGet(k){try{return JSON.parse(localStorage.getItem(k)||'null');}c
 function toLocalSet(k,v){try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 async function toGet(){const r=await fetch(toUrl()+'?action=turnoutStatus&date='+toIso());return r.json();}
 async function toPost(action,extra){const b=new URLSearchParams(Object.assign({action:action},extra||{}));const r=await fetch(toUrl(),{method:'POST',body:b});return r.json();}
+function toHM(ms){const d=new Date(ms);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function toFromInput(id){
+  const v=(document.getElementById(id)||{}).value;if(!v)return null;
+  const [h,m]=v.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);
+  if(d.getTime()>Date.now()+60000)d.setDate(d.getDate()-1);   // typed a time later than now → yesterday
+  return d;
+}
+function toEditToggle(force){
+  const e=document.getElementById('toEdit');const on=force!==undefined?force:!e.classList.contains('show');
+  e.classList.toggle('show',on);
+  if(on){const run=TO.running||toLocalGet('w_to_local');
+    document.getElementById('toStartT').value=run?toHM(run.start-TO.skew):toHM(Date.now());
+    document.getElementById('toStopT').value=toHM(Date.now());}
+}
+async function toSetStart(){
+  const d=toFromInput('toStartT');if(!d){toToast('Pick a time',true);return;}
+  const ms=d.getTime(),date=toIso(d),local=toLocalGet('w_to_local');
+  try{
+    if(local){local.start=ms;local.date=date;toLocalSet('w_to_local',local);toToast('Start set to '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));}
+    else if(TO.running){const j=await toPost('turnoutEdit',{startMs:ms+TO.skew,date});if(!(j.success||j.ok))throw new Error(j.error);TO.running=j.running;toToast('Start changed');}
+    else{const j=await toPost('turnoutStart',{startMs:ms+TO.skew,date});if(!(j.success||j.ok))throw 0;TO.running=j.running;toToast(j.already?'Already out':'Turnout started from '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));}
+  }catch(e){toLocalSet('w_to_local',{start:ms,date,local:true});TO.running=null;toToast('No signal — timing on this phone');}
+  toEditToggle(false);toRender();
+}
+async function toStopAt(){
+  const d=toFromInput('toStopT');if(!d){toToast('Pick a time',true);return;}
+  const local=toLocalGet('w_to_local'),run=TO.running||local;if(!run)return;
+  if(d.getTime()<run.start-TO.skew){toToast('That\'s before he went out',true);return;}
+  if(local){
+    const it={date:local.date,minutes:Math.round((d.getTime()-local.start)/60000)};toLocalSet('w_to_local',null);
+    try{const j=await toPost('turnoutAdd',it);if(!(j.success||j.ok))throw 0;TO.today=j.total;toToast('Logged '+toFmt(it.minutes));}
+    catch(e){const q=toLocalGet('w_to_q')||[];q.push(it);toLocalSet('w_to_q',q);toToast('No signal — saved here, sends later');}
+  }else{
+    try{const j=await toPost('turnoutStop',{stopMs:d.getTime()+TO.skew});if(!(j.success||j.ok))throw new Error(j.error);TO.running=null;TO.today=j.total;toToast('Logged '+toFmt(j.minutes)+' · '+toFmt(j.total)+' total');toAfterStop(j);}
+    catch(e){toToast('Could not reach the sheet — try again with signal',true);}
+  }
+  toEditToggle(false);toRender();
+}
 function toFmt(min){min=Math.max(0,Math.round(min));const h=Math.floor(min/60),m=min%60;return h?h+'h '+m+'m':m+' min';}
 function toRender(){
   const card=document.getElementById('toCard'),sub=document.getElementById('toSub'),btn=document.getElementById('toBtn');
@@ -1016,7 +1068,15 @@ function toRender(){
     const t=new Date(run.start-TO.skew);
     sub.textContent='Out since '+t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' · '+toFmt(el)+(run.local?' · on this phone':'');
     btn.textContent='Stop';
+    document.getElementById('toEditLink').textContent='Wrong time? Edit';
+    document.getElementById('toStartLbl').textContent='Actually went out at';
+    document.getElementById('toStartBtn').textContent='Save start';
+    document.getElementById('toRowStop').style.display='';
   }else{
+    document.getElementById('toEditLink').textContent='Forgot to tap? Set the time';
+    document.getElementById('toStartLbl').textContent='Went out at';
+    document.getElementById('toStartBtn').textContent='Start from this time';
+    document.getElementById('toRowStop').style.display='none';
     sub.textContent=TO.today?('In · '+toFmt(TO.today)+' logged today'):'In';
     btn.textContent='Start';
   }
