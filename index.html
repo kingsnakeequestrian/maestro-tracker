@@ -305,12 +305,10 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 </div>
 
 <div class="nav-tabs" id="navTabs">
-  <button class="nav-tab active" data-s="ridden" onclick="showSection('ridden',this)">Ridden</button>
-  <button class="nav-tab" data-s="behavioral" onclick="showSection('behavioral',this)">Behavior</button>
-  <button class="nav-tab" data-s="lunge" onclick="showSection('lunge',this)">Lunge</button>
-  <button class="nav-tab" data-s="si" onclick="showSection('si',this)">SI</button>
-  <button class="nav-tab" data-s="modalities" onclick="showSection('modalities',this)">Modalities</button>
-  <button class="nav-tab" data-s="media" onclick="showSection('media',this)">Media</button>
+  <button class="nav-tab active" data-s="day" onclick="showSection('day',this)">Day</button>
+  <button class="nav-tab" data-s="ride" onclick="showSection('ride',this)">Ride</button>
+  <button class="nav-tab" data-s="lunge" onclick="showSection('lunge',this)">Lunge / Hand walk</button>
+  <button class="nav-tab" data-s="modalities" onclick="showSection('modalities',this)">PT/BW</button>
   <button class="nav-tab" data-s="notes" onclick="showSection('notes',this)">Notes</button>
   <button class="nav-tab" data-s="history" onclick="showSection('history',this)">History</button>
   <button class="nav-tab" data-s="vet" onclick="showSection('vet',this)">Vet</button>
@@ -334,8 +332,8 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 </div>
 <div class="content">
 
-<!-- RIDDEN -->
-<div class="section active" id="s-ridden">
+<!-- DAY -->
+<div class="section active" id="s-day">
   <div class="card">
     <div class="card-title">Day Overview</div>
     <div class="field">
@@ -347,12 +345,23 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       </div>
     </div>
     <div class="field">
-      <label>Day type</label>
-      <input type="text" id="dayType" placeholder="e.g. Lunge + ride, Hand walk, Day off…">
+      <label>What happened today <span style="color:var(--text-muted);font-weight:300">tick all that apply</span></label>
+      <div class="procedures-grid" id="dayTypeGrid">
+        <div class="proc-item" data-dt="Lunge" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Lunge</div></div>
+        <div class="proc-item" data-dt="Turnout" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Turnout</div></div>
+        <div class="proc-item" data-dt="Ride" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Ride</div></div>
+        <div class="proc-item" data-dt="Hand walk" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Hand walk</div></div>
+        <div class="proc-item" data-dt="Stall rest" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Stall rest</div></div>
+        <div class="proc-item" data-dt="Vet procedure" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Vet procedure</div></div>
+        <div class="proc-item" data-dt="Bodywork" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Bodywork</div></div>
+        <div class="proc-item" data-dt="Farrier" onclick="togDayType(this)"><div class="proc-check"></div><div class="proc-label">Farrier</div></div>
+      </div>
+      <div class="score-hint" id="dayTypeHint"></div>
     </div>
     <div class="field">
       <label>Total duration (min)</label>
-      <input type="number" id="totalDur" placeholder="45" inputmode="numeric">
+      <input type="number" id="totalDur" placeholder="auto" inputmode="numeric">
+      <div class="score-hint">Leave blank and it adds up the ride, lunge and hand-walk minutes.</div>
     </div>
     <div class="field">
       <label>Turnout (min)</label>
@@ -360,24 +369,13 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       <div class="score-hint">Time out, separate from work. The Turnout timer at the top adds to this automatically — leave blank to keep what it logged.</div>
     </div>
   </div>
+</div>
+
+<!-- RIDE -->
+<div class="section" id="s-ride">
   <div class="card">
-    <div class="card-title">Ridden Work</div>
-    <div class="field">
-      <label>Rode today?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="rode" data-v="Y" onclick="tog(this,()=>show('ridenFields'))">Yes</button>
-        <button class="toggle-btn" data-f="rode" data-v="N" onclick="tog(this,()=>hide('ridenFields'))">No</button>
-      </div>
-    </div>
-    <div class="field">
-      <label>Time in each gait (min)</label>
-      <div class="dur-row">
-        <div><label>Walk</label><input type="number" id="walkMin" placeholder="0" inputmode="numeric"></div>
-        <div><label>Trot</label><input type="number" id="trotMin" placeholder="0" inputmode="numeric"></div>
-        <div><label>Canter</label><input type="number" id="canterMin" placeholder="0" inputmode="numeric"></div>
-      </div>
-    </div>
-    <div id="ridenFields" class="cond">
+    <div class="card-title">Ride</div>
+    <div class="score-hint" id="rideOffHint" style="margin-bottom:10px">Tick <strong>Ride</strong> on the Day tab so this counts as a ride day.</div>
       <div class="field">
         <label>Saddle or bareback?</label>
         <select id="saddleType">
@@ -386,6 +384,18 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
           <option>Bareback</option>
           <option>Bareback + pad</option>
         </select>
+      </div>
+      <div class="field">
+        <label>Ride duration (min)</label>
+        <input type="number" id="rideDur" placeholder="auto from gaits" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label>Time in each gait (min)</label>
+        <div class="dur-row">
+          <div><label>Walk</label><input type="number" id="walkMin" placeholder="0" inputmode="numeric"></div>
+          <div><label>Trot</label><input type="number" id="trotMin" placeholder="0" inputmode="numeric"></div>
+          <div><label>Canter</label><input type="number" id="canterMin" placeholder="0" inputmode="numeric" oninput="rideCanterToggle()"></div>
+        </div>
       </div>
       <div class="field">
         <label>Gait achieved</label>
@@ -413,12 +423,33 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
           <button class="toggle-btn" data-f="crop" data-v="N" onclick="tog(this)">No</button>
         </div>
       </div>
+  </div>
+  <div class="card" id="rideCanterCard" style="display:none">
+    <div class="card-title">Canter Quality — Ride</div>
+    <div class="field">
+      <label>Left lead</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="1" onclick="setScore(this,'rcL','rcLHint',CANT)">1</button>
+        <button class="score-btn" data-v="2" onclick="setScore(this,'rcL','rcLHint',CANT)">2</button>
+        <button class="score-btn" data-v="3" onclick="setScore(this,'rcL','rcLHint',CANT)">3</button>
+        <button class="score-btn" data-v="4" onclick="setScore(this,'rcL','rcLHint',CANT)">4</button>
+        <button class="score-btn" data-v="5" onclick="setScore(this,'rcL','rcLHint',CANT)">5</button>
+      </div>
+      <div class="score-hint" id="rcLHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
+    </div>
+    <div class="div"></div>
+    <div class="field">
+      <label>Right lead</label>
+      <div class="score-group">
+        <button class="score-btn" data-v="1" onclick="setScore(this,'rcR','rcRHint',CANT)">1</button>
+        <button class="score-btn" data-v="2" onclick="setScore(this,'rcR','rcRHint',CANT)">2</button>
+        <button class="score-btn" data-v="3" onclick="setScore(this,'rcR','rcRHint',CANT)">3</button>
+        <button class="score-btn" data-v="4" onclick="setScore(this,'rcR','rcRHint',CANT)">4</button>
+        <button class="score-btn" data-v="5" onclick="setScore(this,'rcR','rcRHint',CANT)">5</button>
+      </div>
+      <div class="score-hint" id="rcRHint">1 = refused · 3 = reluctant but achieved · 5 = willing/offered</div>
     </div>
   </div>
-</div>
-
-<!-- BEHAVIORAL -->
-<div class="section" id="s-behavioral">
   <div class="card">
     <div class="card-title">Tacking Up</div>
     <div class="field">
@@ -457,11 +488,33 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         <button class="chip" data-f="stickyResistant" onclick="togChip(this)">Sticky / resistant</button>
       </div>
     </div>
+    <div class="field">
+      <label>Lunged before the ride?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="Y" onclick="tog(this)">Yes</button>
+        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="N" onclick="tog(this)">No</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- LUNGE -->
 <div class="section" id="s-lunge">
+  <div class="card">
+    <div class="card-title">Lunge / Hand walk</div>
+    <div class="field">
+      <label>Lunge — time in each gait (min)</label>
+      <div class="dur-row">
+        <div><label>Walk</label><input type="number" id="lungeWalk" placeholder="0" inputmode="numeric"></div>
+        <div><label>Trot</label><input type="number" id="lungeTrot" placeholder="0" inputmode="numeric"></div>
+        <div><label>Canter</label><input type="number" id="lungeCanter" placeholder="0" inputmode="numeric"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Hand walk (min)</label>
+      <input type="number" id="handWalk" placeholder="0" inputmode="numeric">
+    </div>
+  </div>
   <div class="card">
     <div class="card-title">Canter Quality — Lunge</div>
     <div class="field">
@@ -489,7 +542,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     </div>
   </div>
   <div class="card">
-    <div class="card-title">Lunge Add-ons</div>
+    <div class="card-title">Add-ons</div>
     <div class="field">
       <label>Equibands?</label>
       <div class="toggle-group">
@@ -498,17 +551,65 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
       </div>
     </div>
     <div class="field">
-      <label>Lunge before ride?</label>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="Y" onclick="tog(this)">Yes</button>
-        <button class="toggle-btn" data-f="lungeBeforeRide" data-v="N" onclick="tog(this)">No</button>
+      <label>Gait analysis recorded</label>
+      <div class="chip-group" id="gaChips">
+        <button class="chip" data-ga="Sleip" onclick="togGA(this)">Sleip</button>
+        <button class="chip" data-ga="RealHorse" onclick="togGA(this)">RealHorse</button>
       </div>
+      <div class="score-hint">Drop the export in the Gait Analysis folder so it can be added to the dashboard.</div>
     </div>
   </div>
 </div>
 
-<!-- SI -->
-<div class="section" id="s-si">
+<!-- MODALITIES -->
+<div class="section" id="s-modalities">
+  <div class="card">
+    <div class="card-title">PT / Bodywork</div>
+    <div class="field">
+      <label>Bodywork</label>
+      <div class="chip-group">
+        <button class="chip" onclick="oneChip(this,'bodywork')">None</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">Massage</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">PEMF</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF</button>
+        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF + Other</button>
+      </div>
+    </div>
+    <div class="div"></div>
+    <div class="field">
+      <label>Other modalities used today</label>
+      <div class="chip-group">
+        <button class="chip" data-f="pt"            onclick="multiChip(this,'mod')">PT exercises</button>
+        <button class="chip" data-f="poles"         onclick="multiChip(this,'mod')">Poles</button>
+        <button class="chip" data-f="straddlepoles" onclick="multiChip(this,'mod')">Straddle Poles</button>
+        <button class="chip" data-f="theraplate"    onclick="multiChip(this,'mod')">Theraplate</button>
+        <button class="chip" data-f="balancepad"    onclick="multiChip(this,'mod')">Balance Pad</button>
+        <button class="chip" data-f="bemer"         onclick="multiChip(this,'mod')">Bemer</button>
+        <button class="chip" data-f="magnawave"     onclick="multiChip(this,'mod')">Magnawave</button>
+        <button class="chip" data-f="laser"         onclick="multiChip(this,'mod')">Laser (C4)</button>
+        <button class="chip" data-f="shockwave"     onclick="multiChip(this,'mod')">Shockwave</button>
+        <button class="chip" data-f="exgas"         onclick="multiChip(this,'mod')">ExGas</button>
+        <button class="chip" data-f="farrier"       onclick="multiChip(this,'mod')">Farrier</button>
+      </div>
+      <div class="score-hint" id="magnaHint" style="display:none;margin-top:6px">Log areas treated and fasciculations on <a href="https://kingsnakeequestrian.github.io/maestro-tracker/maestro-bodywork.html" style="color:inherit">Bodywork → Log a session</a>.</div>
+      <div>
+      </div>
+    </div>
+    <div class="field" id="swAreaField" style="display:none">
+      <label>Shockwave — area(s) treated</label>
+      <div class="chip-group" id="swAreaChips">
+        <button class="chip" data-swa="R Quad/Hip"      onclick="multiChip(this,'swa')">R Quad/Hip</button>
+        <button class="chip" data-swa="L Quad/Hip"      onclick="multiChip(this,'swa')">L Quad/Hip</button>
+        <button class="chip" data-swa="SI (bilateral)"  onclick="multiChip(this,'swa')">SI (bilateral)</button>
+        <button class="chip" data-swa="Neck (bilateral)" onclick="multiChip(this,'swa')">Neck (bilateral)</button>
+        <button class="chip" data-swa="Hock L"          onclick="multiChip(this,'swa')">Hock L</button>
+        <button class="chip" data-swa="Hock R"          onclick="multiChip(this,'swa')">Hock R</button>
+        <button class="chip" data-swa="Stifle L"        onclick="multiChip(this,'swa')">Stifle L</button>
+        <button class="chip" data-swa="Stifle R"        onclick="multiChip(this,'swa')">Stifle R</button>
+        <button class="chip" data-swa="Other"           onclick="multiChip(this,'swa')">Other</button>
+      </div>
+    </div>
+  </div>
   <div class="card">
     <div class="card-title">SI Palpation</div>
     <div class="field">
@@ -536,81 +637,6 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
         </div>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- MODALITIES -->
-<div class="section" id="s-modalities">
-  <div class="card">
-    <div class="card-title">Modalities</div>
-    <div class="field">
-      <label>Bodywork</label>
-      <div class="chip-group">
-        <button class="chip" onclick="oneChip(this,'bodywork')">None</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">PEMF</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF</button>
-        <button class="chip" onclick="oneChip(this,'bodywork')">Massage + PEMF + Other</button>
-      </div>
-    </div>
-    <div class="div"></div>
-    <div class="field">
-      <label>Other modalities used today</label>
-      <div class="chip-group">
-        <button class="chip" data-f="pt"            onclick="multiChip(this,'mod')">PT exercises</button>
-        <button class="chip" data-f="poles"         onclick="multiChip(this,'mod')">Poles</button>
-        <button class="chip" data-f="straddlepoles" onclick="multiChip(this,'mod')">Straddle Poles</button>
-        <button class="chip" data-f="theraplate"    onclick="multiChip(this,'mod')">Theraplate</button>
-        <button class="chip" data-f="balancepad"    onclick="multiChip(this,'mod')">Balance Pad</button>
-        <button class="chip" data-f="bemer"         onclick="multiChip(this,'mod')">Bemer</button>
-        <button class="chip" data-f="laser"         onclick="multiChip(this,'mod')">Laser (C4)</button>
-        <button class="chip" data-f="shockwave"     onclick="multiChip(this,'mod')">Shockwave</button>
-        <button class="chip" data-f="exgas"         onclick="multiChip(this,'mod')">ExGas</button>
-        <button class="chip" data-f="farrier"       onclick="multiChip(this,'mod')">Farrier</button>
-      </div>
-    </div>
-    <div class="field" id="swAreaField" style="display:none">
-      <label>Shockwave — area(s) treated</label>
-      <div class="chip-group" id="swAreaChips">
-        <button class="chip" data-swa="R Quad/Hip"      onclick="multiChip(this,'swa')">R Quad/Hip</button>
-        <button class="chip" data-swa="L Quad/Hip"      onclick="multiChip(this,'swa')">L Quad/Hip</button>
-        <button class="chip" data-swa="SI (bilateral)"  onclick="multiChip(this,'swa')">SI (bilateral)</button>
-        <button class="chip" data-swa="Neck (bilateral)" onclick="multiChip(this,'swa')">Neck (bilateral)</button>
-        <button class="chip" data-swa="Hock L"          onclick="multiChip(this,'swa')">Hock L</button>
-        <button class="chip" data-swa="Hock R"          onclick="multiChip(this,'swa')">Hock R</button>
-        <button class="chip" data-swa="Stifle L"        onclick="multiChip(this,'swa')">Stifle L</button>
-        <button class="chip" data-swa="Stifle R"        onclick="multiChip(this,'swa')">Stifle R</button>
-        <button class="chip" data-swa="Other"           onclick="multiChip(this,'swa')">Other</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MEDIA -->
-<div class="section" id="s-media">
-  <div class="card">
-    <div class="card-title">Photos &amp; Videos</div>
-    <div class="field">
-      <div class="upload-area">
-        <input type="file" id="mediaInput" accept="image/*,video/*" multiple onchange="handleMedia(event)">
-        <div class="upload-icon">📎</div>
-        <div class="upload-label">Tap to add photos or videos</div>
-        <div class="upload-hint">Camera or photo library · any format</div>
-      </div>
-      <div class="media-grid" id="mediaGrid"></div>
-    </div>
-    <div class="field">
-      <label>Caption / context</label>
-      <input type="text" id="mediaCaption" placeholder="e.g. Trot both directions on lunge">
-    </div>
-  </div>
-  <div id="driveNote" class="info-note" style="display:none">
-    <strong>Google Drive upload</strong>
-    Media will be uploaded to your Maestro Videos folder when you save. Files are named with the TX Day automatically.
-  </div>
-  <div id="driveSetupNote" class="info-note">
-    <strong>Connect Google Drive to enable auto-upload</strong>
-    Go to the Settings tab to add your credentials. Until then, media is saved locally only.
   </div>
 </div>
 
@@ -1002,6 +1028,7 @@ let S = {
   cranky:'', trigger:[],
   stops:'', spontaneousHalt:'', stickyResistant:'',
   cL:'', cR:'', equibands:'', lungeBeforeRide:'',
+  dayTypes:[], rideDur:'', rcL:'', rcR:'', lungeWalk:'', lungeTrot:'', lungeCanter:'', handWalk:'', gaitAnalysis:[],
   siReactive:'', siSide:'', siSeverity:'',
   bodywork:'', modalities:[], swAreas:[],
   behaviorNotes:'', ptNotes:'',
@@ -1050,8 +1077,9 @@ function updateSyncBadge() {
 }
 
 function updateDriveNote() {
-  document.getElementById('driveNote').style.display = CFG.driveFolderId ? 'block' : 'none';
-  document.getElementById('driveSetupNote').style.display = CFG.driveFolderId ? 'none' : 'block';
+  const a = document.getElementById('driveNote'), b = document.getElementById('driveSetupNote');
+  if (a) a.style.display = CFG.driveFolderId ? 'block' : 'none';
+  if (b) b.style.display = CFG.driveFolderId ? 'none' : 'block';
 }
 
 function txDay(dateStr) {
@@ -1127,6 +1155,7 @@ function multiChip(btn, group) {
     S.trigger = [...document.querySelectorAll('#triggerChips .chip.sel')].map(c => c.textContent.trim());
   } else if (group === 'mod') {
     S.modalities = [...document.querySelectorAll('[data-f].chip.sel')].map(c => c.dataset.f);
+    const mh = document.getElementById('magnaHint'); if (mh) mh.style.display = S.modalities.includes('magnawave') ? 'block' : 'none';
     const swOn = S.modalities.includes('shockwave');
     const swField = document.getElementById('swAreaField');
     if (swField) swField.style.display = swOn ? 'block' : 'none';
@@ -1137,6 +1166,33 @@ function multiChip(btn, group) {
   } else if (group === 'swa') {
     S.swAreas = [...document.querySelectorAll('#swAreaChips .chip.sel')].map(c => c.dataset.swa);
   }
+}
+
+// ── DAY TYPE (checkboxes) ────────────────────────────────────────────
+function togDayType(el){
+  el.classList.toggle('sel');
+  el.querySelector('.proc-check').textContent = el.classList.contains('sel') ? '✓' : '';
+  S.dayTypes = [...document.querySelectorAll('#dayTypeGrid .proc-item.sel')].map(e => e.dataset.dt);
+  S.rode = S.dayTypes.includes('Ride') ? 'Y' : 'N';
+  const h = document.getElementById('rideOffHint'); if (h) h.style.display = S.rode === 'Y' ? 'none' : '';
+  const go = [];
+  if (S.dayTypes.includes('Ride')) go.push('Ride');
+  if (S.dayTypes.includes('Lunge') || S.dayTypes.includes('Hand walk')) go.push('Lunge / Hand walk');
+  if (S.dayTypes.includes('Bodywork')) go.push('PT/BW');
+  document.getElementById('dayTypeHint').textContent = go.length ? 'Next: fill in the ' + go.join(', ') + ' tab' + (go.length > 1 ? 's' : '') + '.' : '';
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    const on = (t.dataset.s === 'ride' && S.dayTypes.includes('Ride')) ||
+               (t.dataset.s === 'lunge' && (S.dayTypes.includes('Lunge') || S.dayTypes.includes('Hand walk')));
+    t.classList.toggle('has-data', on);
+  });
+}
+function rideCanterToggle(){
+  const v = +(document.getElementById('canterMin').value || 0);
+  document.getElementById('rideCanterCard').style.display = v > 0 ? 'block' : 'none';
+}
+function togGA(btn){
+  btn.classList.toggle('sel');
+  S.gaitAnalysis = [...document.querySelectorAll('#gaChips .chip.sel')].map(c => c.dataset.ga);
 }
 
 function setRating(btn) {
@@ -1152,7 +1208,12 @@ function setSev(el, v) {
 }
 
 function collectText() {
-  S.dayType       = document.getElementById('dayType').value;
+  S.dayType       = (S.dayTypes || []).join(', ');
+  S.rideDur       = (document.getElementById('rideDur')||{}).value||'';
+  S.lungeWalk     = (document.getElementById('lungeWalk')||{}).value||'';
+  S.lungeTrot     = (document.getElementById('lungeTrot')||{}).value||'';
+  S.lungeCanter   = (document.getElementById('lungeCanter')||{}).value||'';
+  S.handWalk      = (document.getElementById('handWalk')||{}).value||'';
   S.totalDur      = document.getElementById('totalDur').value;
   S.turnoutMin    = (document.getElementById('turnoutMin')||{}).value||'';
   S.saddleType    = document.getElementById('saddleType').value;
@@ -1161,7 +1222,6 @@ function collectText() {
   S.canterMin     = document.getElementById('canterMin').value;
   S.behaviorNotes = document.getElementById('behaviorNotes').value;
   S.ptNotes       = document.getElementById('ptNotes').value;
-  S.mediaCaption  = document.getElementById('mediaCaption').value;
 }
 
 function handleMedia(e) {
@@ -1178,6 +1238,7 @@ function handleMedia(e) {
 
 function renderMediaGrid() {
   const g = document.getElementById('mediaGrid');
+  if (!g) return;
   g.innerHTML = S.mediaFiles.map((f,i) => {
     const isVid = f.type.startsWith('video');
     const status = f.driveUrl
@@ -1217,15 +1278,24 @@ async function pushToSheets(entry) {
   const tx = txDay(entry.date);
   const pr = tx - TX_START + 1;
   const driveLinks = entry.mediaFiles.filter(f => f.driveUrl).map(f => f.driveUrl).join(', ');
+  // Walk/Trot/Canter columns (H–J) stay the DAY's total work, ride + lunge, so the
+  // workload charts mean what they always have. The split is kept in new columns.
+  const n = v => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+  const has = (...v) => v.some(x => String(x||'').trim() !== '');
+  const sumCol = (a, b) => has(a, b) ? n(a) + n(b) : '';
+  const rideMin = entry.rideDur || (has(entry.walkMin, entry.trotMin, entry.canterMin) ? n(entry.walkMin) + n(entry.trotMin) + n(entry.canterMin) : '');
+  const totalMin = entry.totalDur || (has(rideMin, entry.lungeWalk, entry.lungeTrot, entry.lungeCanter, entry.handWalk)
+    ? n(rideMin) + n(entry.lungeWalk) + n(entry.lungeTrot) + n(entry.lungeCanter) + n(entry.handWalk) : '');
+  const dt = entry.dayTypes || [];
   const row = [
     tx, pr, entry.date,
     entry.dayType || '',
-    entry.totalDur || '',
-    entry.rode || 'N',
+    totalMin,
+    dt.length ? (dt.includes('Ride') ? 'Y' : 'N') : (entry.rode || 'N'),
     entry.saddleType || '',
-    entry.walkMin || '',
-    entry.trotMin || '',
-    entry.canterMin || '',
+    sumCol(entry.walkMin, entry.lungeWalk),
+    sumCol(entry.trotMin, entry.lungeTrot),
+    sumCol(entry.canterMin, entry.lungeCanter),
     entry.gait || '',
     entry.will || '',
     entry.crop || '',
@@ -1244,7 +1314,7 @@ async function pushToSheets(entry) {
     entry.bodywork || '',
     entry.modalities?.includes('laser') ? 'Y' : '',
     entry.modalities?.includes('shockwave') ? 'Y' : '',
-    entry.modalities?.includes('farrier') ? 'Y' : '',
+    (entry.modalities?.includes('farrier') || dt.includes('Farrier')) ? 'Y' : '',
     entry.modalities?.includes('exgas') ? 'Y' : '',
     entry.behaviorNotes || '',
     [
@@ -1258,7 +1328,17 @@ async function pushToSheets(entry) {
     entry.rode === 'Y' ? (entry.spontaneousHalt || 'N') : '',
     entry.rode === 'Y' ? (entry.stickyResistant || 'N') : '',
     (entry.modalities?.includes('shockwave') && entry.swAreas?.length) ? entry.swAreas.join(', ') : '',
-    entry.turnoutMin || ''   // col 37 / AL — Turnout (min)
+    entry.turnoutMin || '',  // col 37 / AL — Turnout (min)
+    (entry.gaitAnalysis || []).join(', '),                       // 38 AM  Gait analysis
+    entry.modalities?.includes('magnawave') ? 'Y' : '',          // 39 AN  Magnawave
+    entry.lungeWalk || '',                                       // 40 AO  Lunge walk (min)
+    entry.lungeTrot || '',                                       // 41 AP  Lunge trot (min)
+    entry.lungeCanter || '',                                     // 42 AQ  Lunge canter (min)
+    entry.handWalk || '',                                        // 43 AR  Hand walk (min)
+    rideMin,                                                     // 44 AS  Ride (min)
+    entry.rcL || '',                                             // 45 AT  Ride canter L (1-5)
+    entry.rcR || '',                                             // 46 AU  Ride canter R (1-5)
+    entry.lungeBeforeRide || ''                                  // 47 AV  Lunge before ride
   ];
   try {
     const params = new URLSearchParams();
@@ -1307,7 +1387,8 @@ async function saveEntry() {
   const hasMeaningfulData = entry.rode || entry.will || entry.stops || entry.dayType ||
     entry.cranky || entry.siReactive || entry.behaviorNotes || entry.rating ||
     entry.cL || entry.cR || entry.modalities?.length ||
-    entry.walkMin || entry.trotMin || entry.canterMin || entry.totalDur || entry.turnoutMin || entry.ptNotes || entry.equibands;
+    entry.walkMin || entry.trotMin || entry.canterMin || entry.totalDur || entry.turnoutMin ||
+    entry.dayTypes?.length || entry.lungeWalk || entry.lungeTrot || entry.lungeCanter || entry.handWalk || entry.rideDur || entry.gaitAnalysis?.length || entry.ptNotes || entry.equibands;
 
   if (CFG.scriptUrl && hasMeaningfulData) {
     setSyncBadgeText('Syncing…');
